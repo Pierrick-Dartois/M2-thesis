@@ -1,0 +1,249 @@
+\documentclass[a4paper,10pt]{article}
+
+\usepackage{stackrel, amsmath,amsthm,amsfonts,amssymb, stmaryrd}
+%\usepackage{amsthm}
+%\usepackage{mathrsfs}
+%\usepackage{amsfont}
+\usepackage{dsfont}\let\mathbb\mathds
+\usepackage{yhmath}
+\usepackage{listings}
+\lstset{breaklines=true}
+\usepackage{xr}
+
+
+%PGF/TikZ
+\usepackage{pgf,pgfplots, tikz}
+\usetikzlibrary{arrows}
+
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks,
+    citecolor=black,
+    filecolor=black,
+    linkcolor=black,
+    urlcolor=black
+}
+
+\usepackage{float}
+\usepackage[utf8]{inputenc} 
+%\usepackage[T1]{fontenc} 
+\usepackage[english]{babel}
+\usepackage[all]{xy}
+\usepackage{graphicx} 
+\usepackage{geometry}
+\geometry{hmargin=2.5cm,vmargin=2cm}
+
+\usepackage{fancyvrb}
+
+\usepackage{setspace}
+\onehalfspacing 
+
+\usepackage{mathtools}
+
+\usepackage[ruled,linesnumbered]{algorithm2e}
+
+\usepackage[
+n, % or lambda advantage , operators , sets,
+adversary , landau , probability , notions ,
+logic ,
+ff, mm,
+primitives , events , complexity , asymptotics , keys
+]{cryptocode}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+
+\theoremstyle{plain}
+\newtheorem{proposition}[definition]{Proposition}
+\newtheorem{lemma}[definition]{Lemma}
+\newtheorem{corollary}[definition]{Corollary}
+\newtheorem{theorem}[definition]{Theorem}
+
+\theoremstyle{definition}
+\newtheorem{remark}[definition]{Remark}
+\newtheorem{example}[definition]{Example}
+\newtheorem{assumption}[definition]{Assumption}
+\newtheorem{problem}[definition]{Problem}
+
+ %macros
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\K}{\mathbb{K}}
+\newcommand{\F}{\mathbb{F}}
+\newcommand{\Hc}{\mathbb{H}}
+\newcommand{\Lc}{\mathbb{L}}
+\newcommand{\M}{\mathbb{M}}
+\newcommand{\Pc}{\mathbb{P}}
+\newcommand{\A}{\mathbb{A}}
+\newcommand{\B}{\mathbb{B}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\V}{\mathbb{V}}
+\newcommand{\m}[1]{\mathcal{#1}}
+\newcommand{\mA}{\mathcal{A}}
+\newcommand{\mB}{\mathcal{B}}
+\newcommand{\mC}{\mathcal{C}}
+\newcommand{\mP}{\mathcal{P}}
+\newcommand{\mK}{\mathcal{K}}
+\newcommand{\mL}{\mathcal{L}}
+\newcommand{\mE}{\mathcal{E}}
+\newcommand{\mD}{\mathcal{D}}
+\newcommand{\mF}{\mathcal{F}}
+\newcommand{\mO}{\mathcal{O}}
+\newcommand{\im}{\mbox{im}}
+\renewcommand{\ker}{\mbox{ker}}
+\renewcommand{\dim}{\mbox{dim}}
+\renewcommand{\deg}{\mbox{deg}}
+\renewcommand{\i}[2]{\left\llbracket #1~;~#2\right\rrbracket}
+\renewcommand{\(}{\left(}
+\renewcommand{\)}{\right)}
+\renewcommand{\P}{\mathbb{P}}
+%commandes de Quentin
+%\newcommand{\F}[1]{\mathbb{F}_{#1}}
+\newcommand{\Fp}[1]{\mathbb{F}_{p^{#1}}}
+\newcommand{\db}[1]{\mathbb{#1}}
+\newcommand{\id}{\mbox{id}}
+\newcommand{\mf}[1]{\mathfrak{#1}}
+\newcommand{\mfm}{\mathfrak{m}}
+\newcommand{\mfn}{\mathfrak{n}}
+\newcommand{\mfp}{\mathfrak{p}}
+\newcommand{\mfq}{\mathfrak{q}}
+\newcommand{\Spec}{\mbox{Spec}}
+\newcommand{\Proj}{\mbox{Proj}}
+\newcommand{\Hom}{\mbox{Hom}}
+\newcommand{\End}{\mbox{End}}
+\newcommand{\leftmapsto}{\leftarrow\!\shortmid}
+\newcommand{\longleftmapsto}{\longleftarrow\!\shortmid}
+\renewcommand{\vec}[1]{\mathbf{#1}}
+
+\begin{document}
+
+\begin{center}
+
+{\LARGE {\bfseries A Lattice Based Cryptanalysis of Oriented Supersingular Isogeny Diffie-Hellman}}
+
+\vspace{1cm}
+
+{\Large Pierrick Dartois\footnote{IBM Research GmbH - Zurich, Universit\'{e} de Rennes 1, Corps des Mines} and Luca De Feo\footnote{IBM Research GmbH - Zurich}}
+
+\vspace{1cm}
+
+\end{center}
+
+\textbf{Abstract:} We present an attack on the Oriented Supersingular Isogeny Diffie-Hellman key exchange due to Leonardo Col\`{o} and David Kohel  \cite{OSIDH} based on the ideal class group action of an order of a quadratic imaginary field $\mO_n\subset K$ with prime power conductor $\ell^n$ on oriented descending $\ell$-isogeny chains. This attack is based on an idea due to Hiroshi Onuki \cite{Onuki}.  As the conceptors of OSIDH noticed themselves \cite[§ 5.3]{OSIDH}, to break the key encapsulation mechanism, it suffices to be able to recover the whole descending $\ell$-isogeny chain given the first and the deepest elliptic curves of the chain $E_0$, $E_n$ and some additional data on the class group action on $E_n$. Onuki noted that one can recover the whole isogeny chain with the knowledge of $K$-oridented endomorphisms at each level of the chain.  However, Onuki's approach to this problem based on meet-in-the-middle and an exhaustive search of powersmooth elements of $\mO_n$ can be dramatically improved with an approach based on lattices.
+
+\section{Introduction to the problem}
+
+Let $K$ be a quadratic imaginary number field with trivial ideal class group $\mbox{Cl}(\mO_K)=\{1\}$, $\ell$ a small prime number, $n\in\N^*$, $p$ be a big prime number that does not split in $K$ and $\mf{q}_1, \cdots, \mf{q}_t\subseteq \mO_K$ a set of prime ideals lying above distinct splitting primes $q_1, \cdots, q_t$ distinct from $\ell$. For all $i\in\N$, let $\mO_i:=\Z+\ell^i\mO_K$. We assume that the prime ideals $\mf{q}_j$ (when intersected with $\mO_n$) generate $\mbox{Cl}(\mO_n)$. 
+
+A descending $\ell$-isogeny chain $(E_i, \iota_i)_{0\leq i\leq n}$ is a sequence of descending $\ell$-isogenies:
+\[(E_0, \iota_0)\overset{\varphi_0}{\longrightarrow}(E_1,\iota_1)\cdots(E_{n-1},\iota_{n-1})\overset{\varphi_{n-1}}{\longrightarrow}(E_n,\iota_n)\]
+such that $(E_i, \iota_i)$ is an $\mO_i$-orientation for all $i\in\i{0}{n}$. The OSIDH cryptosystem is based on a restricted effective group action of $\mbox{Cl}(\mO_n)$ on descending $\ell$-isogeny chains represented as sequences of $j$-invariants.  We know how to compute efficiently the action of ideals of the form $\mf{a}=\prod_{j=1}^t\mf{q}_j^{e_j}$ where the exponents $e_j$ all lye in a small integer range $\i{-r}{r}$. 
+
+To break the OSIDH Diffie-Hellman key exchange, one has to solve the following problem:
+
+\begin{problem}\label{problem 1}
+Let $(E_i,\iota_i)_{0\leq i\leq n}$ be a descending $\ell$-isogeny chain, $\mf{a}:=\prod_{j=1}^t\mf{q}_j^{e_j}$ with $e_1,\cdots, e_t\in\i{-r}{r}$ a secret ideal and:
+\[(F_i,\iota'_i)_{0\leq i\leq n}:=\mf{a}\cdot (E_i,\iota_i)_{0\leq i\leq n}\]
+be the result of the class group action of $\mf{a}$ on $(E_i,\iota_i)_{0\leq i\leq n}$. Then, with the knowledge of the chain $(E_i,\iota_i)_{0\leq i\leq n}$, the ending elliptic curve $F_n$, and the horizontal chains:
+\[\mf{q}_j^{-r}\cdot F_n:=F_n/F_n[\overline{\mf{q}}_j^r]\longrightarrow \cdots \longrightarrow F_n\longrightarrow \cdots\longrightarrow \mf{q}_j^{r}\cdot F_n:=F_n/F_n[\mf{q}_j^r]\]
+for all $j\in\i{1}{n}$, the problem is to recover the ideal class of $[\mf{a}]$ and more precisely, exponents $e'_1, \cdots, e'_t\in\i{-r}{r}$ such that $[\mf{a}]=\prod_{j=1}^t [\mf{q}_j]^{e'_j}$. \footnote{These exponents do not have to be the exact exponents $e_1, \cdots, e_t$ used to generate $\mf{a}$. Only the class of $\mf{a}$ matters.}
+\end{problem}
+
+As Leonardo Col\`{o} and David Kohel noted \cite[§ 5.3]{OSIDH}, there is a reduction of problem \ref{problem 1} to the following:
+
+\begin{problem}\label{problem 2}
+Let $(E_i,\iota_i)_{0\leq i\leq n}$ be a descending $\ell$-isogeny chain. Then, with the knowledge of the first elliptic curve $E_0$, the ending elliptic curve $E_n$, and the chains:
+\[\mf{q}_j^{-r}\cdot E_n:=E_n/E_n[\overline{\mf{q}}_j^r]\longrightarrow \cdots \longrightarrow E_n\longrightarrow \cdots\longrightarrow \mf{q}_j^{r}\cdot E_n:=E_n/E_n[\mf{q}_j^r]\]
+for all $j\in\i{1}{n}$, the problem is to recover the chain $(E_i,\iota_i)_{0\leq i\leq n}$.
+\end{problem}
+
+\section{Onuki's attack}
+
+We present an attack due to Hiroshi Onuki \cite[§ 6.3]{Onuki} recovering the descending $\ell$-isogeny chain:
+\[(E_0, \iota_0)\overset{\varphi_0}{\longrightarrow}(E_1,\iota_1)\cdots(E_{n-1},\iota_{n-1})\overset{\varphi_{n-1}}{\longrightarrow}(E_n,\iota_n)\] 
+given $E_0$ and $E_n$ together with the horizontal chains:
+\[\mf{q}_j^{-r}\cdot E_n\longrightarrow \cdots \longrightarrow E_n\longrightarrow \cdots\longrightarrow \mf{q}_j^{r}\cdot E_n \quad (j\in\i{1}{t})\quad (\star)\]
+
+Assume that the attacker knows an endomorphism $\iota_n(\beta)$ for a known value $\beta\in\mO_n\setminus \mO_{n+1}$ that we write $\beta:=a+b\ell^n\theta$, where $\theta$ is a generator of $\mO_K$ and $a,b\in\Z$, with $b\wedge \ell=1$. Since $\iota_n(a)=[a]$ is easy to compute, we can assume that $a=0$ i.e. that $\beta=b\ell^n\theta$. We assume that $\iota_n(\beta)$ can be efficiently evaluated on $\ell$-torsion points (i.e. in polynomial time in $n$). Then the attacker can compute the subgroup $G:=\ker(\iota_n(\beta))\cap  E_n[\ell]$ in polynomial time in $n$. 
+
+\begin{lemma}
+$G=\ker(\widehat{\varphi}_{n-1})$.
+\end{lemma}
+
+\begin{proof}
+We have:
+\[\iota_n(\beta)=\iota_n(b\ell^n\theta)=[\ell]\iota_n(b\ell^{n-1}\theta)=\varphi_{n-1}\iota_{n-1}(b\ell^{n-1}\theta)\widehat{\varphi}_{n-1}\]
+and $b\ell^{n-1}\theta\in\mO_{n-1}$, so that $\iota_{n-1}(b\ell^{n-1}\theta)\in\End(E_{n-1})$, and consequently, $\ker(\widehat{\varphi}_{n-1})\subseteq\ker(\iota_n(\beta))$. Since $\deg(\varphi_{n-1})=\ell$, we have also $\ker(\widehat{\varphi}_{n-1})\subseteq E_{n}[\ell]$ so that $\ker(\widehat{\varphi}_{n-1})\subseteq G$.  So $G$ is either cyclic of order $\ell$ and equal to $\ker(\widehat{\varphi}_{n-1})$ or of order $\ell^2$ and equal to the entire $\ell$-torsion subgroup $E_n[\ell]$. If the latter holds, $\iota_n(\beta)$ factors through $[\ell]$ by \cite[corollary III.4.11]{Silverman1} and $\beta/\ell=b\ell^{n-1}\theta\in\mO_n$, so $\ell|b$. Contradiction. Hence, $G=\ker(\widehat{\varphi}_{n-1})$.
+\end{proof}
+
+Hence, we can compute $\widehat{\varphi}_{n-1}$ using V\'{e}lu's formulas \cite{Velu} in $O(\ell)$ operations over the field of definition of $E_n[\ell]$. With this information, we can recover $\varphi_{n-1}$ easily, by evaluating $\widehat{\varphi}_{n-1}$ on $E_{n-1}[\ell]$, since $\ker(\varphi_{n-1})=\widehat{\varphi}_{n-1}(E_{n-1}[\ell])$, and using V\'{e}lu's formulas again.
+
+We conclude that the attacker can compute the chain of isogenies $(\varphi_i : E_i\longrightarrow E_{i+1})_{0\leq i\leq n-1}$, if at each index $i\in\i{1}{n}$,  they have access to an oracle providing $\iota_i(\beta_i)$ for $\beta_i\in\mO_i\setminus\mO_{i+1}$, when $E_{i}$ is given. 
+
+For $i=n$,Onuki's idea to provide this oracle is the following.  We look for $\beta\in\mO_n\setminus\mO_{n+1}$ such that $\beta\mO_K:=\mf{b}\mf{c}$ with $\mf{b}:=\prod_{j=1}^t\mf{q}_j^{e_j}$ and $e_1, \cdots, e_t\in\i{-r}{r}$ big enough to make the norm of $\mf{c}$ as small as possible. Then, we compute the isogeny associated to $\mf{b}$:
+\[\varphi_{\mf{b}}: E_n\longrightarrow \mf{b}\cdot E_n\]
+with the help of the chains $(\star)$ as explained in \cite[§ 5.2]{OSIDH}. To compute the isogeny associated to $\mf{c}$:
+\[\varphi_{\mf{c}}: \mf{b}\cdot E_n\longrightarrow E_n\]
+Onuki recommends a meet-in-the-middle approach (without any indication to make it effective). Combining the exhaustive search of $\beta\in \mO_n\setminus\mO_{n+1}$ with a big factor $\mf{b}$, i.e. whose norm is divisible by many powers of the $q_j$ and the meet-in-the-middle approach to find $\mf{c}$, the attack is exponential, so we need a way to make the oracle more efficient.
+
+
+\section{An improvement based on short vector compuation in a euclidean lattice}
+
+Given $E_0$ and $E_n$ and the chains $(\star)$, we recover the whole chain $(E_i,\iota_i)_{0\leq i\leq n}$ with an oracle returning an endomorphism $\iota_i(\beta_i)$ with $\beta_i\in\mO_i\setminus\mO_{i+1}$ when given $E_i$ for $i\in\i{1}{n}$. However, the oracle is different here.  Instead of searching for $\beta\in\mO_n\setminus\mO_{n+1}$ (for $i=n$) with smoothness conditions on its norm coupled with a meet-in-the-middle attack, we directly look for $\beta\in\mO_n\setminus\mO_{n+1}$ as a product of the $\mf{q}_j$ with exponents in $\i{-2r}{2r}$ by solving the equation:
+\[\prod_{j=1}^t[\mf{q}_j]^{e_j}=[1]\]
+in $\mbox{Cl}(\mO_n)$, with $e_1,\cdots, e_t\in\i{-2r}{2r}$ non-trivial.  Then, we write $e_j:=e'_j+e''_j$ with $e'_j,e''_j\in\i{-r}{r}$ for all $j\in\i{1}{t}$ and compute the isogenies:
+\[\varphi : E_n \longrightarrow \prod_{j=1}^t[\mf{q}_j]^{e'_j}\cdot E_n \qquad \mbox{and} \qquad \psi : E_n  \longrightarrow  \prod_{j=1}^t[\mf{q}_j]^{-e''_j}\cdot E_n=\prod_{j=1}^t[\mf{q}_j]^{e'_j}\cdot E_n\]
+and finally compute $\iota_n(\beta)=\hat{\psi}\circ\varphi$ with $\beta\mO_K= \prod_{j=1}^t\mf{q}_j^{e_j}$.
+
+Hence, our problem is solved if we can compute the lattice:
+\[L:=\left\{(e_1,\cdots,e_t)\in\Z^t\middle| \  \prod_{j=1}^t[\mf{q}_j]^{e_j}=[1]\right\}\]
+and find a short vector in $L$ whose norm $\ell_\infty$ is $\leq 2r$ to make sure that we can compute $\iota_n(\beta)$ by the meet-in-the-middle argument presented above.  
+
+\subsection{On the existence of short vectors in $L$}
+
+Assuming that the $[\mf{q}_j]$ generate $\mbox{Cl}(\mO_n)$, $L$ has covolume $h(\mO_n)$. Assuming that $L$ behaves as a uniformly random lattice among lattices of covolume $h(\mO_n)$, we may assume that:
+\[\lambda_1^{(\infty)}(L)\leq \(1+\frac{\log\log(t)}{t}\)\frac{h(\mO_n)^{\frac{1}{t}}}{2}\]
+This result can be proved with the techniques of Aono, Espitau and Nguyen \cite[§ 3]{Aono}.
+
+To ensure that the key space is sufficiently large to cover $\mbox{Cl}(\mO_n)$, we require the surjectivity of the map:
+\[f:(e_1,\cdots, e_t)\in\i{-r}{r}^t\longmapsto \prod_{j=1}^t[\mf{q}_j]^{e_j}\in G\]
+It follows that $h(\mO_n)\leq (2r+1)^t$, so that:
+\[2r\geq h(\mO_n)^{\frac{1}{t}}-1>\(1+\frac{\log\log(t)}{t}\)\frac{h(\mO_n)^{\frac{1}{t}}}{2}\geq \lambda_1^{(\infty)}(L)\]
+Hence, we are confident that a sufficiently short vector exists in this lattice and therefore, that the attack is theoretically possible in general.
+
+\subsection{Computing a basis of $L$}
+
+We can find a basis of $L$ in polynomial time in $n$ and $t$ with the following method. First, we extract from the generating set $\{[\mf{q}_1],\cdots, [\mf{q}_t]\}$ a basis $\m{B}:=(g_1, \cdots, g_r)$ of $\mbox{Cl}(\mO_n)$. In general, this is very simple because $\mbox{Cl}(\mO_n)$ is cyclic generated by one of the $[\mf{q}_j]$. When $\mbox{Cl}(\mO_n)$ is not cyclic, this can be done with Sutherland's algorithm \cite[algorithm 4]{Sutherland2010} for each Sylow subgroup of $\mbox{Cl}(\mO_n)$. The computation remains polynomial because $\mbox{Cl}(\mO_n)$ has a big $\ell$-Sylow subgroup of rank $\leq 4$ (as a consequence of \cite[theorem 4.2.10]{Cohen2}) and that other Sylow subgroups are very small.
+
+With this basis, we can compute the discrete logarithms of the $[\mf{q}_j]$ in $\m{B}$, i.e.obtain $x_{1,j}, \cdots, x_{r, j}\in\Z$ such that:
+\[[\mf{q}_j]=\prod_{i=1}^r g_i^{x_{i,j}}\]
+for all $j\in\i{1}{t}$. Again, this can be done in polynomial time (using \cite[algorithm 2]{Sutherland2010} for instance) because the prime factors of $h(\mO_n)$ and number of elements $r$ of $\m{B}$ is small. 
+
+Then, we get that the lattice $L$ is given by:
+\[L=\left\{(e_1, \cdots, e_t)\in\Z^t\middle|\ \forall j\in\i{1}{r}, \quad \sum_{j=1}^t x_{i,j}e_j\equiv 0 \ [|g_i|]\right\}\]
+$|g_i|$ being the order of $g_i$ for all $i\in\i{1}{r}$.  
+
+It is easier to compute the dual lattice of $L$:
+\[L^*=\Z^t+\sum_{i=1}^r|g_i|^{-1}\Z\cdot x_i\]
+where $x_i:=(x_{i,j})_{1\leq j\leq t}$ for all $i\in\i{1}{r}$.  Once we have obtained a basis $C$ of $L^*$ (for instance by computing the Hermite normal form of $\(m/|g_1|x_1^T|\cdots|m/|g_r|x_r^T|mI_t\)\in M_{t, t+r}(\Z)$ with $m:=\mbox{lcm}(|g_i|)_{1\leq i\leq r}$), we obtain a basis $B$ of $L$ af follows:
+\[B:=(C^T)^{-1}\]
+
+\subsection{Finding a short vector in $L$}
+
+To be safe, one would have to use a SVP algorithm in norm $\ell_\infty$.  The best known algorithm to solve this problem is due to \cite{Aggarwal2018} and its space and time complexities are $2^{0.62t+o(t)}$ and $2^{0.415t+o(t)}$ respectively.  This prohibits any practical implementation. 
+
+However, in practice, one can find very short vectors with polynomial time algorithms. Even LLL is satisfying, despite its exponentially big theoretical bounds. In practice, BKZ with small block size outputs a vector $e\in L$ with $\|e\|_\infty\leq 2r$. 
+
+\subsection{Practical implementation}
+
+With the parameters of \cite[p. 28]{OSIDH}: $\ell=2$, $r=5$, $t=74$ and $n=256$ $K=\Q(i)$,  and $q_1,\cdots, q_t$ the $t$ smallest splitting primes in $\mO_K$ the relation lattice $L$ was computed in 2 h 31 using \verb?SageMath? \cite{sagemath}. This could have been reduced to 1 h 04 if we had expoited the fact that $\mbox{Cl}(\mO_n)$ is cyclic and generated by $[\mf{q}_1]$. The BKZ algorithm was applied to $L$ using the \verb?fpylll? library \cite{fpylll} with a block size $k=4$ to find a vector $e\in L$ of infinity norm $\|e\|_\infty=9<2r$ in less that 0.5 s.
+
+\newpage
+
+\bibliography{bib_report_OSIDH}
+\bibliographystyle{unsrt}
+
+\end{document}
