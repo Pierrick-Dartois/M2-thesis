@@ -141,6 +141,11 @@ primitives , events , complexity , asymptotics , keys
 \newcommand{\longleftmapsto}{\longleftarrow\!\shortmid}
 \renewcommand{\vec}[1]{\mathbf{#1}}
 
+%to get figures at the top of pages
+\makeatletter
+\setlength{\@fptop}{0pt}
+\makeatother
+
 \begin{document}
 
 \begin{center}
@@ -594,11 +599,11 @@ it follows that $\ell^2|ac$.  If $\ell\nmid c$, then $\ell^2|a$ and $bc+ad-\ell 
 In the course of this proof, we obtained that every horizontal $\ell$-isogeny comes from a proper prime ideal of norm $\ell$.
 \end{remark}
 
-\subsection{Graph refolding and the forgetting map}
+\subsection{Graph refolding and the forgetful map}
 
-Forgetting the $K$-orientation, one can always consider supersingular $\ell$-isogeny graphs whose set of vertices is $\SS(p)$, the set of isogeny classes of supersingular elliptic curves. We have a natural map $G_\ell(K,p)\longrightarrow\SS(p)$, called the \emph{forgetting map}. This map cannot be injective since $G_\ell(K,p)$ is infinite (as ordinary $\ell$-isogeny graphs with complex multiplication by orders of $K$) and $\SS(p)$ is finite of cardinality close to $\frac{p}{12}$ (by \cite[theorem V.4.1.(c)]{Silverman1}).
+Forgetting the $K$-orientation, one can always consider supersingular $\ell$-isogeny graphs whose set of vertices is $\SS(p)$, the set of isogeny classes of supersingular elliptic curves. We have a natural map $G_\ell(K,p)\longrightarrow\SS(p)$, called the \emph{forgetful map}. This map cannot be injective since $G_\ell(K,p)$ is infinite (as ordinary $\ell$-isogeny graphs with complex multiplication by orders of $K$) and $\SS(p)$ is finite of cardinality close to $\frac{p}{12}$ (by \cite[theorem V.4.1.(c)]{Silverman1}).
 
-However, the cryptographic constructions of OSIDH use $j$-invariants alone so the $\mO$-orientations we consider on a given elliptic curves might be ambiguous.  That is why we look for partial injectivity results of the forgetting map.  Indeed, we can always restrict the set of vertices to the finite subset:
+However, the cryptographic constructions of OSIDH use $j$-invariants alone so the $\mO$-orientations we consider on a given elliptic curves might be ambiguous.  That is why we look for partial injectivity results of the forgetful map.  Indeed, we can always restrict the set of vertices to the finite subset:
 \[\SS_{\mO}(p)\cap\im(\rho)=\bigcup_{\mO\subseteq\mO'}\rho(\Ell(\mO'))\]
 formed of (not necessarily primitively) $\mO$-oriented supersingular elliptic curves obtained by the reduction map $\rho$.
 
@@ -782,7 +787,7 @@ Hence, the set $\mbox{Cl}(\mO_n)$ acts upon is not $\rho(\mbox{Ell}(\mO_n))$ per
 \definecolor{xdxdff}{rgb}{0.49019607843137253,0.49019607843137253,1}
 \definecolor{ududff}{rgb}{0.30196078431372547,0.30196078431372547,1}
 
-\begin{figure}[!h]\label{figure 1}
+\begin{figure}[!h]
 \centering
 
 \begin{tikzpicture}[line cap=round,line join=round,>=triangle 45,x=1cm,y=1cm,scale=0.7]
@@ -822,7 +827,7 @@ Hence, the set $\mbox{Cl}(\mO_n)$ acts upon is not $\rho(\mbox{Ell}(\mO_n))$ per
 \end{scriptsize}
 \end{tikzpicture}
 
-\caption{Action of the prime ideal $\mfq_j$ on the descending $\ell$-isogeny chain.}
+\caption{Action of the prime ideal $\mfq_j$ on the descending $\ell$-isogeny chain.}\label{figure 1}
 \end{figure}
 
 Alice and Bob separately choose secret exponents $e_1,\cdots,e_t$ and $f_1,\cdots, f_t$ lying in the integer range $\i{-r}{r}$ (where $r$ is a small positive integer) and respectively compute the action of:
@@ -839,7 +844,7 @@ The key exchange protocol is illustrated in figure \ref{figure 2}.
 \definecolor{ffqqqq}{rgb}{1,0,0}
 \definecolor{sqsqsq}{rgb}{0.12549019607843137,0.12549019607843137,0.12549019607843137}
 
-\begin{figure}[!h]\label{figure 2}
+\begin{figure}[!h]
 \centering
 
 \begin{tikzpicture}[line cap=round,line join=round,>=triangle 45,x=1cm,y=1cm]
@@ -864,7 +869,7 @@ The key exchange protocol is illustrated in figure \ref{figure 2}.
 \end{scriptsize}
 \end{tikzpicture}
 
-\caption{Naive Oriented Supersingular Isogeny Diffie-Hellman key exchange protocol. Public data in black, Alice's secret data in green, Bob's secret data in blue, shared secret in red.}
+\caption{Naive Oriented Supersingular Isogeny Diffie-Hellman key exchange protocol. Public data in black, Alice's secret data in green, Bob's secret data in blue, shared secret in red.}\label{figure 2}
 \end{figure}
 
 Unfortunately, this protocol is insecure because the the attacker can recover the secret ideal class $[\mf{a}]$ with the knowledge of the chains $(E_i,\iota_i)_{0\leq i\leq n}$ and $\mf{a}\cdot(E_i,\iota_i)_{0\leq i\leq n}$.  This attack due to Col\'{o} and Kohel \cite[§ 5.1]{OSIDH} is presented in section \ref{paragraph 7}.  That is why the authors came up with a more secure way to perform the key exchange that do not involve an explicit exchange of the chains.
@@ -877,52 +882,91 @@ Alice still computes $(E_{A,i},\iota_{A,i}):=\mf{a}\cdot (E_i,\iota_i)$ but only
 
 We recall that $\mf{a}$ and $\mf{b}$ can be written:
 \[\mf{a}=\prod_{j=1}^t \mf{q}_j^{e_j} \qquad \mbox{and} \qquad \mf{b}=\prod_{j=1}^t \mf{q}_j^{f_j}\]
-with small exponents $e_1,\cdots,e_t, f_1,\cdots,f_t\in\i{-r}{r}$.  Note that we allow negative exponents as we identify $\mf{q}_j^{-k}$ with $\overline{\mf{q}}_j^{k}$ for all $k\in\N^*$ and $j\in\i{1}{t}$.  In the OSIDH protocol, Alice computes for all $j\in\i{1}{t}$ the chains $\mfq_j^k\cdot (E_{A,i},\iota_{A,i})$ and transmits to Bob the ending element $E_{A,n,j}^{(k)}:=(\mfq_j)^k\cdot E_{A,n}$ for all $k\in\i{-r}{r}$, forming the $q_j$-isogeny chain:
-\[(\mfq_j)^{-r}\cdot E_{A,n}\longrightarrow \cdots \longrightarrow E_{A,n}\longrightarrow \cdots\longrightarrow (\mfq_j)^{r}\cdot E_{A,n}\]
+with small exponents $e_1,\cdots,e_t, f_1,\cdots,f_t\in\i{-r}{r}$.  Note that we allow negative exponents as we identify $\mf{q}_j^{-k}$ with $\overline{\mf{q}}_j^{k}$ for all $k\in\N^*$ and $j\in\i{1}{t}$.  In the OSIDH protocol, Alice computes for all $j\in\i{1}{t}$ the chains $\mfq_j^k\cdot (E_{A,i},\iota_{A,i})$ and transmits to Bob the ending element $[\mfq_j]^k\cdot E_{A,n}$ for all $k\in\i{-r}{r}$, forming the $q_j$-isogeny chain:
+\[[\mfq_j]^{-r}\cdot E_{A,n}\longrightarrow \cdots \longrightarrow E_{A,n}\longrightarrow \cdots\longrightarrow [\mfq_j]^{r}\cdot E_{A,n}\]
 
-
-With this data, Bob can construct:
-\[E_{A,n,\leq j}^{(k_1,\cdots,k_j)}:=\prod_{m=1}^j (\mfq_m^{(n)})^{k_m}\cdot E_{A,n}\] 
-for all $j\in\i{1}{t}$ and $k_1,\cdots,k_j\in\i{-r}{r}$, which leads to $E_{A,n,\leq n}^{(f_1,\cdots,f_n)}=E_{AB,n}$. Let us explain the process for the computation of $E_{A,n,\leq 2}^{(f_1,1)}$ (assuming $e_1\geq 0$).  Bob knows the chain:
-\[E_{A,n}=E_{A,n,1}^{(0)}\longrightarrow \cdots \longrightarrow E_{A,n,1}^{(f_1)}\]
-and $E_{A,n,2}^{(1)}$, which enables him to construct the chain:
+This data is enough for Bob to compute $[\mf{b}]\cdot E_{A,n}$. We explain how. Suppose that $f_1, f_2\geq 0$. Bob knows the chain:
+\[E_{A,n}\longrightarrow \cdots \longrightarrow [\mf{q}_1]^{f_1}\cdot E_{A,n}\]
+and $[\mf{q}_2]\cdot E_{A,n}$, which enables him to construct the ladder:
 \[\xymatrix{
-E_{A,n,2}^{(1)}  \ar[r] & E_{A,n,\leq 2}^{(1,1)} \ar[r] & \cdots \ar[r] & E_{A,n,\leq 2}^{(f_1-1,1)} \ar[r] & E_{A,n,\leq 2}^{(f_1,1)}\\
-E_{A,n} \ar[u]^{q_2} \ar[r]^{q_1} & E_{A,n,1}^{(1)} \ar[u] \ar[r] & \cdots \ar[r] & E_{A,n,1}^{(f_1-1)}\ar[u] \ar[r] & E_{A,n,1}^{(f_1)}\ar[u]
+[\mf{q}_2]\cdot E_{A,n}  \ar[r] & [\mf{q}_1][\mf{q}_2]\cdot E_{A,n} \ar[r] & \cdots \ar[r] & [\mf{q}_1]^{f_1-1}[\mf{q}_2]\cdot E_{A,n} \ar[r] & [\mf{q}_1]^{f_1}[\mf{q}_2]\cdot E_{A,n}\\
+E_{A,n} \ar[u]^{q_2} \ar[r]^{q_1} & [\mf{q}_1]\cdot E_{A,n} \ar[u] \ar[r] & \cdots \ar[r] & [\mf{q}_1]^{f_1-1}\cdot E_{A,n} \ar[u] \ar[r] & [\mf{q}_1]^{f_1}\cdot E_{A,n} \ar[u]
 }\]
-using $q_1$ and $q_2$ modular equations only as in paragraph \ref{paragraph 1}.This can be done without ambiguity (there is always a unique solution to the system of modular equations) by the same arguments we used in proposition \ref{proposition 9}. Indeed, we know that $E_{A,n,2}^{(1)}=\mfq_2^{(n)}\cdot E_{A,n}$, $(\mfq_2^{(n)})^2$ is not principal in $\mO_n$ and the map $\SS_{\mO_n}(p)\cap\im(\rho)\longrightarrow\SS(p)$ is injective by theorem \ref{theorem 4}. Going further, Bob obtains $E_{A,n,\leq 2}^{(f_1,2)}$ from $E_{A,n,2}^{(2)}$ and the chain:
-\[E_{A,n,2}^{(1)}\longrightarrow \cdots \longrightarrow  E_{A,n,\leq 2}^{(f_1,1)}\]
-and repeats the process until reaching $E_{A,n,\leq 2}^{(f_1,f_2)}$ (if $f_2\geq 0$). To sum up the method, we compute the following diagram starting from the bottom:
+using $q_1$ and $q_2$-modular equations only as in paragraph \ref{paragraph 1}. This can be done without ambiguity (there is always a unique solution to the system of modular equations) by the same arguments we used in proposition \ref{proposition 9}. Indeed, we know that the elliptic curve at the top left corner is $[\mfq_2]\cdot E_{A,n}$, that $(\mfq_2^{(n)})^2$ is not principal in $\mO_n$ and that the map $\SS_{\mO_n}(p)\cap\im(\rho)\longrightarrow\SS(p)$ is injective by theorem \ref{theorem 4}. Going further, Bob obtains $[\mf{q}_1]^{f_1}[\mf{q}_2]^2\cdot E_{A,n}$ from $[\mf{q}_2]^2\cdot E_{A,n}$ and the chain:
+\[[\mf{q}_2]\cdot E_{A,n}\longrightarrow \cdots \longrightarrow [\mf{q}_1]^{f_1}[\mf{q}_2]\cdot E_{A,n}\]
+and repeats the process until reaching $[\mf{q}_1]^{f_1}[\mf{q}_2]^{f_2}\cdot E_{A,n}$. The method consists in computing the following diagram, horizontal chain by horizontal chain, starting from the bottom:
 \[\xymatrix{
-E_{A,n,2}^{(f_2)}  \ar[r] & E_{A,n,\leq 2}^{(1,f_2)} \ar[r] & \cdots \ar[r] & E_{A,n,\leq 2}^{(f_1-1,f_2)} \ar[r] & E_{A,n,\leq 2}^{(f_1,f_2)}\\
-E_{A,n,2}^{(f_2-1)} \ar[u] \ar[r] & E_{A,n,\leq 2}^{(1,f_2-1)}\ar[u] \ar[r] & \cdots \ar[r] & E_{A,n,\leq 2}^{(f_1-1,f_2-1)} \ar[u] \ar[r] & E_{A,n,\leq 2}^{(f_1,f_2-1)}\ar[u]\\
+[\mf{q}_2]^{f_2}\cdot E_{A,n}  \ar[r] & [\mf{q}_1][\mf{q}_2]^{f_2}\cdot E_{A,n} \ar[r] & \cdots \ar[r] & [\mf{q}_1]^{f_1-1}[\mf{q}_2]^{f_2}\cdot E_{A,n} \ar[r] & [\mf{q}_1]^{f_1}[\mf{q}_2]^{f_2}\cdot E_{A,n}\\
+[\mf{q}_2]^{f_2-1}\cdot E_{A,n}  \ar[u] \ar[r] & [\mf{q}_1][\mf{q}_2]^{f_2-1}\cdot E_{A,n} \ar[u] \ar[r] & \cdots \ar[r] & [\mf{q}_1]^{f_1-1}[\mf{q}_2]^{f_2-1}\cdot E_{A,n} \ar[u] \ar[r] & [\mf{q}_1]^{f_1}[\mf{q}_2]^{f_2-1}\cdot E_{A,n}\ar[u]\\
 \vdots \ar[u] & \vdots \ar[u] & \ddots & \vdots \ar[u] & \vdots \ar[u]\\
-E_{A,n,2}^{(1)}  \ar[u] \ar[r] & E_{A,n,\leq 2}^{(1,1)} \ar[u]\ar[r] & \cdots \ar[r] & E_{A,n,\leq 2}^{(f_1-1,1)} \ar[u]\ar[r] & E_{A,n,\leq 2}^{(f_1,1)} \ar[u] \\
-E_{A,n} \ar[u]^{q_2} \ar[r]^{q_1} & E_{A,n,1}^{(1)} \ar[u] \ar[r] & \cdots \ar[r] & E_{A,n,1}^{(f_1-1)}\ar[u] \ar[r] & E_{A,n,1}^{(f_1)}\ar[u]
+[\mf{q}_2]\cdot E_{A,n}  \ar[u] \ar[r] & [\mf{q}_1][\mf{q}_2]\cdot E_{A,n} \ar[u]\ar[r] & \cdots \ar[r] & [\mf{q}_1]^{f_1-1}[\mf{q}_2]\cdot E_{A,n} \ar[u]\ar[r] & [\mf{q}_1]^{f_1}[\mf{q}_2]\cdot E_{A,n} \ar[u] \\
+E_{A,n} \ar[u]^{q_2} \ar[r]^{q_1} & [\mf{q}_1]\cdot E_{A,n} \ar[u] \ar[r] & \cdots \ar[r] & [\mf{q}_1]^{f_1-1}\cdot E_{A,n} \ar[u] \ar[r] & [\mf{q}_1]^{f_1}\cdot E_{A,n} \ar[u]
 }\]
-For negative exponents, the method is the same but starts from $E_{A,n,1}^{(-1)}$, $E_{A,n,1}^{(-2)}$...  
+For negative exponents, the method is the same but starts from $[\mf{q}_1]^{-1}\cdot E_{A,n}$, $[\mf{q}_1]^{-2}\cdot E_{A,n}$...  
 
-Starting from the chain:
+In order to compute $[\mf{q}_1]^{f_1}[\mf{q}_2]^{f_2}[\mf{q}_3]^{f_3}\cdot E_{A,n}$, Bob computes a diagram as above with the chains:
+\[E_{A,n}\longrightarrow \cdots\longrightarrow [\mfq_1]^{f_1}\cdot E_{A,n}\]
+\[[\mfq_1]^{f_1}\cdot E_{A,n}\longrightarrow \cdots\longrightarrow [\mfq_1]^{f_1}[\mf{q}_2]^{f_2}\cdot E_{A,n}\]
+at the bottom (the latter following the first) and the chain:
+\[E_{A,n}\longrightarrow \cdots\longrightarrow [\mfq_3]^{f_3}\cdot E_{A,n}\]
+on the left side.
+
+More generally, for $j\in\i{1}{t-1}$, assuming Bob has already computed the chains:
+\[E_{A,n}\longrightarrow [\mf{q}_1]\cdot E_{A,n} \longrightarrow \cdots\longrightarrow [\mfq_1]^{f_1}\cdot E_{A,n}\]
+\[\vdots\]
+\[\prod_{k=1}^{j-1} [\mfq_k]^{f_k}\cdot E_{A,n}\longrightarrow \(\prod_{k=1}^{j-1} [\mfq_k]^{f_k}\)[\mf{q}_j]\cdot E_{A,n}\longrightarrow \cdots\longrightarrow \prod_{k=1}^{j} [\mfq_k]^{f_k}\cdot E_{A,n}\]
+Bob can compute the following diagram from bottom and left to top and right for all $k\in\i{1}{j}$:
 \[\xymatrix{
-E_{A,n,2}^{(f_2)}  \ar[r] & E_{A,n,\leq 2}^{(1,f_2)} \ar[r] & \cdots \ar[r] & E_{A,n,\leq 2}^{(f_1-1,f_2)} \ar[r] & E_{A,n,\leq 2}^{(f_1,f_2)}}\]
-at the bottom, and the chain:
-\[\xymatrix{
-E_{A,n}=E_{A,n,3}^{(0)}  \ar[r] & E_{A,n,3}^{(1)} \ar[r] & \cdots \ar[r] & E_{A,n,3}^{(f_3-1)} \ar[r] & E_{A,n,3}^{(f_3)}}\]
-on the left, Bob obtains $E_{A,n,\leq 3}^{(f_1,f_2,f_3)}$. Applying this process successively,  Bob finally obtains the secret $E_{A,n,\leq n}^{(f_1,\cdots,f_n)}=E_{AB,n}$.  Of course, Alice performs the symmetric process with the data sent by Bob.
+[\mf{q}_{j+1}]^{f_{j+1}}\prod_{l=1}^{k-1} [\mfq_l]^{f_l} \cdot E_{A,n} \ar[r] & [\mf{q}_{j+1}]^{f_{j+1}}\(\prod_{l=1}^{k-1} [\mfq_l]^{f_l}\)[\mf{q}_{k}] \cdot E_{A,n}  \ar[r] & \cdots \ar[r] & [\mf{q}_{j+1}]^{f_{j+1}}\prod_{l=1}^{k} [\mfq_l]^{f_l} \cdot E_{A,n} \\
+\vdots \ar[u] & \vdots \ar[u] & \ddots & \vdots \ar[u] \\
+[\mf{q}_{j+1}]\prod_{l=1}^{k-1} [\mfq_l]^{f_l} \cdot E_{A,n} \ar[u] \ar[r] & [\mf{q}_{j+1}]\(\prod_{l=1}^{k-1} [\mfq_l]^{f_l}\)[\mf{q}_{k}] \cdot E_{A,n} \ar[u] \ar[r] & \cdots \ar[r] & [\mf{q}_{j+1}]\prod_{l=1}^{k} [\mfq_l]^{f_l} \cdot E_{A,n} \ar[u]\\
+\prod_{l=1}^{k-1} [\mfq_l]^{f_l} \cdot E_{A,n} \ar[u]^{q_{j+1}} \ar[r]^{q_k} & \(\prod_{l=1}^{k-1} [\mfq_l]^{f_l}\)[\mf{q}_k] \cdot E_{A,n} \ar[u] \ar[r] & \cdots \ar[r] & \prod_{l=1}^{k} [\mfq_l]^{f_l} \cdot E_{A,n} \ar[u]
+}\]
+starting from the chain:
+\[E_{A,n}\longrightarrow \cdots\longrightarrow [\mfq_{j+1}]^{f_{j+1}}\cdot E_{A,n}\]
+on the left side for $k=1$. The result for $k=j$ on the right side of the diagram is:
+\[\prod_{k=1}^{j} [\mfq_k]^{f_k}\cdot E_{A,n}\longrightarrow \(\prod_{k=1}^{j} [\mfq_k]^{f_k}\)[\mf{q}_{j+1}]\cdot E_{A,n}\longrightarrow \cdots\longrightarrow \prod_{k=1}^{j+1} [\mfq_k]^{f_k}\cdot E_{A,n}\]
+making it possible to repeat the procedure once again at rank $j+1$. For $j=t$, Bob finally obtain at the end of the chain:
+\[\prod_{k=1}^{t} [\mfq_k]^{f_k}\cdot E_{A,n}=[\mf{b}]\cdot E_{A,n}\]
+In parallel, Alice performs the symmetric process with the data sent by Bob.
 
-%\pseudocode{
-%\textbf{Alice} \<  \< \textbf{Bob} \\[][\hline ] \text{Choose random integers } (e_1,\cdots, e_t)\in\i{-r}{r}^t \<  \< \\
- %\text{Compute } (E_{A,i},\iota_{A,i}):=\prod_{j=1}^t \mf{q}_j^{e_j}\cdot (E_i,\iota_i) \<  \< \\
-  %\text{Compute for all } j\in\i{1}{t} \text{ the chain} \<  \< \\
- %E_{A,n,j}^{(-r)}\longrightarrow \cdots \longrightarrow E_{A,n}\longrightarrow \cdots\longrightarrow E_{A,n,j}^{(r)} \< \sendmessagerightx{5}{E_{A,n,j}^{(-r)}\longrightarrow \cdots\longrightarrow E_{A,n,j}^{(r)} \ (j\in\i{1}{t}) }  \<\\
- %\<  \< \text{Choose random integers } (f_1,\cdots, f_t)\in\i{-r}{r}^t \\
- %\<  \< \text{Compute } (E_{B,i},\iota_{B,i}):=\prod_{j=1}^t \mf{q}_j^{f_j}\cdot (E_i,\iota_i)  \\
- %\<  \< \text{Compute for all } j\in\i{1}{t} \text{ the chain}  \\
-%\< \< E_{B,n,j}^{(-r)}\longrightarrow \cdots \longrightarrow E_{B,n}\longrightarrow \cdots\longrightarrow E_{B,n,j}^{(r)} \\
- %\sendmessageleftx{5}{E_{B,n,j}^{(-r)}\longrightarrow \cdots\longrightarrow E_{B,n,j}^{(r)} \ (j\in\i{1}{t}) } \<\< \\
-%\text{Computes } E_{B,n,\leq n}^{(e_1,\cdots,e_n)}=E_{AB,n} \text{ as above} \< \< \text{Computes } E_{A,n,\leq n}^{(f_1,\cdots,f_n)}=E_{AB,n} \text{ as above}
-%}
+The real OSIDH protocol as introduced in \cite[§ 5.2]{OSIDH} is presented in figure \ref{figure 3}. 
 
+\begin{figure}[!h]
+\centering
+
+\begin{tikzpicture}
+  % Public parameter:
+  \node[draw=none,fill=none,align=center] (public) at (0,1) {Public parameter:\\ $(E_i,\iota_i)_{0\leq i\leq n}, \ \mf{q}_1, \cdots, \mf{q}_t$};
+  
+  % Alice
+  \node[draw] (Alice) at (-3.5,0) {Alice}; 
+  \draw[thick] (Alice) -- ++(0, -5);
+    
+  % Calculations of Alice
+  \node[draw=none,fill=none,anchor=east] (asecret) at ($(Alice) + (0,-1)$) {$e_1,\cdots, e_t\in_R\i{-r}{r}$};
+  \node[draw=none,fill=none,anchor=east] (asecretideal) at ($(Alice) + (0,-1.75)$) {$\mf{a}:=\prod_{j=1}^t[\mf{q}_j]^{e_j}$};
+  \node[draw=none,fill=none,anchor=east] (Apublic) at ($(Alice) + (0,-3)$) {$(E_{A,i},\iota_{A,i}):=[\mf{a}]\cdot (E_i,\iota_i)$};
+  \node[draw=none,fill=none,anchor=east] (akey) at ($(Alice) + (0,-5)$) {$E_{AB,n}:= [\mf{a}]\cdot E_{B,n}$};
+    
+  % Bob
+  \node[draw] (Bob) at (3.5,0) {Bob}; 
+  \draw[thick] (Bob) -- ++(0, -5);
+   
+  % Calculations of Bob
+  \node[draw=none,fill=none,anchor=west] (bsecret) at ($(Bob) + (0,-1)$) {$e_1,\cdots, e_t\in_R\i{-r}{r}$};
+   \node[draw=none,fill=none,anchor=west] (bsecretideal) at ($(Bob) + (0,-1.75)$) {$\mf{b}:=\prod_{j=1}^t[\mf{q}_j]^{f_j}$};
+  \node[draw=none,fill=none,anchor=west] (Bpublic) at ($(Bob) + (0,-4)$) {$(E_{B,i},\iota_{B,i}):=[\mf{b}]\cdot (E_i,\iota_i)$};
+  \node[draw=none,fill=none,anchor=west] (bkey) at ($(Bob) + (0,-5)$) {$E_{AB,n}:= [\mf{b}]\cdot E_{A,n}$};
+   
+  % Messages
+  \draw[->,thick] ($(Alice)+(0,-3)$) -- ($(Bob)+(0,-3)$) node [pos=0.5,above,font=\footnotesize] {$[\mfq_j]^{-r}\cdot E_{A,n}\longrightarrow \cdots\longrightarrow [\mfq_j]^{r}\cdot E_{A,n} \ (1\leq j\leq t)$};
+  \draw[->,thick] ($(Bob)+(0,-4)$) -- ($(Alice)+(0,-4)$) node [pos=0.5,above,font=\footnotesize] {$[\mfq_j]^{-r}\cdot E_{B,n}\longrightarrow \cdots\longrightarrow [\mfq_j]^{r}\cdot E_{B,n} \ (1\leq j\leq t)$};
+    
+\end{tikzpicture}
+
+\caption{The OSIDH protocol as presented in \cite[§ 5.2]{OSIDH}.}\label{figure 3}
+\end{figure}
 
 \chapter{Cryptanalysis of OSIDH}
 
