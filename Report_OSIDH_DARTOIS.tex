@@ -977,6 +977,8 @@ This chapter studies different attacks against the OSIDH cryptosystem. In the fi
 
 The three next sections study attacks on the real OSIDH key exchange. Section 3 presents an attack due to Onuki explaining how to recover a descending $\ell$-isogeny chain with the knowledge of a $K$-oriented endomorphism at each level. Section 4 presents an original attack based on this approach and coupled with a lattice reduction. Finally, section 5 presents Kuperberg's quantum attack.
 
+We also provide implementations of the attacks of sections 2 and 4 in \verb?SageMath? \cite{sagemath} for toy parameters. The source code may be found on my Github repository \cite{MyGithub}.
+
 \section{A first attack using quaternions}\label{paragraph 7}
 
 We recall here the problem we have to solve: given a chain $(E_i,\iota_i)_{0\leq i\leq n}$ and a chain $(F_i,\iota'_i)_{0\leq i\leq n}=\mf{a}\cdot(E_i,\iota_i)_{0\leq i\leq n}$ with a secret ideal class $[\mf{a}]\in\Cl(\mO_n)$, we want to recover $[\mf{a}]$, or more exactly, exponents $e_1,\cdots, e_t\in\Z$ (relatively small) such that $[\mf{a}]=\prod_{j=1}^t[\mf{q}_j]^{e_j}$, so that the action of $[\mf{a}]$ on descending $\ell$-isogeny chains of length $n$ can be easily computed. The attack follows the following steps:
@@ -1148,15 +1150,18 @@ See appendix \ref{appendix 1}.
 Since $|\Cl(\mO_n)|$ is smooth (with a factor $\ell^{n-1}$ and all other prime factors $\leq \ell+1$), we get that discrete logarithms can be computed in polynomial time in $n$ by Pohlig-Hellman methods. As a consequence, one can compute a basis of $|\Cl(\mO_n)|$ in terms of the $[\mf{q}_j]$ in time $O(tn^2)$ (by Lemma \ref{lemma 19}) and the discrete logarithm of $[\mf{N}]$ in such a basis can be computed in time $O(n^2)$ using Algorithm \ref{algorithm 9}. This way, we obtain an expression of $[\mf{N}]$ as $(\star)$ with big exponents $e_j$.
 
 
-\subsubsection{Reducing the exponents modulo the relations lattice of the $[\mf{q}_j]$}
+\subsubsection{Reducing the exponents modulo the relations lattice of the $[\mf{q}_j]$}\label{paragraph 16}
 
 We want to make the vector $e:=(e_1, \cdots, e_t)$ as short as possible, which can be done by computing the closest vector $c$ to $e$ in the lattice:
-\[L':=\left\{(e_1,\cdots,e_{t})\in\Z^{t} \middle| \  \prod_{j=1}^t[\mf{q}_j]^{e_j}=[1]\right\}\]
-In practice, an approximation of this closest vector is sufficient, because the search for such a vector may be very costly. In practice, there is a tradeoff between the norm of the vector $e':=e-c$ and the the cost of this approximation. Computing the action of $[\mf{N}]=\prod_{j=1}^t[\mf{q}_j]^{e'_j}$ has time complexity:
+\[L:=\left\{(f_1,\cdots,f_{t})\in\Z^{t} \middle| \  \prod_{j=1}^t[\mf{q}_j]^{f_j}=[1]\right\}\]
+
+Knowing a basis of $\Cl(\mO_n)$ and an algorithm to efficiently compute discrete logarithms, a $\Z$-basis of this lattice could be computed in polynomial time in $t$ and $n$ (actually, in time $O(t^3+tn^2)$) using Algorithm \ref{algorithm 11}.
+
+An approximation of the closest vector $c$ is sufficient, because the search for such a vector may be very costly. There is a tradeoff between the norm of the vector $e':=e-c$ and the the cost of this approximation. Computing the action of $[\mf{N}]=\prod_{j=1}^t[\mf{q}_j]^{e'_j}$ has time complexity:
 \[\theta\(n\sum_{j=1}P(q_j,n)|e'_j|\)\]
 where $P$ is a polynomial. Since:
 \[\|e'\|_2\leq \sum_{j=1}P(q_j,n)|e'_j|\leq \|e'\|_2\sqrt{\sum_{j=1}^tP(q_j,n)^2}\]
-the temporal complexity of the action of $[\mf{N}]$ is $\|e'\|_2$, up to a polynomial factor in $n$, $t$ and the $q_j$. Hence, we can optimize $e'$ in $\ell_2$ norm. There is a trade-off between the tightness of our approximation of CVP to optimize the performance of  the action of $[\mf{N}]$ and the time complexity of finding a close vector.
+the time complexity of the action of $[\mf{N}]$ is $\|e'\|_2$, up to a polynomial factor in $n$, $t$ and the $q_j$. Hence, we can optimize $e'$ in $\ell_2$ norm. There is a trade-off between the tightness of our approximation to optimize the performance of  the action of $[\mf{N}]$ and the time complexity of finding a close vector.
 
 \begin{theorem}\cite[theorem 3.3]{Espitau2020}\label{theorem 7}
 Let $\Lambda\subseteq\Z^d$ be a lattice of rank $d$, $B:=(b_1,\cdots, b_d)$,  a basis of $\Lambda$, a target $x\in\R^d$ and $k\in\N^*$ such that $d>2k$. Under some heuristic assumptions, there exists an algorithm finding $c\in\Lambda$ such that:
@@ -1171,7 +1176,7 @@ where $T_{CVP}(k)$ and $T_{SVP}(k)$ are the time complexities of oracles  for CV
 The best known algorithm for CVP (with preprocessing) is due to \cite{Ducas2020} and runs in time $T_{CVP}(k)=2^{c_1 k+o(k)}$ with $c_1\approx 0.264$. The best known algorithm for SVP is due to \cite{Ducas2016} and runs in time $T_{SVP}(k)=\(\frac{3}{2}\)^{k/2+o(k)}=2^{c_2 k+o(k)}$ with $c_2\approx 0.292$.
 
 \begin{corollary}\label{corollary 1}
-Applying the algorithm of theorem \ref{theorem 7}, one can recover an ideal $\mf{a}\subseteq mO_n$ which is a product of the $\mf{q}_j$ with small exponents such that $(F_i)_{0\leq i\leq n}=\mf{a}\cdot (E_i)_{0\leq i\leq n}$ in time: 
+Applying the algorithm of theorem \ref{theorem 7}, one can recover an ideal $\mf{a}\subseteq \mO_n$ which is a product of the $\mf{q}_j$ with small exponents such that $(F_i)_{0\leq i\leq n}=\mf{a}\cdot (E_i)_{0\leq i\leq n}$ in time: 
 \[2^{c_2k+o(k)}P(k,n,t,\max_{1\leq j\leq t}q_j)\]
 where $P$ is a polynomial.  One can compute the action of $[\mf{a}]$ on any chain in time: 
 \[GH(k)^{\frac{t}{2k}}\ell^{\frac{n}{t}}Q(n,t,\max_{1\leq j\leq t}q_j)\] 
@@ -1179,14 +1184,15 @@ here $Q$ is a polynomial.
 \end{corollary} 
 
 \begin{proof}
-The corollary is a restatement of what has been said before. We simply apply the algorithm of theorem \ref{theorem 7} to $\Lambda=L'$ and get the desired complexity, since $\Covol(L')=|G|$, where $G$ is the subgroup generated by the $[\mf{q}_j]$.  Indeed, we have an exact sequence:
-\[\{0\}\longrightarrow L'\hookrightarrow \Z^t\overset{\varphi}{\longrightarrow} G\longrightarrow\{0\}\]
-where $ L'\hookrightarrow \Z^t$ is the natural inclusion and $\varphi : (e_1,\cdots,e_t)\in\Z^t\longmapsto \prod_{j=1}^t[\mf{q}_j]^{e_j}\in G$. It follows that:
-\[\Covol(L')=|\Z^t/L'|=|G|\]
-but $|G||h(\mO_n)$ by Lagrange's theorem so $\Covol(L')\leq h(\mO_n)$.
+The corollary is a restatement of what has been said before. We simply apply the algorithm of theorem \ref{theorem 7} to $\Lambda=L$ and get the desired complexity, since $\Covol(L)=h(\mO_n)$.  Indeed, since the $[\mf{q}_j]$ generate $\Cl(\mO_n)$, we have an exact sequence:
+\[\{0\}\longrightarrow L\hookrightarrow \Z^t\overset{\varphi}{\longrightarrow} \Cl(\mO_n)\longrightarrow\{0\}\]
+where $ L\hookrightarrow \Z^t$ is the natural inclusion and $\varphi : (e_1,\cdots,e_t)\in\Z^t\longmapsto \prod_{j=1}^t[\mf{q}_j]^{e_j}\in \Cl(\mO_n)$. It follows that:
+\[\Covol(L)=|\Z^t/L|=h(\mO_n)\]
 \end{proof}
 
-This attack is still subexponential, but much more damaging to the cryptosystem. To ensure a security level of $\lambda=128$ bits, we need $t\geq 16064$, which is utterly unrealistic.
+This attack is still subexponential, but much more damaging to the cryptosystem. To ensure a security level of $\lambda=128$ bits, we need $t\geq 16064$, which is utterly unrealistic. 
+
+For smaller parameters, like those Col\'{o} and Kohel proposed in \cite[section 6]{OSIDH} ($t=74$ for $n=256$, $\ell=2$ and $r=5$), the closest vector approximation can be computed with polynomial algorithms such as Babai's nearest plane algorithm \cite{Babai} running in $O(t^6)$ because the outputted exponents will have reasonable size. 
 
 \section{A second attack using the class group action only}
 
@@ -1208,11 +1214,11 @@ However, we have to make sure that all the values of $\mf{b}$ to be tested can b
 
 By Lemma \ref{lemma 20}, we know that $\Cl(\mO_n)$ is either cyclic or of the form $\Cl(\mO_n)\simeq(\Z/\ell\Z)\times(\Z/h_{n-1}\Z)$ with $h_{n-1}:=|\mbox{Cl}(\mO_{n-1})|$.
 
-We describe how to proceed when $\Cl(\mO_n)$ is cyclic (case $(i)$). If we assume that the $\mf{q}_j$ generate $\Cl(\mO_n)$, we can compute an $\mO_K$-ideal $\mf{g}$ such that $[\mf{g}\cap\mO_n]$ generates $\Cl(\mO_n)$, as one of the $\mf{q}_j$ or a as product of some $\mf{q}_j$. By the surjection $\Cl(\mO_{i+1})\relbar\joinrel\twoheadrightarrow\Cl(\mO_i)$, we get that $[\mf{g}\cap\mO_i]$ generates $\Cl(\mO_i)$ for all $i\in\i{0}{n-1}$ and that:
+We describe how to proceed when $\Cl(\mO_n)$ is cyclic. If we assume that the $\mf{q}_j$ generate $\Cl(\mO_n)$, we can compute an $\mO_K$-ideal $\mf{g}$ such that $[\mf{g}\cap\mO_n]$ generates $\Cl(\mO_n)$, as one of the $\mf{q}_j$ or a as product of some $\mf{q}_j$. By the surjection $\Cl(\mO_{i+1})\relbar\joinrel\twoheadrightarrow\Cl(\mO_i)$, we get that $[\mf{g}\cap\mO_i]$ generates $\Cl(\mO_i)$ for all $i\in\i{0}{n-1}$ and that:
 \[\ker(\Cl(\mO_{i+1})\relbar\joinrel\twoheadrightarrow\Cl(\mO_{i}))=\langle [\mf{g}\cap\mO_{i+1}]^{h_i}\rangle\]
 with $h_i:=|\Cl(\mO_i)|$. 
 
-Now, if $\Cl(\mO_n)\simeq(\Z/\ell\Z)\times(\Z/h_{n-1}\Z)$ (case $(ii)$).  In that case, as previously, we obtain easily an ideal $\mf{g}$ expressed as one of the $\mf{q}_j$ or as a product of some $\mf{q}_j$ such that $[\mf{g}\cap\mO_n]$ has order $h_{n-1}$. We also obtain that $[\mf{g}\cap\mO_i]$ has order $h_{i-1}$ for all $i\in\i{2}{n}$ (for instance by lemma \ref{lemma 18}.(iv)).  As previously, it follows that:
+Now, if $\Cl(\mO_n)\simeq(\Z/\ell\Z)\times(\Z/h_{n-1}\Z)$.  In that case, as previously, we obtain easily an ideal $\mf{g}$ expressed as one of the $\mf{q}_j$ or as a product of some $\mf{q}_j$ such that $[\mf{g}\cap\mO_n]$ has order $h_{n-1}$. We also obtain that $[\mf{g}\cap\mO_i]$ has order $h_{i-1}$ for all $i\in\i{2}{n}$ (for instance by lemma \ref{lemma 18}.(iv)).  As previously, it follows that:
 \[\ker(\Cl(\mO_{i+1})\relbar\joinrel\twoheadrightarrow\Cl(\mO_{i}))=\langle [\mf{g}\cap\mO_{i+1}]^{h_{i-1}}\rangle\]
 for all $i\in\i{2}{n-1}$. For $i=0,1$, the kernel can be very easily computed because the class groups are small. 
 
@@ -1220,15 +1226,30 @@ Either way, we can easily express every ideal $\mf{b}$ such that $\mf{b}\cap\mO_
 
 \subsubsection{Reducing the exponents of $\mf{a}_i\cdot \mf{b}$}
 
-Once $\mf{b}$ is expressed in terms of the $\mf{q}_j$, \ie when the $d_j$ are known, we still have to make sure that the exponents $e_{i+1,j}=e_{i,j}+d_j$ of $\mf{a}_i\cdot \mf{b}$ are small.  Actually, $e_{i+1}:=(e_{i+1,j})_{1\leq j\leq t}$ is determined up to trnaslation by an element of the lattice:
+Once $\mf{b}$ is expressed in terms of the $\mf{q}_j$, \ie when the $d_j$ are known, we still have to make sure that the exponents $e_{i+1,j}=e_{i,j}+d_j$ of $\mf{a}_i\cdot \mf{b}$ are small.  Actually, $e_{i+1}:=(e_{i+1,j})_{1\leq j\leq t}$ is determined up to translation by an element of the lattice:
 \[L_{i+1}:=\left\{(e_1,\cdots,e_{t})\in\Z^{t} \middle| \  \prod_{j=1}^t[\mf{q}_j]^{e_j}=[1] \quad \mbox{in} \ \Cl(\mO_{i+1}) \right\}\]
-Using algorithm \ref{algorithm 11},  one can find a basis of $L_{i+1}$ in time $O(t^3+t(i+1)^2)$. Using Babai's nearest plane algorithm, one can find $f\in L_{i+1}$ relatively close to $e_{i+1}$ in time $O(t^6)$. Then, we can compute the action of $[\mf{b}\cdot\mf{a}_i]=\prod_{j=1}^t[\mf{q}_j]^{e'_{i+1,j}}$ with $e'_{i+1}:=e_{i+1}-f$.  
+Hence, we can apply the method of paragraph \ref{paragraph 16} to find $f\in L_{i+1}$ relatively close to $e_{i+1}$ and compute the action of $[\mf{b}\cdot\mf{a}_i]=\prod_{j=1}^t[\mf{q}_j]^{e'_{i+1,j}}$ with $e'_{i+1}:=e_{i+1}-f$.  
+
+Using algorithm \ref{algorithm 11},  one can find a basis of $L_{i+1}$ in time $O(t^3+t(i+1)^2)$. Using Babai's nearest plane algorithm \cite{Babai}, one can find $f\in L_{i+1}$ close to $e_{i+1}$ in time $O(t^6)$. Then, we can compute the action of $[\mf{b}\cdot\mf{a}_i]=\prod_{j=1}^t[\mf{q}_j]^{e'_{i+1,j}}$ with $e'_{i+1}:=e_{i+1}-f$.  
 
 \begin{theorem}
 One can recover the secret ideal class $\mf{a}$ in time:
 \[O\(n^3t^2+n^4+t^6+n\ell T_{CL}\)\]
-where $T_{CL}$ is the time complexity of the computation of the class group action on a given elliptic curve by the method of paragraph \ref{paragraph 1} when exponents are outputted by Babai's nearest plane algorithm and where the $O$ constant depends only on $\ell$ and the rank $r\leq 4$ of $\Cl(\mO_n)$.
+where $T_{CL}$ is the time complexity of the computation of the class group action on a given elliptic curve by the method of paragraph \ref{paragraph 1} when exponents are outputted by Babai's nearest plane algorithm and where the $O$ constant depends only on $\ell$.
 \end{theorem}
+
+\subsubsection{Implementation of this attack}\label{paragraph 18}
+
+We implemented the attack described above with \verb?SageMath? \cite{sagemath}.  The source code can be found in \cite{MyGithub}, more specifically in the files \verb?OSIDH_protocol.py? and \verb?OSIDH_attack.py?.
+
+We tested our implementation with toy parameters: $n=28$, $t=10$,
+$\ell=2$, $r=3$ (and $K=\Q(i)$). These parameters have been chosen so that $(2r+1)^t\simeq h(\mO_n)\simeq \ell^n$ to ensure the key space:
+\[\left\{\prod_{j=1}^t[\mf{q}_j]^{e_j}\middle| e_1, \cdots, e_t\in\i{-r}{r}\right\}\]
+covers the whole class group $\Cl(\mO_n)$.
+
+Given two chains $(E_i,\iota_i)_{0\leq i\leq n}$ and $(F_i,\iota'_i)_{0\leq i\leq n}=\mf{a}\cdot(E_i,\iota_i)_{0\leq i\leq n}$ with a secret ideal class $[\mf{a}]\in\Cl(\mO_n)$, our attack found $[\mf{a}]$ in 90 s.\footnote{The running times provided here were extracted from a single test so they are subject to some statistical variation. However, all other tests performed were consistent with these results.  Obviously, the reproducibility of these results depend on the machine used to run the tests.  Here, we used a MacBook Pro Retina 2015 with a 2.5 GHz quad-core processor and 16 GB RAM.} The drawback of our performance is not the attack itself but rather the class group action on the chains. Indeed, computing with modular polynomials is very costly.  For that reason, the protocol runs very slowly: with our parameters, the naive Diffie Hellman key exchange runs in 37 s and the strong version of OSIDH runs in 83 s, which is almost the running time of the attack. 
+
+Testing the attack with realistic parameters like those Col\'{o} and Kohel proposed ($t=74$ for $n=256$, $\ell=2$ and $r=5$) would require us to manage modular polynomials much more efficiently of to find an alternative method to compute the class group action.
 
 \section{Onuki's attack}
 
@@ -1264,6 +1285,12 @@ with $\ell_1,\cdots, \ell_s$ distinct prime numbers and $f_1,\cdots, f_s\in\N^*$
 \[\exp\(O\(\log(N(\mf{b}))^{\frac{1}{3}}\log\log(N(\mf{b}))^{\frac{2}{3}}\)\)\] 
 and use a meet-in-the-middle technique to recover $\varphi_{\mf{b}}$ as follows. We divide our search in two approximately equal parts, by exhaustive search among isogenies $\phi_1 : [\mf{a}]\cdot E_n\longrightarrow E$ of degree $\deg(\phi_1)=\prod_{k=1}^s\ell_k^{g_k}$ and and $\phi_2 : E_n\longrightarrow E'$ of degree $\deg(\phi_2)=\prod_{k=1}^s\ell_k^{h_k}$, where the exponents are chosen, so that $h_k+g_k=f_k$ for all $k\in\i{1}{s}$ and $\deg(\phi_1)\simeq\deg(\phi_2)\simeq\sqrt{\deg(\varphi_{\mf{b}})}$. We stop our exhaustive search when we find a collision $E=E'$ and return $\varphi_{\mf{b}}=\widehat{\phi}_2\circ\phi_1$. $\phi_1$ (respectively $\phi_2$) is represented as chains of $g_k$ (respectively $g_k$) $\ell_k$-isogenies for $k\in\i{1}{s}$. Hence, there are $\prod_{k=1}^s(\ell_k+1)^{g_k}$ (respectively $\prod_{k=1}^s(\ell_k+1)^{h_k}$) possible isogenies (counting the number of possible kernels of each isogeny of the chain). Hence, the exhaustive search has complexity:
 \[\Omega\(\prod_{k=1}^s(\ell_k+1)^{g_k}+\prod_{k=1}^s(\ell_k+1)^{h_k}\)=\Omega(\sqrt{\deg(\varphi_{\mf{b}})})=\Omega\(\sqrt{\frac{N(\beta)}{\prod_{j=1}^t q_j^{e_j}}}\)\]
+
+\begin{remark}
+Note that we have no theoretical guarantee that we shall actually find the isogeny $\varphi_{\mf{b}}:[\mf{a}]\cdot E_n\longrightarrow E_n$. Make sure of it would require knowledge of the $K$-orientation of the domain or codomain, which are hidden.
+\end{remark} 
+
+Here, we estimate the time complexity of Onuki's attack in order to provide sharper security bounds. Indeed, Onuki's estimates were very pessimistic.
 
 \begin{lemma}
 We make the heuristic assumption that $N(\beta)$ has the same arithmetic properties as a uniform variable in $\i{N_{min}}{N_{max}}$ when $\beta:=a+b\theta$ with $(a,b)$ sampled uniformly in $\i{-m}{m}\times\i{-m}{m}\setminus\ell\Z$. Then, the average time complexity of Onuki's attack \cite[§ 6.3]{Onuki} is:
@@ -1316,8 +1343,10 @@ Since, we have $N_{min}=\Omega(\ell^{2n})$, to ensure a level of security of $\l
 \[n\geq \frac{5\log(2)}{6\log(\ell)}\lambda+\frac{t}{3}\log(r+1)\]
 
 \begin{example}
-For $\lambda=128$ bits, $\ell=2$, $r=3$ and $t=207$ (see how this parameter has been chosen in paragraph \ref{paragraph 9}), we get $n\geq 269$. This is much less than the first estimate of Onuki (see \cite[§ 6.3]{Onuki}) for similar parameters ($n=1428$).
+For $\lambda=128$ bits, $\ell=2$, $r=3$ and $t=100$ (parameters proposed by Onuki), we get $n\geq 153$. This is much less than the first estimate of Onuki (see \cite[§ 6.3]{Onuki}) for the same parameters ($n=1428$) and even less than Col\'{o} and Kohel's choice in \cite[section 6]{OSIDH} ($n=256$).
 \end{example}
+
+However, this attack can be dramatically improved if we replace the exhaustive search of endomorphisms by a reduction of the relations lattice. This will lead to a significant revision of the security parameters.
 
 \section{A variant of Onuki's attack based on lattice reduction}\label{paragraph 9}
 
@@ -1333,7 +1362,7 @@ As we saw in paragraph \ref{paragraph 11}, we can find a basis set of the lattic
 \[L:=\left\{(e_1,\cdots,e_t)\in\Z^t\middle| \  \prod_{j=1}^t[\mf{q}_j]^{e_j}=[1]\right\}\]
 in polynomial time in $n$ and $t$.  Our problem reduces to finding a short vector in $L$ for the norm $\ell_\infty$, hoping that this vector has norm $\leq 2r$ to make sure that we can compute $\iota_n(\beta)$ by the meet-in-the-middle argument presented above.  Hence,  an estimation of the infinity norm of the shortest vector in $L$ is necessary.
 
-\subsubsection{Estimating the first minimum of $L$ for the norm $\ell_\infty$}
+\subsection{Estimating the first minimum of $L$ for the norm $\ell_\infty$}
 
 We want to estimate, at least statistically the first minimum of $L$ for the norm $\ell_\infty$, depending on the parameters:
 \[\lambda_1^{(\infty)}(L):=\min_{v\in L\setminus\{0\}}\|v\|_\infty\]
@@ -1354,12 +1383,12 @@ where $r:=\Covol(L)^{\frac{1}{t}}$, whose volume is $2^t\Covol(L)$ and which is 
 \begin{remark}
 Since $h(\mO_n)=\frac{\ell^{n-1}}{[\mO_K^\times:\mO_n^\times]}\(\ell-\(\frac{\Delta_K}{\ell}\)\)\simeq\ell^n$ by \cite[theorem 7.24]{Cox}, we conclude that $\lambda_1^{(\infty)}(L)=O(\ell^{\frac{n}{t}})$. Hence, we have to make sure that $2r<\ell^{\frac{n}{t}}$ to have a chance that $2r<\lambda_1^{(\infty)}(L)$.  Of course, $n$ has to be sufficiently larger than $t$ to make this inequality possible.
 
-However, we do not know how thight the estimate $\lambda_1^{(\infty)}(L)\leq h(\mO_n)^{\frac{1}{t}}$ is, and therefore if the choice of parameters $2r<O(\ell^{\frac{n}{t}})$ is sufficient. Assuming that the $[\mf{q}_j]$ generate $\Cl(\mO_n)$, we have $\Covol(L)=h(\mO_n)^{\frac{1}{t}}$, and $\Covol(L)$ is close to this bound if the $[\mf{q}_j]$ generate a big enough subgroup. Heuristically, it makes sense to assume that $\lambda_1^{(\infty)}(L)$ is relatively close to $\Covol(L)^{\frac{1}{t}}$ in general, namely that $\lambda_1^{(\infty)}(L)=\theta(\Covol(L)^{\frac{1}{t}})$, as the following asymptotical result indicates. 
+However, we do not know how thight the estimate $\lambda_1^{(\infty)}(L)\leq h(\mO_n)^{\frac{1}{t}}$ is, and therefore if the choice of parameters $2r<O(\ell^{\frac{n}{t}})$ is sufficient. Assuming that the $[\mf{q}_j]$ generate $\Cl(\mO_n)$, we have $\Covol(L)=h(\mO_n)^{\frac{1}{t}}$, and $\Covol(L)$ is close to this bound if the $[\mf{q}_j]$ generate a big enough subgroup. Heuristically, it makes sense to assume that $\lambda_1^{(\infty)}(L)$ is relatively close to $\Covol(L)^{\frac{1}{t}}$ in general, namely that $\lambda_1^{(\infty)}(L)=\Theta(\Covol(L)^{\frac{1}{t}})$, as the following asymptotical result indicates. 
 \end{remark}
 
 Let $N, n\in\N^*$ and $\m{I}_{N,n}$ be the set of full-rank sublattices of $\Z^n$ of rank $N$.
 
-\begin{lemma}
+\begin{lemma}\label{lemma 22}
 \begin{description}
 \item[(i)] $\m{I}_{N,n}$ is finite.
 \item[(ii)] Let $\Lambda$ be a random value following the uniform distribution on $\m{I}_{N,n}$. Then, for all $\varepsilon>0$, there exists $n_0, N_0\in\N^*$ such that for all $n\geq n_0$ and $N\geq N_0$:
@@ -1382,15 +1411,15 @@ with $d_1, \cdots, d_n\in\N^*$ such that $\prod_{i=1}^n d_i=N$ and $a_{i,i+1}, \
 \textbf{(ii)} This result has already been proved in \cite[theorem 11]{Aono} for the norm $\ell_2$. The reasoning would be exactly the same here. We only have to replace the function $h(n)=\frac{1}{\Vol(B_2(0,1))^{\frac{1}{n}}}$ by the constant $\frac{1}{\Vol(B_\infty(0,1))^{\frac{1}{n}}}=\frac{1}{2}$ in the inequality.
 \end{proof}
 
-\begin{remark}
-Let $G$ be the subgroup of $\Cl(\mO_n)$ generated by the $[\mf{q}_j]$. Assuming that $L$ behaves like a random lattice with uniform distribution in $\m{I}_{|G|,t}$, we get that:
-\[\lambda_1^{(\infty)}(L)\leq \(1+\frac{\log\log(t)}{t}\)\frac{|G|^{\frac{1}{t}}}{2}\] 
+\begin{remark}\label{remark 4}
+As always,we assume that $\Cl(\mO_n)$ is generated by the $[\mf{q}_j]$. Assuming that $L$ behaves like a random lattice with uniform distribution in $\m{I}_{h(\mO_n),t}$, we get that:
+\[\lambda_1^{(\infty)}(L)\leq \(1+\frac{\log\log(t)}{t}\)\frac{h(\mO_n)^{\frac{1}{t}}}{2}\] 
 
 To ensure that the key space is sufficiently large to cover a wide portion of $\Cl(\mO_n)$, we require the surjectivity of the map:
 \[f:(e_1,\cdots, e_t)\in\i{-r}{r}^t\longmapsto \prod_{j=1}^t[\mf{q}_j]^{e_j}\in G\]
-It follows that $|G|\leq (2r+1)^t$, so that:
-\[2r\geq |G|^{\frac{1}{t}}-1>\(1+\frac{\log\log(t)}{t}\)\frac{|G|^{\frac{1}{t}}}{2}\geq \lambda_1^{(\infty)}(L)\]
-for $|G|$ big enough, so the SVP attack is possible.
+It follows that $h(\mO_n)\leq (2r+1)^t$, so that:
+\[2r\geq h(\mO_n)^{\frac{1}{t}}-1>\(1+\frac{\log\log(t)}{t}\)\frac{h(\mO_n)^{\frac{1}{t}}}{2}\geq \lambda_1^{(\infty)}(L)\]
+for $h(\mO_n)$ big enough, so the SVP attack is possible.
 \end{remark}
 
 \begin{example}
@@ -1399,11 +1428,65 @@ For instance, with the parameters of \cite[p. 28]{OSIDH}: $\ell=2$, $r=5$, $t=74
 so that $\lambda_1^{(\infty)}(L)\leq 5<2r=10$ and the attack is indeed possible.
 \end{example}
 
-The safest way to find a vector $e\in L$ such that $\|e\|_\infty\leq 2r$ is the SVP algorithm for infinity norm due to \cite{Aggarwal2018} whose space and time complexities are $2^{0.62t+o(t)}$ and $2^{0.415t+o(t)}$ respectively. However, this is not necessary in practice since usual reduction algorithms like BKZ provide vectors far shorter than their theoretical bounds.
+\subsection{Countermeasures to our attack}
+
+There are two ways of countering our attack: 
+\begin{enumerate}
+\item Increase $t$ sufficiently to ensure that finding a short vector $e\in L$ such that $\|e\|_\infty\leq 2r$ is computationally very hard.
+\item Make any SVP attack impossible by choosing our parameters so that $\lambda_1^{(\infty)}(L)>2r$. 
+\end{enumerate}
+
+The safest way to find a vector $e\in L$ such that $\|e\|_\infty\leq 2r$ is the SVP algorithm for infinity norm due to \cite{Aggarwal2018} whose space and time complexities are $2^{0.62t+o(t)}$ and $2^{0.415t+o(t)}$ respectively. Hence, to ensure $128$ bits of security, choosing $t\geq 207$ would be enough. However, in practice, algorithms with much less time complexity like BKZ \cite{BKZ} provide vectors far shorter than their theoretical bounds (see paragraph \ref{paragraph 17}). Considering the fact that SVP algorithms in infinity norm could always be improved, this makes the first method risky. Besides, relying on lattice based problem to ensure the security of OSIDH would damage its relevance as an isogeny based cryptosystem, since one of the main arguments in favor of isogeny based cryptography is diversity: it is based on distinct computational problems and assumptions that of lattice based primitives prevailing in the NIST competition.
+
+The second method is much safer but it has a strong drawback. As explained in Remark \ref{remark 4}, if the key space covers $\Cl(\mO_n)$, then OSIDH is vulnerable to our attack. Hence, we need to restrict the key space to ensure $\lambda_1^{(\infty)}(L)>2r$. By making that choice, we dramatically reduce the relevance of OSIDH for other cryptographic constructions beyond Diffie-Hellman key exchange. For instance hash proof systems based on OSIDH (see Appendix \ref{appendix C}) rely on cryptographic group actions with transitivity property. Since we limit the key space to a small portion of the group, the transitivity is no longer guaranteed.
+
+Besides, our attack can still be performed when $\lambda_1^{(\infty)}(L)>2r$. Indeed, let us assume that we found a short vector $e\in L$ with norm $\|e\|_\infty>2r$. Then, we may write $e:=e'+e''+d$ with $e', e'', d\in\Z^t$ such that $\|e'\|_\infty=\|e''\|_\infty=r$ and $d$ has infinity norm as small as possible. As previously, we can compute the isogenies:
+\[\varphi : E_n \longrightarrow E':=\prod_{j=1}^t[\mf{q}_j]^{e'_j}\cdot E_n \qquad \mbox{and} \qquad \psi : E_n  \longrightarrow  E'':=\prod_{j=1}^t[\mf{q}_j]^{-e''_j}\cdot E_n=\prod_{j=1}^t[\mf{q}_j]^{e'_j+d_j}\cdot E_n\]
+In order to compute the endomorphism of $E_n$ associated to $e$ (whose kernel is $E_n[\prod_{j=1}^t \mf{q}_j^{e_j}]$), it remains to compute the isogeny $E'\longrightarrow E''$ associated to $d$ (whose kernel is $E'[\prod_{j=1}^t\mf{q}_j^{d_j}]$). Following Onuki's idea, we compute this isogeny by meet-in-the middle exhaustive search. Let us write $d:=d'+d''$ with $d'_j:=\lfloor d_j/2\rfloor$ and $d''_j:=d_j-d'_j$ for all $j\in\i{1}{t}$. We compute:
+\[\phi: E'\longrightarrow \prod_{j=1}^t [\mf{q}_j]^{d'_j}\cdot E' \qquad \mbox{and} \qquad \phi': E''\longrightarrow \prod_{j=1}^t [\mf{q}_j]^{-d''_j}\cdot E''=\prod_{j=1}^t [\mf{q}_j]^{d'_j}\cdot E'\]
+by exhaustively testing all isogenies of degree $\prod_{j=1}^t q_j^{|d'_j|}$ and $\prod_{j=1}^t q_j^{|d''_j|}$ respectively, until the codomains of $\phi$ and $\phi'$ match. In that case, the desired endomorphism will be the composite $\widehat{\psi}\circ\widehat{\phi'}\circ\phi\circ\varphi$. Note that, as in Onuki's attack, we have no theoretical guarantee that such an isogeny will actually be a $K$-oriented isomorphism. However, likewise,we can estimate the complexity of this attack.
+
+\begin{proposition}
+Under the heuristic assumption that $L$ behaves like a random lattice among lattices of covolume $h(\mO_n)$ and that the shortest vector of $L$ can be found in negligible time, our attack performs in time:
+\[\Omega\((q_1+1)^{\frac{1}{4}\ell^{n/t}-r}\)\]
+where $q_1:=N(\mf{q}_1)$ is assumed to be the shortest prime among the $q_j:=N(\mf{q}_j)$ for $j\in\i{1}{t}$.
+\end{proposition} 
+
+\begin{proof}
+The dominant step in our attack is clearly the meet-in-the middle exhaustive search and its time complexity is (up to polynomial factors):
+\[\Omega\(\prod_{j=1}^t (q_j+1)^{|d'_j|}+\prod_{j=1}^t (q_j+1)^{|d''_j|}\)\]
+By assumption $d'$ and $d''$ cut $d$ in half and $e=e'+e''+d$, so that:
+\[\|e\|_\infty\leq \|e'\|_\infty+\|e''\|_\infty+\|d\|_\infty=2r+\|d\|_\infty\]
+and $\|d\|_\infty\geq \|e\|_\infty-2r\geq \lambda_1^{(\infty)}(L)-2r$.  But by \ref{lemma 22}, we have:
+\[\lambda_1^{(\infty)}(L)\geq \(1-\frac{\log\log(t)}{t}\)\frac{h(\mO_n)^{\frac{1}{t}}}{2}\underset{t\rightarrow +\infty}{\sim}\frac{\ell^{\frac{n}{t}}}{2}\]
+The result follows.
+\end{proof}
 
 \begin{example}
-With the parameters of \cite[p. 28]{OSIDH}: $\ell=2$, $r=5$, $t=74$ and $n=256$ $K=\Q(i)$,  and $q_1,\cdots, q_t$ the $t$ smallest splitting primes in $\mO_K$ the relation lattice $L$ was computed in 2 h 31 using \verb?SageMath? \cite{sagemath}. The BKZ algorithm was applied to $L$ using the \verb?fpylll? library \cite{fpylll} with a block size $k=4$ to find a vector $e\in L$ of infinity norm $\|e\|_\infty=9<2r$ in less that 0.5 s.
+For the parameters chosen by Col\'{o} and Kohel in \cite[section 6]{OSIDH} ($\ell=2$, $t=74$, $r=5$ and $K=\Q(i)$), the smallest value possible for $q_1$ (as a splitting prime $\neq \ell$) is $q_1=5$. To ensure a security level of $\lambda=128$ bits,  we need to take $n$ such that:
+\[(q_1+1)^{\frac{1}{4}\ell^{n/t}-r}\geq 2^\lambda \Longleftrightarrow n\geq t\frac{\log\(4r+\frac{4\lambda\log(2)}{\log(q_1+1)}\)}{\log(\ell)}\]
+It follows that $n\geq 575$. The value $n=256$ was initially proposed, and the parameters were chosen so that the key space just covers $\Cl(\mO_n)$. (with few or no redundancies). With $n\geq 575$, the key space is way smaller than $\Cl(\mO_n)$.
 \end{example}
+
+\subsection{Implementation}\label{paragraph 17}
+
+This attack was implemented in \verb?SageMath? \cite{sagemath}, partly with realistic parameters and completely (end-to-end) with toy parameters. The source code is available on my Github repository \cite{MyGithub}, more specifically:
+\begin{itemize}
+\item  in the files \verb?Group_basis.py?, \verb?Relations_lattice.py? and \verb?Find_SVP.py? for the partial attack with realistic parameters;
+\item in the files \verb?OSIDH_attack.py? and \verb?OSIDH_attack_tests.py? for the end-to-end attack.
+\end{itemize}
+
+With the parameters of \cite[p. 28]{OSIDH}: $\ell=2$, $r=5$, $t=74$ and $n=256$ $K=\Q(i)$,  and $q_1,\cdots, q_t$ the $t$ smallest splitting primes in $\mO_K$ the relation lattice $L$ was computed in 2 h 31 using \verb?SageMath? \cite{sagemath}, including 1 h 28 for the group basis computation with algorithm \ref{algorithm 10} and 1 h 03 for the relations lattice per se with \ref{algorithm 11}. Have we known before performing the test that $\Cl(\mO_n)$ was cyclic and generated by $[\mf{q}_1]$, the group basis computation could have been dramatically accelerated. The BKZ algorithm \cite{BKZ} was applied to $L$ using the \verb?fpylll? library \cite{fpylll} with a block size $k=4$ to find a vector $e\in L$ of infinity norm $\|e\|_\infty=9<2r$ in less that 0.5 s, proving that our lattice based attack could be very efficient in practice with large parameters.
+
+With toy parameters ($n=28$, $t=10$,$\ell=2$, $r=3$ and $K=\Q(i)$), we performed an end-to-end attack on a protocol execution between two parties Alice and Bob. This attack included:
+\begin{enumerate}
+\item Our lattice based chain recovery of both Alice's and Bob's chains.
+\item A recovery of Alice's ideal class using the implementation presented in paragraph \ref{paragraph 18}.
+\item The shared secret chain computation by acting with Alice's ideal class on Bob's chain.
+\end{enumerate}
+Step 1 ran in 288.6 s (144.3 s per chain), step 2 ran in 90 s and step 3 ran in 6.4 s for a total execution time of 385 s. In comparison, the protocol ran in 83.1 s.
+
+As explained in paragraph \ref{paragraph 18}, the main limiting factor to test our attack with real parameters is the ideal class group action. Roughly speaking, our implementation of the protocol is "as slow as the attack".
 
 \section{Kuperberg's attack}
 
@@ -1431,353 +1514,7 @@ Actually, we know how to compute $f$ and $g$ on products on the prime ideals $[\
 However, the condition $|e_j|\leq r$ might be an issue if the parameters are chosen so that $(2r+1)^t\ll |\Cl(\mO_n)|$. Hence, we can avoid both our lattice based classical attack and Kuperberg's attack with this chose of parameters.
 \end{remark}
 
-\chapter{Cryptographic constructions obtained with the OSIDH framework}
 
-\section{Hash proof systems}
-
-\subsection{Definition}
-
-This notion was first introduced in \cite{Cramer_Shoup}. We use the notations of \cite{DeFeo1}.
-
-\begin{definition}
-A \emph{hash proof system} is a tuple $\Pi:=(\Lambda,\pi,\ProjEval,L,\Sigma,W,\m{K},\m{P},\Gamma)$, where, on the one hand $L,\Sigma,W,\m{K},\m{P}$ and $\Gamma$ are sets such that:
-\begin{description}
-\item[(i)] There exist efficient algorithms to sample elements from $\Sigma$ and $\m{K}$ with uniform distribution.
-\item[(ii)] $L\subset \Sigma$ and $W$ is the space of witnesses to test membership in $L$.
-\item[(iii)]  The uniform distributions on $L$ and $\Sigma$ are computationally indistinguishable (\emph{subset membership problem}).
-\end{description}
-
-On the other hand, $\Lambda,\pi$ and $\ProjEval$ are efficiently computable functions:
-\begin{description}
-\item[(i)] The \emph{hash function} $\Lambda: \m{K}\times\Sigma\longrightarrow \Gamma$.
-\item[(ii)] The \emph{projection} $\pi: \m{K}\longrightarrow \m{P}$.
-\item[(iii)] The \emph{projective evaluation} $\ProjEval: \m{P}\times L\longrightarrow \Gamma$.
-\end{description}
-such that, for any algorithm (possibly inefficient) $\omega : L\longrightarrow W$ associating a membership witness $w=\omega(\sigma)\in W$ to every element $\sigma\in L$ there we have a commutative diagram:
-\[
-\xymatrix{
-\m{K}\times L  \ar[r]^{\Lambda} \ar[d]_{\pi\times\omega} & \Gamma\\
-\m{P}\times W \ar[ru]_{\ProjEval} &
-}
-\]
-
-We additionally require $\Pi$ to be \emph{universal}, meaning that knowing $(\pi(k),\sigma)$ for $(k,\sigma)\in \m{K}\times \Sigma\setminus L$ provides no information on the value of $\Lambda(k,\sigma)$. Formally, for $\varepsilon>0$, we say that $\Pi$ is $\varepsilon$-universal if:
-\[H_\infty(\Lambda(k,\sigma)|(\pi(k),\sigma))\geq\log(\varepsilon^{-1})\]
-where $H_\infty(.|.)$ is the conditional min-entropy defined below.
-\end{definition}
-
-\begin{definition}
-Let $X$ and $Y$ be discrete random variables taking values in $\m{X}$ and $\m{Y}$ respectively. Then, the conditional min-entropy of $X$, knowing $Y$ is the quantity:
-\[H_\infty(X|Y)=-\log\max_{(x,y)\in\m{X}\times\m{Y}}\P(X=x|Y=y)\]
-\end{definition}
-
-\subsection{Cryptographic applications of hash proof systems}
-
-\subsection{Hash proof system form weak-pseudorandom restricted effective group actions}
-
-\begin{definition}\cite[definition 2]{DeFeo1}
-An \emph{effective group action} is a triplet $(G,X,\cdot)$ where $G$ is a finite group, $X$ a finite set $\cdot : G\times X\longrightarrow X$ a transitive and faithful group action, such that:
-\begin{description}
-\item[(i)] There are efficient algorithms on $G$ to test membership, equality,  to sample elements (with uniform distribution), compute the product of two elements and the inverse of one element.
-\item[(ii)] There is an efficient algorithm to test membership in $X$ and every element of $X$ admits a unique (bitstring) representation.
-\item[(iii)] We know (the bitstring representation of) an element $x_0\in X$ called the \emph{origin}.
-\item[(iv)] There exists an efficient algorithm computing $g\cdot x$ when $g\in G$ and $x\in X$ are given.
-\end{description}
-\end{definition}
-
-In the context of OSIDH, we don't know how to efficiently compute the action of the whole group but only on a subset. The definition can be adapted to this case:
-
-\begin{definition}\cite[definition 6]{DeFeo1}
-A \emph{restricted effective group action} is a triplet $(G,X,\cdot,g)$ where $G$ is a finite group, $X$ a finite set $\cdot : G\times X\longrightarrow X$ a transitive and faithful group action, and $\m{G}:=\{g_1,\cdots, g_t\}$ a generating set of $G$ such that:
-\begin{description}
-\item[(i)] $t$ is polynomial in $\log(|G|)$.
-\item[(ii)] There is an efficient algorithm to test membership in $X$ and every element of $X$ admits a unique (bitstring) representation.
-\item[(iii)] We know (the bitstring representation of) an element $x_0\in X$ called the \emph{origin}.
-\item[(iv)] There exist efficient algorithms computing $g_i\cdot x$ and $g_i^{-1}\cdot x$ when $i\in\i{1}{t}$ and $x\in X$ are given.
-\end{description}
-\end{definition}
-
-\begin{remark}\label{remark 3}
-We assume $G$ is abelian. Knowing the generating set $\m{G}=\{g_1,\cdots, g_t\}$ of $G$,  we can represent elements $g\in G$ as tuples of $\Z^t$ via the map:
-\[\phi : e:=(e_1,\cdots, e_t)\in\Z^t\longmapsto g^e:=\prod_{i=1}^t g_i^{e_i}\in G\]
-and compute the action of $g^e$ on $X$ when $e\in\Z^t$ has components of polynomial size. We can even sample on $G$ with distributions statistically closed to the uniform by sampling $e\in \Z^t$ with Gaussian distribution with standard deviation sufficiently greater than the smoothing parameter of the lattice $\ker(\phi)\subseteq \Z^t$ (see \cite[sections 3 and 4]{MaccianoRegev}). 
-\end{remark}
-
-\begin{definition}
-A group action $(G,X,\cdot)$ is said \emph{weak-pseudorandom} if given a randomly chosen secret $g\in G$, one cannot distinguish between the distribution of $(x,g\cdot x)$ and $(x, y)$, where $x$ and $y$ are chosen uniformly in $X$.
-\end{definition}
-
-Let $(G,X,\cdot)$ be an abelian weak-pseudorandom  (restricted) effective group action. We can construct a hash proof system with it as follows: we fix $x_0, x_1\in X$ with $x_1=s\cdot x_0$ with $s\in G$ secret. Let: 
-\[\Sigma:=\{(g_0\cdot x_0,g_1\cdot x_1)\mid g_0, g_1\in G\}\quad \mbox{and} \quad L:=\{(g\cdot x_0,g\cdot x_1)\mid g\in G\}\]
-$W:=G$, $\m{K}:=G\times\{0,1\}$ and $\m{P}=\Gamma:=X$.  We define the hash function $\Lambda : (G\times\{0,1\})\times\Sigma\longrightarrow X$ as follows:
-\[\forall (h, b)\in G\times\{0,1\}, (y_0,y_1)\in \Sigma, \quad \Lambda((h,b),(y_0,y_1)):=h\cdot y_b\]
-and set:
-\[\forall (h, b)\in G\times\{0,1\}, \quad \pi(h,b):=h\cdot x_b\]
-\[\forall (x,g)\in X\times G, \quad \ProjEval(x,g):=g\cdot x\]
-\[\forall g\in G, \quad \omega((g\cdot x_0,g\cdot x_1)):=g\]
-so that $\Lambda=\ProjEval\circ(\pi\times \omega)$ on $\m{K}\times L$.
-
-\begin{theorem}\cite[theorem 1]{DeFeo1}\label{theorem 5}
-The system $\Pi:=(\Lambda,\pi,\ProjEval,L,\Sigma,G,G\times\{0,1\},X,X)$ defined above is a $2^{-1}$-universal hash proof system.
-\end{theorem}
-
-\begin{proof}
-Under the hypothesis we made, the non-trivial points to prove are subset membership problem and universality.  
-
-Since the group action of $G$ on $X$ is transitive and faithful, sampling an element $(y_0,y_1)\in L$ with uniform distribution is equivalent to sampling $g\in G$ with uniform distribution and returning $(g\cdot x_0, g\cdot x_1)$. Writing $y_0:=g\cdot x_0$, we get that $g\cdot x_1=g\cdot s\cdot x_0=s\cdot g\cdot x_0=s\cdot y_0$ because $G$ is abelian. Since $y_0$ is uniform, $(g\cdot x_0, g\cdot x_1)=(y_0,s\cdot y_0)$ is indistinguishable from $(y_0,y_1)$ sampled with uniform distribution from $X^2$. by weak-pseudorandomness. But $X^2=\Sigma$ by transitivity of the group action. Hence, the uniform distributions on $L$ and $\Sigma$ are undistinguishable.
-
-Let $(h,b)\in G\times\{0,1\}$ be a key (secret and sampled with uniform distribution) and $(y_0,y_1)=(g_0\cdot x_0, g_1\cdot x_1)\in \Sigma\setminus L$ be sampled with uniform distribution. Let us assume that an attacker with unbounded capabilities knows $(y_0,y_1)$ and $\pi(h,b)=h\cdot x_b$ and wants to recover $\Lambda((h,b),(y_0,y_1))=h\cdot y_b$. Since $\pi(h,b)=h\cdot x_b=hs^{2b-1}\cdot x_{1-b}$, the knowledge of $(y_0,y_1)$ and $\pi(h,b)$ enables the unbounded attacker to infer that $\Lambda((h,b),(y_0,y_1))=h\cdot y_b=hg_b\cdot x_b$ or:
-\[\Lambda((h,b),(y_0,y_1))=hs^{2b-1}\cdot y_{1-b}=hs^{2b-1}g_{1-b}\cdot x_{1-b}=hs^{2b-1}g_{1-b}s^{1-2b}\cdot x_b=hg_{1-b}\cdot x_b\neq hg_b\cdot x_b\]
-Hence, the attacker has a probability $\frac{1}{2}$ to guess the right value. It follows that:
-\[H_\infty(\Lambda((h,b),(y_0,y_1))|(\pi(h,b),(y_0,y_1)))=-\log\(\frac{1}{2}\)\]
-so that $\Pi$ is $2^{-1}$-universal.
-\end{proof}
-
-Using the OSIDH framework, we can take $G:=\Cl(\mO_n)$ (or the subgroup generated by the ideals $\mf{q}_1, \cdots, \mf{q}_t$) and $X:=\rho(\Ell(\mO_n))$. To simplify the computation of the group action using the techniques of paragraph \ref{paragraph 1}, we could represent elements of $X$ as descending $\ell$-isogeny chains $(E_i)_{0\leq i\leq n}$. However, in that case, weak-pseudorandomness would not hold because of the attacks of paragraph \ref{paragraph 7}.  Indeed, let us fix two descending $\ell$-isogeny chains $(E_{0,i})_{0\leq i\leq n}$ and $(E_{1,i})_{0\leq i\leq n}:=\mf{s}\cdot (E_{0,i})_{0\leq i\leq n}$, where $\mf{s}$ is a secret randomly chosen ideal of $\mO_n$. Then, sampling $[\mf{a}],[\mf{b}]\in\Cl(\mO_n)$ uniformly (using Gaussian distributions as explained in remark \ref{remark 3} if necessary) we can distinguish the distribution of pairs $([\mf{a}]\cdot(E_{0,i}),[\mf{a}]\cdot(E_{1,i}))$ and $([\mf{a}]\cdot(E_{0,i}),[\mf{b}]\cdot(E_{1,i}))$ by recovering $[\mf{a}]$ and $[\mf{b}]$. 
-
-To correct this, we use the same technique introduced in paragraph \ref{paragraph 8}. Given an descending $\ell$-isogeny chain $(E_i)_{0\leq i\leq n}$, we give away $E_n\in\rho(\Ell(\mO_n))$ together with the additional data:
-\[E_{n,j}^{(-r)}:=(\mf{q}_j^{(n)})^{-r}\cdot E_n\longrightarrow \cdots \longrightarrow E_{n}\longrightarrow \cdots\longrightarrow E_{n,j}^{(r)}:=(\mf{q}_j^{(n)})^{r}\cdot E_n\]
-for all $j\in\i{1}{t}$. Under assumption ???, weak-pseudorandomness still holds but the subset membership problem remains vulnerable to a subexponential attack (see paragraph ???). In the following, we construct a hash proof system with enhanced subset membership security combining Supersingular Isogeny Diffie Hellman (SIDH) due to \cite{DeFeoSIDH} and OSIDH.
-
-\subsection{An original hash proof system combining SIDH with OSIDH}
-
-Attempts have been made to construct a hash proof system using SIDH only which has stronger security than OSIDH. If the subset membership problem is indeed stronger, these constructions fail to ensure universality, which is a direct consequence of the transitivity and faithfulness of the class group action in the OSIDH framework.  Actually, combining the strengths of both frameworks proves to be fruitful.  The main idea of the hash proof system we propose here is to make the projection $\pi$ act horizontally by ideal class group action (OSIDH component) and make $\ProjEval$ act vertically as quotient by cyclic kernels (SIDH component).   
-
-Let $K$ be a quadratic imaginary number field such that $\Cl(\mO_K)$ is trivial.  Let $r\neq \ell$ be a small prime inert in $K$ (\ie such that $\(\frac{\Delta_K}{r}\)=-1$). Let $\ell$ be a small prime and $\mO_i:=\Z+\ell^i\mO_K$ and $\mO_{i,j}:=\Z+\ell^ir^j\mO_K$ for all $i, j\in\N$. We chose $p$ of the form $p:=f r^e\pm 1$ with $e\in\N^*$ big enough (to ensure SIDH security) and $f$ big enough to construct descending $\ell$-ladders and $r$-ladders efficiently with the techniques of paragraph \ref{paragraph 1}. Actually:
-\[p>\max_{1\leq j\leq t}(q_j)\ell^{2n}r^{2e}|\Delta_K|\qquad (\mbox{see lemma \ref{lemma 6}})\]
-We also impose that $p$ does not split in $K$ (see proposition \ref{proposition 2}). 
-
-\begin{lemma}\label{lemma 7}
-Let $E/\F_{p^2}$ such that $|E(\F_{p^2})|=(f r^e)^2$. Then:
-\begin{description}
-\item[(i)] $E(\F_{p^2})=E[fr^e]$. In particular, $E[r^e]\subseteq E(\F_{p^2})$.
-\item[(ii)] Assume that $E\in\rho(\Ell(\mO_n))$ and let $P\in E[r^e]$ be of order $r^e$. Then $E/\langle P\rangle\in \rho(\Ell(\mO_{n,e}))$ (we recall that $\mO_{n,e}=\Z+r^e\mO_n=\Z+\ell^n r^e\mO_K$).
-\end{description}
-\end{lemma}
-
-\begin{proof}
-\textbf{(i)} Since $|E(\F_{p^2})|=(f r^e)^2=(p\mp 1)^2$, the trace of the $p^2$-th Frobenius $\pi_2$ is $\mp 2p$, so we have $\pi_2^2\pm [2p]\pi_2+[p^2]=0$ \ie $(\pi_2\pm[p])^2=0$ \ie $\pi=\mp[p]$. 
-
-Let $P\in E[fr^e]$. Then for all $Q\in E[fr^e]$, we have:
-\[e_{fr^e}(\pi_2(P),Q)=e_{fr^e}(\mp[p]P,Q)= e_{fr^e}(P,Q)^{\mp p}=e_{fr^e}(P,Q)^{\mp fr^e+1}=e_{fr^e}(P,Q)\]
-so that $e_{fr^e}(\pi_2(P)-P,Q)=1$. It follows that $\pi_2(P)=P$ \ie $P\in E(\F_{p^2})$. Hence $E[fr^e]\subseteq E(\F_{p^2})$ and we have an equality since both sets have cardinality $(fr^e)^2$.
-
-\textbf{(ii)} Let $\phi : E\longrightarrow E/\langle P\rangle$ the isogeny of kernel $\langle P\rangle$. Then, we have $\phi=\phi_e\circ\cdots\circ\phi_0$ with $\phi_0=[1]_E$ and for all $i\in\i{1}{e}$, $\phi_i :E_{i-1}\longrightarrow E_i$ ($E_0:=E$, $E_e:=E/\langle P\rangle$) has kernel generated by $\phi_{i-1}\circ\cdots\circ\phi_0(r^{e-i}P)$. For all $i\in\i{1}{r}$, $\phi_i$ has degree $r$, so it suffices to prove that $\phi_i$ is descending.  Since $r$ is inert in $K$, by proposition \ref{proposition 5}.(i), $\phi_1$ is descending. Let $i\in\i{2}{e}$. Assume that $\phi_1, \cdots, \phi_{i-1}$ are descending. By proposition \ref{proposition 5}.(ii), $\phi_i$ is either descending or ascending. If it was ascending, since there is only one ascending isogeny, from $E_{i-1}$, we would have $\phi_i=\widehat{\phi_{i-1}}$ so that $\phi$ factors through $[r]$ and $E[r]\subseteq \ker(\phi)$. But $\ker(\phi)$ is cyclic and $E[r]$ is not. Contradiction. Hence, $\phi_i$ is descending. This completes the proof.
-\end{proof}
-
-Let $q$ be a prime $\neq r,\ell, p$ splitting in $K$ and $\mf{q}$ a prime ideal of $\mO_K$ lying above $q$. Let $\mf{q}^{(i,j)}:=\mf{q}\cap\mO_{i,j}$ for all $i, j\in\N$. To lighten the notations, the exponent $(i,j)$ will often be omitted. Let $E\in\rho(\Ell(\mO_n))$, such that $|E(\F_{p^2})|=(f r^e)^2$ and let $P\in E[r^e]$ of order $r^e$. For our construction, we need to compute the action of $\mf{q}^{(n,e)}$ on $E/\langle P\rangle$ (with its induced $\mO_{n,e}$-orientation).  This computation uses descending $r$-ladders and the ideas of paragraph \ref{paragraph 1}.
-
-\begin{lemma}\label{lemma 8}
-There is a descending $r$-ladder of length $n$ and degree $q$:
-\[\xymatrix{
-E_0 \ar[d]^{\psi_0} \ar[r]^{\phi_1} & E_1\ar[d]^{\psi_1} \ar[r]^{\phi_{2}}& \cdots \ar[r]^{\phi_{e-1}} & E_{e-1} \ar[d]^{\psi_{e-1}} \ar[r]^{\phi_{e}} & E_e \ar[d]^{\psi_e}\\
-F_0:=\mf{q}\cdot E_0 \ar[r]^-{\phi'_1} & F_1:=\mf{q}\cdot E_1 \ar[r]^-{\phi'_{2}}& \cdots \ar[r]^-{\phi'_{e-1}} & F_{e-1}:=\mf{q}\cdot E_{e-1} \ar[r]^-{\phi'_{e}} & F_e:=\mf{q}\cdot E_e
-}\]
-such that: 
-\begin{description}
-\item[(i)] $E_0=E$ and $E_e=E/\langle P\rangle$.
-\item[(ii)] $\phi:=\phi_e\circ\cdots\circ\phi_1$ has kernel $\langle P\rangle$.
-\item[(iii)] $\ker(\psi_i)=E_i[\mf{q}]$ for all $i\in\i{0}{e}$.
-\item[(iv)] $\phi':=\phi'_e\circ\cdots\circ\phi'_1$ has kernel $\langle \psi_0(P)\rangle$ or equivalently, $\mf{q}\cdot(E/\langle P\rangle)=(\mf{q}\cdot E)/\langle \psi_0(P)\rangle$.
-\end{description}
-\end{lemma}
-
-\begin{proof}
-As in the proof of lemma \ref{lemma 7}, point (ii), we define $\phi_0=[1]_E$ and for all $i\in\i{1}{e}$, $\phi_i :E_{i-1}\longrightarrow E_i$ as the $r$-isogeny of kernel generated by $Q_i:=\phi_{i-1}\circ\cdots\circ\phi_0(r^{e-i}P)$, so that points (i) and (ii) are satisfied. For all $i\in\i{0}{e}$, $\psi_i:E_i\longrightarrow \mf{q}\cdot E_i$ is the isogeny associated to $\mf{q}$ ($\ker(\psi_i)=E_i[\mf{q}]$), so that point (iii) is satisfied. 
-
-To prove the existence of the $r$-ladder satisfying point (iv), we simply prove that for all $i\in\i{1}{e}$, $\psi_i\circ\phi_i$ factors through $\psi_{i-1}$ by an isogeny $\phi'_i$ of kernel $\langle \psi_{i-1}(Q_i)\rangle$.  By \cite[corollary III.4.11]{Silverman1}, it suffices to prove that $\ker(\psi_{i-1})\subseteq \ker(\psi_i\circ\phi_i)$. The equality $\ker(\phi'_i)=\langle \psi_{i-1}(Q_i)\rangle$ will then follow from $\psi_i\circ\phi_i=\phi'_i\circ\psi_{i-1}$. 
-
-Let $\iota_{i-1}$ be the primitive $\mO_{n,i-1}$-orientation defined on $E_{i-1}$. Then, $\iota_i:={\phi_{i}}_{*}(\iota_{i-1})$ is a primitive $\mO_{n,i}$-orientation because $\phi_{i}$ is vertical, as we saw when we proved lemma \ref{lemma 7}, point (ii). Let $P\in\ker(\psi_{i-1})=E_{i-1}[\mf{q}^{(n,i-1)}]$. Then, we have $\iota_{i-1}(\alpha)(P)=0$ for all $\alpha\in\mf{q}^{(n,i-1)}$, so that:
-\[\iota_{i}(\alpha)(\phi_i(P))=\frac{1}{r}\phi_i\iota_{i-1}(\alpha)\widehat{\phi_i}\phi_i(P)=\frac{1}{r}\phi_i\iota_{i-1}(\alpha)[r](P)=\phi_i\iota_{i-1}(\alpha)(P)=0\]
-for all $\alpha\in \mf{q}^{(n,i)}\subseteq \mf{q}^{(n,i-1)}$. Hence $\phi_i(P)\in E_i[ \mf{q}^{(n,i)}]$ \ie $\psi_i\circ\phi_i(P)=0$. This completes the proof.
-\end{proof}
-
-We can construct the $r$-ladder of lemma \ref{lemma 7} with the techniques of paragraph \ref{paragraph 1}. For all $i\in\i{1}{e}$, $j(F_i)$ is solution of:
-\[\left\{\begin{array}{c}
-\Phi_q(j(E_i),x)=0\\
-\Phi_r(j(F_{i-1}),x)=0
-\end{array}\right. \Longleftrightarrow \quad \gcd(\Phi_q(j(E_i),x),\Phi_r(j(F_{i-1}),x))=0\quad (E_i)\]
-
-\begin{lemma}\label{lemma 6}
-Conversely, consider a descending $r$-ladder of length $e$ and degree $q$:
-\[\xymatrix{
-E_0 \ar[d]^{\psi_0} \ar[r]^{\phi_1} & E_1\ar[d]^{\psi_1} \ar[r]^{\phi_{2}}& \cdots \ar[r]^{\phi_{e-1}} & E_{e-1} \ar[d]^{\psi_{e-1}} \ar[r]^{\phi_{e}} & E_e \ar[d]^{\psi_e}\\
-F_0 \ar[r]^-{\phi'_1} & F_1 \ar[r]^-{\phi'_{2}}& \cdots \ar[r]^-{\phi'_{e-1}} & F_{e-1} \ar[r]^-{\phi'_{e}} & F_e
-}\]
-and assume that:
-\begin{description}
-\item[(i)] $E_0=E$ and $\ker(\phi_i)=\langle\phi_{i-1}\circ \cdots\circ\phi_0(r^{e-i}P)\rangle$ for all $i\in\i{1}{e}$ (with $\phi_0=[1]_{E_0}$).
-\item[(ii)] $p>q\ell^{2n}r^{2e}|\Delta_K|$.
-\item[(iii)] $F_0=\mf{q}\cdot E_0$
-\item[(iv)] $j(F_i)$ is solution of $(E_i)$ for all $i\in\i{1}{e}$.
-\item[(v)] $\mf{q}^2$ is not principal in $\mO_n$. 
-\end{description}
-Then $\ker(\psi_i)=E_i[\mf{q}]$ and $F_i=\mf{q}\cdot E_i$ for all $i\in\i{1}{e}$.
-\end{lemma}
-
-\begin{proof}
-See proposition \ref{proposition 9}. The same ideas stand.
-\end{proof}
-
-In the following, we shall work under the hypothesis of lemma \ref{lemma 6}.
-
-\subsubsection{Settings and public data}
-
-\textbf{1. Two supersingular elliptic curves $E_0$ and $E_1$.}
-We fix $E_0\in\rho(\Ell(\mO_n))$ and $E_1:=[\mf{s}]\cdot E_0$ for a secret ideal class $[\mf{s}]\in\Cl(\mO_n)$ such that $|E_0(\F_{p^2})|=|E_1(\F_{p^2})|=(f r^e)^2=(p\mp 1)^2$ (to ensure that $E_b[r^e]\subseteq E_b(\F_{p^2})$ for $b\in\{0,1\}$, by lemma \ref{lemma 7}.(i)). $E_0$ can be constructed as the ending curve of a descending $\ell$-isogeny chain $(E_{0,i})_{0\leq i\leq n}$ obtained by random descent of the $\ell$-isogeny graph from a known curve $E_{0,0}\in\rho(\Ell(\mO_K))$.  Unfortunately, this process does not guarantee the cardinality of $E_0(\F_{p^2})$, which can be in a limited set of values $\{(p-1)^2,p^2-p+1,p^2+1,p^2+p+1,(p+1)^2\}$. Since $|E(\F_{p^2})|$ is roughly uniform when $E/\F_{p^2}$ is sampled uniformly among elliptic curves defined over $\F_{p^2}$ as \cite[theorem 1.1]{Howe} seems to indicate, there is heuristically a probability of success close to $\frac{1}{5}$. By repeating the descent of the $\ell$-isogeny graph we may then reach the desired cardinality.  For, $E_1$ we take the ending curve of $(E_{1,i})_{0\leq i\leq n}:=\mf{s}\cdot (E_{0,i})_{0\leq i\leq n}$ where $\mf{s}$ is uniformly sampled among the $\mO_n$-ideals of norm prime to $r$ and $\ell$, until $|E_1(\F_{p^2})|=(f r^e)^2$. 
-
-\textbf{2. Basis of the $r^e$ torsion of $E_0$ and $E_1$.}
-We fix $(P_0, Q_0)$, a basis of $E_0[r^e]$. To do that, we execute a slightly modified version of algorithm \ref{algorithm 5}, using the fact that $E_0[r^e]\subseteq E_0(\F_{p^2})$. First, we sample $P\in E_0(\F_{p^2})$ with uniform distribution and compute $fP$. Then $fP\in E_0[r^e]$ since $E_0(\F_{p^2})=E_0[fr^e]$ by lemma \ref{lemma 7}.(i) and $fP$ has order $r^e$ with probability $1-\frac{1}{r}$ (it can be checked by multiplying $fP$ by $r$ successively). If it is the case, we set $P_0:=fP$. Otherwise, we repeat this step. Then, we sample $Q\in E_0(\F_{p^2})$ in a similar way and compute $fQ$, until $e_{r^e}(P_0,fQ)$ has order $r^e$ and set $Q_0:=fQ$ when this condition is met.  
-
-Then, we know that every point $R\in E_0[r^e]$ of order $r^e$ is of the form $R=\lambda P_0+\mu Q_0$ with $\lambda,\mu\in\Z/r^e\Z$ such that $\lambda$ or $\mu$ is invertible modulo $r^e$.  If $R':=\lambda'P_0+\mu'Q_0$ is another point of order $r^e$, then $\langle R\rangle=\langle R'\rangle$ if and only if there exists $\nu\in(\Z/r^e\Z)^\times$ such that $R'=\nu R$ \ie  $\lambda'=\nu\lambda$ and $\mu'=\nu\mu$. Hence, the cyclic subgroups of order $r^e$ of $E_0$ are in bijection with $\P^1(\Z/r^e\Z)$ via the map:
-\[(\lambda:\mu)\in\P^1(\Z/r^e\Z)\longmapsto \langle \lambda P_0+\mu Q_0\rangle\]
-For all $\alpha:=(\lambda:\mu)\in\P^1(\Z/r^e\Z)$, we shall denote by $\langle\alpha\rangle$ the image subgroup $\langle \lambda P_0+\mu Q_0\rangle$. Given an ideal $\mf{a}\subseteq \mO_n$, of norm prime to $r$ and $\ell$, and $\varphi_{\mf{a}}: E_0\longrightarrow \mf{a}\cdot E_0$, the isogeny of kernel $E_0[\mf{a}]$, $B_{\mf{a}}:=(\varphi_{\mf{a}}(P_0), \varphi_{\mf{a}}(Q_0))$ is a basis of $\mf{a}\cdot E_0[r^e]$, since:
-\[e_{r^e}(B_{\mf{a}})=e_{r^e}(\varphi_{\mf{a}}(P_0), \varphi_{\mf{a}}(Q_0))=e_{r^e}(P_0,Q_0)^{\deg(\varphi_{\mf{a}})}=e_{r^e}(P_0,Q_0)^{N(\mf{a})}\]
-with $N(\mf{a})\wedge r=1$, so that $e_{r^e}(B_{\mf{a}})$ is still a primitive $r^e$-th root of unity.  For all $\alpha:=(\lambda:\mu)\in\P^1(\Z/r^e\Z)$, we shall also denote by $\langle \alpha\rangle_{B_{\mf{a}}}$ or simply $\langle \alpha\rangle$ the subgroup of $\mf{a}\cdot E_b$ generated by $\lambda\varphi_{\mf{a}}(P_0)+\mu\varphi_{\mf{a}}(Q_0)$. By lemma \ref{lemma 8}, we know that $\mf{a}\cdot E_0/\langle\alpha\rangle=(\mf{a}\cap\mO_{n,e})\cdot(E_0/\langle\alpha\rangle)$. 
-
-In particular, we can consider $E_1/\langle\alpha\rangle=\mf{s}\cdot E_0/\langle\alpha\rangle=(\mf{s}\cap\mO_{n,e})\cdot(E_0/\langle\alpha\rangle)$ and the basis $(P_1,Q_1):=(\varphi_{\mf{s}}(P_0), \varphi_{\mf{s}}(Q_0))$ of $E_1[r^e]$. We assume that this basis is public along with $(P_0,Q_0)$. 
-
-\textbf{3. Public chains to compute the action of $\Cl(\mO_n)$ horizontally and the action of $\P^1(\Z/r^e\Z)$ vertically on $E_0$ and $E_1$.}
-To have a restricted effective group action, we assume that $\Cl(\mO_{n,e})$ is generated by $\mf{q}_1^{(n,e)}, \cdots, \mf{q}_t^{(n,e)}$, where $\mf{q}_1, \cdots, \mf{q}_t$ are prime ideals of $\mO_K$ lying above small splitting primes $q_1, \cdots, q_t$ distinct from $r,\ell,p$. We even assume that every ideal of $\Cl(\mO_{n,e})$ can be written as a product of these primes with exponents in $\i{-s}{s}$, $s\in\N^*$ being relatively small (negative exponents meaning exponentiation of the conjugate ideal). We assume that the chains $(E_{b,i})_{0\leq i\leq n}$ associated to $E_b=E_{b,n}$ for $b\in\{0,1\}$ remain secret but that the chains:
-\[E_{b,j}^{(-s)}:=(\mf{q}_j^{(n)})^{-s}\cdot E_b\longrightarrow \cdots \longrightarrow E_{b}\longrightarrow \cdots\longrightarrow E_{b,j}^{(s)}:=(\mf{q}_j^{(n)})^{s}\cdot E_b\]
-are public for all $j\in\i{1}{t}$. Note that these chains can efficiently be computed with the techniques of paragraph \ref{paragraph 1}.  For all $\mO_n$-ideal $\mf{a}$, we denote by $\varphi_{b,\mf{a}}:E_b\longrightarrow \mf{a}\cdot E_b$, the isogeny of kernel $E_b[\mf{a}]$. We assume that the basis $(P_{b,j}^{(k)},Q_{b,j}^{(k)}):=(\varphi_{b,\mf{q}_j^{k}}(P_b),\varphi_{b,\mf{q}_j^{k}}(Q_b))$ of $E_{b,j}^{(k)}[r^e]$ is known for all $k\in\i{-s}{s}$ and $j\in\i{1}{t}$. It can be computed by expressing every isogeny of the chain above by exhaustive search among the $q_j+1$ possible $q_j$-isogenies to match the $j$-invariant of the codomain.
-
-\subsubsection{The Hash Proof System HashOSIDH}
-
-Now, we construct the following hash proof system, that we will call HashOSIDH. Let:
-\[\Sigma:=\left\{\(((E_{0,j}^{(k)}/\langle\alpha\rangle)_{\substack{1\leq j\leq t\\ -s\leq k\leq s}}, (E_{1,j}^{(k)}/\langle\beta \rangle)_{\substack{1\leq j\leq t\\ -s\leq k\leq s}}\)\mid \alpha,\beta\in\P^1(\Z/r^e\Z)\right\}\]
-and:
-\[L:=\left\{\(((E_{0,j}^{(k)}/\langle\alpha\rangle)_{\substack{1\leq j\leq t\\ -s\leq k\leq s}}, (E_{1,j}^{(k)}/\langle\alpha \rangle)_{\substack{1\leq j\leq t\\ -s\leq k\leq s}}\)\mid \alpha\in\P^1(\Z/r^e\Z)\right\}\]
-To lighten the notations, the elements of $\Sigma$ will be denoted $(E_0/\langle\alpha\rangle, E_1/\langle\beta\rangle)$ (and similarly for the elements of $L$), omitting the chains which are implicitly known. 
-
-The definition of the projection space $\m{P}$ is more subtle and will become natural later (see the definition of $\pi$ and lemma \ref{lemma 9}). We consider the set $\m{S}$ of tuples $(E,\iota,P,Q)$ where $(E,\iota)$ is a primitively $\mO_n$-oriented elliptic curve whose $K$-equivalence class is in $\rho(\Ell(\mO_n))$ and $(P,Q)$ is a basis of $E[r^e]$. We consider the equivalence relation $\sim$ over $\m{S}$ defined as follows: $(E,\iota,P,Q)\sim (E',\iota',P',Q')$ if and only if there exists an isomorphism $\lambda : E\overset{\sim}{\longrightarrow} E'$ such that $\lambda_*(\iota)=\iota'$ and $x, y\in\mO_{n,e}$ of norm prime to $p r\ell$ such that $\lambda\circ\iota(x)(P)=\iota'(y)(P')$ and $\lambda\circ\iota(x)(Q)=\iota'(y)(Q')$; and set $\m{P}:=\m{S}/\sim$. The elements of $\m{P}$ will be denoted by $[E,P,Q]$, omitting the $\mO_n$-orientation, which is unique on $E$ under hypothesis (ii) of lemma \ref{lemma 6}, by theorem \ref{theorem 4}. 
-
-We also set $\m{K}:=\Cl(\mO_{n,e})\times\{0,1\}$, $W:=\P^1(\Z/r^e\Z)$ and $\Gamma:=\rho(\Ell(\mO_{n,e}))$. We define the functions:
-\[\begin{array}{rcl}
-\Lambda : \Cl(\mO_{n,e})\times\{0,1\}\times \Sigma & \longrightarrow & \rho(\Ell(\mO_{n,e}))\\
-(([\mf{a}], b),(F_0,F_1)) & \longmapsto & [\mf{a}]\cdot F_b
-\end{array}\]
-\[\begin{array}{rcl}
-\pi : \Cl(\mO_{n,e})\times\{0,1\} & \longrightarrow & \m{P}\\
-([\mf{a}], b) & \longmapsto & [[\mf{a}\mO_n]\cdot E_b,\varphi_{b,\mf{a}}(P_b),\varphi_{b,\mf{a}}(Q_b)]
-\end{array}\]
-where $\varphi_{b,\mf{a}}: E_b\longrightarrow (\mf{a}\mO_n)\cdot E_b$ is the isogeny of kernel $E_b[\mf{a}\mO_n]$, for all ideal $\mf{a}\subseteq\mO_{n,e}$ of norm prime to $r$ and $\ell$ and $b\in\{0,1\}$. Note that, by the definition of $\m{P}$, $\pi$ is well defined, meaning that the class $\pi([\mf{a}],b)$ does not depend on the representative $\mf{a}$ chosen in the class $[\mf{a}]$.  In practice, the computed value of $\pi([\mf{a}],b)$ is the value of a representative. Finally, we define:
-\[\begin{array}{rcl}
-\ProjEval :\m{P}\times \P^1(\Z/r^e\Z) & \longrightarrow & \rho(\Ell(\mO_{n,e}))\\
-([E,P,Q],\alpha:=(a:b)) & \longmapsto & E/\langle\alpha\rangle_{(P,Q)}:=E/\langle aP+bQ\rangle
-\end{array}\]
-and:
-\[\begin{array}{rcl}
-\omega : L & \longrightarrow & \P^1(\Z/r^e\Z)\\
-(E_0/\langle\alpha\rangle,E_1/\langle\alpha\rangle) & \longmapsto & \alpha
-\end{array}\]
-The well definition of $\ProjEval$ is a consequence of the following lemma:
-
-\begin{lemma}\label{lemma 9}
-Let $(E,P,Q), (E',P',Q')\in \m{S}$ such that $(E,P,Q)\sim (E',P',Q')$ and $\alpha\in\P^1(\Z/r^e\Z)$.  Then $E/\langle\alpha\rangle_{(P,Q)}\simeq E'/\langle\alpha\rangle_{(P',Q')}$.
-\end{lemma}
-
-\begin{proof}
-Since $(E,P,Q)\sim (E',P',Q')$, there exists an isomorphism $\lambda:E\overset{\sim}{\longrightarrow} E'$ and $x, y\in\mO_{n,e}$ of norm prime to $pr\ell$ such that $\lambda\circ\iota(x)(P)=\iota'(y)(P')$ and $\lambda\circ\iota(x)(Q)=\iota'(y)(Q')$, where $\iota$ and $\iota'$ are the primitive $\mO_n$-orientations of $E$ and $E'$ respectively.  We set $\alpha:=(a:b)$. Then, we have:
-\begin{align*}
-E'/\langle\alpha\rangle_{(P,Q)}&\simeq [y\mO_{n,e}]\cdot(E'/\langle\alpha\rangle_{(P',Q')}) \quad (\mbox{since } y\in\mO_{n,e})\\
-&=[y\mO_{n,e}]\cdot(E'/\langle aP'+bQ' \rangle)\simeq [y\mO_n]\cdot E'/\langle \iota'(y)(aP'+bQ')\rangle \quad (\mbox{by lemma \ref{lemma 8}.(iv)})\\
-&= E'/\langle \iota'(y)(aP'+bQ')\rangle=E'/\langle \lambda(a\iota(x)(P)+b\iota(x)(Q))\rangle \\
-&\simeq E/\langle \iota(x)(aP+bQ)\rangle\quad (\mbox{since } \lambda \mbox{ is an isomorphism})\\
-&=[x\mO_n]\cdot E/\langle \iota(x)(aP+bQ)\rangle\simeq [x\mO_{n,e}]\cdot (E/\langle aP+bQ \rangle) \quad (\mbox{by lemma \ref{lemma 8}.(iv)})\\
-&=E/\langle aP+bQ \rangle=E/\langle\alpha\rangle_{(P,Q)} \quad (\mbox{since } x\in\mO_{n,e})
-\end{align*}
-\end{proof}
-
-We now justify that $\Pi:=(\Lambda,\pi,\ProjEval,L,\Sigma,W,\m{K},\m{P},\Gamma)$ is indeed a hash proof system.
-
-\begin{lemma}
-The following diagram is commutative:
-\[\xymatrix{
-(\Cl(\mO_{n,e})\times\{0,1\})\times L  \ar[r]^-{\Lambda} \ar[d]_{\pi\times\omega} & \rho(\Ell(\mO_{n,e}))\\
-\m{P}\times \P^1(\Z/r^e\Z) \ar[ru]_{\ProjEval} &
-}\]
-\end{lemma}
-
-\begin{proof}
-This is a direct consequence of lemma \ref{lemma 8}.
-\end{proof}
-
-\begin{lemma}
-$\Lambda$, $\pi$ and $\ProjEval$ are efficiently computable (\ie computable in polynomial time in the parameters $n, e,\ell, r, q_1, \cdots, q_t,s$).
-\end{lemma}
-
-\begin{proof}
-$\ProjEval((E,P,Q),\alpha)$ is efficiently computable by computing the chain of $r$-isogenies whose product is the isogoneny of kernel $\langle\alpha\rangle_{(P,Q)}$ for all $[E,P,Q]\in \m{P}$ and $\alpha\in\P^1(\Z/r^e\Z)$. This computation can be optimized with computation trees, as in \cite[section 4.2.2]{DeFeoSIDH}.
-
-Let $b\in\{0,1\}$. The chain:
-\[(E_{b,j}^{(-s)},P_{b,j}^{(-s)},Q_{b,j}^{(-s)})\longrightarrow \cdots \longrightarrow (E_{b},P_b,Q_b)\longrightarrow \cdots\longrightarrow (E_{b,j}^{(-s)},P_{b,j}^{(s)},Q_{b,j}^{(s)})\]
-is public for all $j\in\i{1}{t}$. Hence, under the hypothesis of lemma \ref{lemma 6}, we can compute efficiently the chain:
-\[E_{b,j}^{(-s)}/\langle\alpha\rangle:=(\mf{q}_j^{(n)})^{-s}\cdot (E_b/\langle\alpha\rangle)\longrightarrow \cdots \longrightarrow E_b/\langle\alpha\rangle\longrightarrow \cdots\longrightarrow E_{b,j}^{(s)}/\langle\alpha\rangle:=(\mf{q}_j^{(n)})^{s}\cdot(E_b/\langle\alpha\rangle)\]
-for all $j\in\i{1}{t}$ and $\alpha\in\P^1(\Z/r^e\Z)$, by computing the chain of $r$-isogenies whose product is the isogoneny of kernel $\langle\alpha\rangle_{(P_b,Q_b)}$ and using the techniques of paragraph \ref{paragraph 1} to construct ladders on the right and on the left of this chain, whose last elements correspond to the chain above. Hence, given $\mf{a}\subseteq\mO_{n,e}$ expressed as a product of the $\mf{q}_j$: $\mf{a}=\prod_{j=1}^t\mf{q}_j^{e_j}$, with $e_1, \cdots, e_t\in\i{-s}{s}$, and $\alpha_0,\alpha_1\in\P^1(\Z/r^e\Z)$:
-\[\Lambda(([\mf{a}],b),(E_0/\langle\alpha_0\rangle,E_1/\langle\alpha_1\rangle))=[\mf{a}]\cdot (E_b/\langle\alpha_b\rangle)\] 
-is efficiently computable with the method of paragraph \ref{paragraph 8}, using the chains computed above. 
-
-Knowing the chain:
-\[E_{b,j}^{(-s)}\longrightarrow \cdots \longrightarrow E_{b}\longrightarrow \cdots\longrightarrow E_{b,j}^{(-s)}\]
-is public for all $j\in\i{1}{t}$, we can easily compute $[\mf{a}\mO_n]\cdot E_b$ using the methods of paragraph \ref{paragraph 8}.  To compute $\pi([\mf{a}],b)$, we still have to compute the image of the basis $(P_b,Q_b)$ by $\varphi_{b,\mf{a}}$, the isogeny associated to $\mf{a}$.  $\varphi_{b,\mf{a}}$ is obtained by composition of $e_j$ $q_j$-isogenies for $j\in\i{1}{t}$.  Each $q_j$-isogeny can be computed using V\'{e}lu's formulas by an exhaustive search among the $q_j+1$ possible isogenies in order to map the $j$-invariant of the domain to the $j$-invariant of the codomain. The complexity of this exhaustive search is $O(s(q_j+1))$ uses of V\'{e}lu's formulas for all $j\in\i{1}{t}$, which is costly but still polynomial.
-\end{proof}
-
-\begin{lemma}
-HashOSIDH is $2^{-1}$-universal.
-\end{lemma}
-
-\begin{proof}
-Let $([\mf{a}],b)\in \Cl(\mO_{n,e})\times\{0,1\}$ be a key (secret and sampled with uniform distribution). Let $(F_0,F_1)=(E_0/\langle\alpha_0\rangle, E_1/\langle\alpha_1\rangle)\in \Sigma\setminus L$ be sampled with uniform distribution.  Since $(F_0,F_1)\not\in L$, we have $\alpha_0\neq\alpha_1$. Let us assume that an attacker with unbounded capabilities knows $(F_0,F_1)$ and $\pi([\mf{a}],b)=[[\mf{a}\mO_n]\cdot E_b, \varphi_{b,\mf{a}}(P_b),\varphi_{b,\mf{a}}(Q_b)]$ and wants to recover $\Lambda(([\mf{a}],b),(F_0,F_1))=\mf{a}\cdot F_b$.  
-
-We assume that $b=0$. Let $\mf{b}:=\mf{a}\cdot (\overline{\mf{s}}\cap\mO_{n,e})$. We prove that $\pi([\mf{a}],0)=\pi([\mf{b}],1)$. Let $(E,\iota, P,Q)$ and $(E',\iota',P',Q')$ be representatives of $\pi([\mf{a}],0)$ and $\pi([\mf{b}],1)$ respectively. It suffices to prove that $(E,\iota, P,Q)\sim(E',\iota',P',Q')$.  We know that there exists two isomorphisms $\lambda : E\overset{\sim}{\longrightarrow} [\mf{a}\mO_n]\cdot E_0$ and $\lambda' : E'\overset{\sim}{\longrightarrow} [\mf{b}\mO_n]\cdot E_1$ and $x, y, x',y'\in\mO_{n,e}$ of norm prime to $pr\ell$ such that:
-\[\left\{\begin{array}{c}
-\lambda\circ\iota(x)(P)=\iota_{0,\mf{a}}(y)\circ\varphi_{0,\mf{a}}(P_0)\\
-\lambda\circ\iota(x)(Q)=\iota_{0,\mf{a}}(y)\circ\varphi_{0,\mf{a}}(Q_0)
-\end{array}\right.\qquad \mbox{and}\qquad \left\{\begin{array}{c}
-\lambda'\circ\iota'(x')(P')=\iota_{1,\mf{b}}(y')\circ\varphi_{1,\mf{b}}(P_1)\\
-\lambda'\circ\iota'(x')(Q')=\iota_{1,\mf{b}}(y')\circ\varphi_{1,\mf{b}}(Q_1)
-\end{array}\right.\quad (\star)\]
-where $\iota_{0,\mf{a}}$ and $\iota_{1,\mf{b}}$ are the $\mO_n$-orientations of $[\mf{a}\mO_n]\cdot E_0$ and $[\mf{b}\mO_n]\cdot E_1$ respectively. Since $E_1=[\mf{s}]\cdot E_0$, we have $E_0=[\overline{\mf{s}}]\cdot E_1$, so that $[\mf{a}\mO_n]\cdot E_0=[\mf{b}\mO_n]\cdot E_1$ and $\varphi_{1,\mf{b}}=\varphi_{0,\mf{a}}\circ\varphi_{1,\overline{\mf{s}}}$.  Under hypothesis (ii) of lemma \ref{lemma 6}, we then have $\iota_{0,\mf{a}}=\iota_{1,\mf{b}}$ by theorem \ref{theorem 4}.  Furthermore, $P_1=\varphi_{0,\mf{s}}(P_0)$, so that:
-\[\varphi_{1,\mf{b}}(P_1)=\varphi_{0,\mf{a}}\circ\varphi_{1,\overline{\mf{s}}}\circ\varphi_{0,\mf{s}}(P_0)=N(\mf{s})\varphi_{0,\mf{a}}(P_0)\]
-and by the same argument $\varphi_{1,\mf{b}}(Q_1)=N(\mf{s})\varphi_{0,\mf{a}}(Q_0)$.  Combining that with $(\star)$, we get:
-\[\left\{\begin{array}{c}
-\lambda^{-1}\circ\lambda\circ\iota(x'y)(P')=\iota(N(\mf{s})xy')(P)\\
-\lambda^{-1}\circ\lambda\circ\iota(x'y)(Q')=\iota(N(\mf{s})xy')(Q)
-\end{array}\right.\]
-so that $(E',\iota',P',Q')\sim (E,\iota, P,Q)$.
-
-By similar arguments, we get that $\pi([\mf{a}],b)=\pi([\mf{b}],0)$, with $\mf{b}:=\mf{a}\cdot(\overline{\mf{s}}\cap\mO_{n,e})$, when $b=1$. Hence, the attacker can guess $([\mf{a}],b)$ or $([\mf{b}],1-b)$.
-
-With its unbounded capabilities, the attacker can also guess $\alpha_0$ and $\alpha_1$ from $(F_0,F_1)=(E_0/\langle\alpha_0\rangle, E_1/\langle\alpha_1\rangle)$.  We also have:
-\begin{align*}\Lambda(([\mf{a}],b),(F_0,F_1))&=[\mf{a}]\cdot F_b=[\mf{a}\mO_n]\cdot E_b/\langle\alpha_b\rangle=[\mf{b}\mO_n]\cdot E_{1-b}/\langle\alpha_b\rangle\\
-&\neq [\mf{b}\mO_n]\cdot E_{1-b}/\langle\alpha_{1-b}\rangle=\Lambda(([\mf{b}],1-b),(F_0,F_1))
-\end{align*}
-since $\alpha_b\neq\alpha_{1-b}$, the inequality is a consequence of the following lemma. Hence, the attacker finds the value of the hash function with $1$ bit of indetermination, so that:
-\[H_\infty(\Lambda(([\mf{a}],b),(F_0,F_1))|(\pi([\mf{a}],b),(F_0,F_1)))=-\log\(\frac{1}{2}\)\]
-\end{proof}
-
-\begin{lemma}
-Let $E\in \rho(\Ell(\mO_n))$. Then, the map:
-\[\begin{array}{rcl}
-\{\mbox{cyclic subbroups of order } r^e \mbox{ in } E[r^e]\}& \longrightarrow & \rho(\Ell(\mO_{n,e}))\\
-H & \longmapsto & E/H 
-\end{array}\]
-\end{lemma}
-
-\begin{remark}
-Note that under hypothesis (ii) of lemma \ref{lemma 6},  we can omit the $\mO_{n,e}$-orientation when considering elements of $\rho(\Ell(\mO_{n,e}))$, and see these elements as elliptic curves up to isomorphism, or equivalently, as $j$-invariants.  Hence, we even have an injective map when considering $j$-invariants.
-\end{remark}
-
-\begin{proof}
-Let $H, H'$ be two cyclic subgroups of order $r^e$ in $E$ such that $E/H=E/H'$. Then, as in the proof of lemma \ref{lemma 7}.(ii), we have descending $r$-isogeny chains $(E_i)_{0\leq i\leq e}$ and $(E'_i)_{0\leq i\leq e}$ whose composition are the isogenies $E\longrightarrow E/H$ and $E\longrightarrow E/H'$ respectively. We assume that these chains are distinct. Then, there exists $i\in\i{1}{e}$ such that $E_i=E'_i$ and $E_{i-1}\neq E'_{i-1}$. Hence, $E_i$ has two $r$-ascending isogenies, which contradicts proposition \ref{proposition 5}. Then, the two chains are the same and we have $H=H'$.
-\end{proof}
-
-Due to the strength of the SIDH framework, we can assume that the subset membership problem for HashOSIDH is hard (\ie has exponential complexity).
-
-\begin{theorem}
-Assuming that uniform distributions on $\Sigma$ and $L$ are computationally indistinguishable (subset membership problem), HashOSIDH is a hash proof system.
-\end{theorem}
 
 \bibliography{bib_report_OSIDH}
 \bibliographystyle{unsrt}
@@ -3210,5 +2947,353 @@ Hidden reflection problem in $D_G$ can be solved in time $2^{O(\log_2(|G|))}$ wi
 \begin{proof}
 See \cite[theorem 7.1]{Kuperberg}.
 \end{proof}
+
+\chapter{Cryptographic constructions obtained with the OSIDH framework}\label{appendix C}
+
+\section{Hash proof systems}
+
+\subsection{Definition}
+
+This notion was first introduced in \cite{Cramer_Shoup}. We use the notations of \cite{DeFeo1}.
+
+\begin{definition}
+A \emph{hash proof system} is a tuple $\Pi:=(\Lambda,\pi,\ProjEval,L,\Sigma,W,\m{K},\m{P},\Gamma)$, where, on the one hand $L,\Sigma,W,\m{K},\m{P}$ and $\Gamma$ are sets such that:
+\begin{description}
+\item[(i)] There exist efficient algorithms to sample elements from $\Sigma$ and $\m{K}$ with uniform distribution.
+\item[(ii)] $L\subset \Sigma$ and $W$ is the space of witnesses to test membership in $L$.
+\item[(iii)]  The uniform distributions on $L$ and $\Sigma$ are computationally indistinguishable (\emph{subset membership problem}).
+\end{description}
+
+On the other hand, $\Lambda,\pi$ and $\ProjEval$ are efficiently computable functions:
+\begin{description}
+\item[(i)] The \emph{hash function} $\Lambda: \m{K}\times\Sigma\longrightarrow \Gamma$.
+\item[(ii)] The \emph{projection} $\pi: \m{K}\longrightarrow \m{P}$.
+\item[(iii)] The \emph{projective evaluation} $\ProjEval: \m{P}\times L\longrightarrow \Gamma$.
+\end{description}
+such that, for any algorithm (possibly inefficient) $\omega : L\longrightarrow W$ associating a membership witness $w=\omega(\sigma)\in W$ to every element $\sigma\in L$ there we have a commutative diagram:
+\[
+\xymatrix{
+\m{K}\times L  \ar[r]^{\Lambda} \ar[d]_{\pi\times\omega} & \Gamma\\
+\m{P}\times W \ar[ru]_{\ProjEval} &
+}
+\]
+
+We additionally require $\Pi$ to be \emph{universal}, meaning that knowing $(\pi(k),\sigma)$ for $(k,\sigma)\in \m{K}\times \Sigma\setminus L$ provides no information on the value of $\Lambda(k,\sigma)$. Formally, for $\varepsilon>0$, we say that $\Pi$ is $\varepsilon$-universal if:
+\[H_\infty(\Lambda(k,\sigma)|(\pi(k),\sigma))\geq\log(\varepsilon^{-1})\]
+where $H_\infty(.|.)$ is the conditional min-entropy defined below.
+\end{definition}
+
+\begin{definition}
+Let $X$ and $Y$ be discrete random variables taking values in $\m{X}$ and $\m{Y}$ respectively. Then, the conditional min-entropy of $X$, knowing $Y$ is the quantity:
+\[H_\infty(X|Y)=-\log\max_{(x,y)\in\m{X}\times\m{Y}}\P(X=x|Y=y)\]
+\end{definition}
+
+\subsection{Cryptographic applications of hash proof systems}
+
+\subsection{Hash proof system form weak-pseudorandom restricted effective group actions}
+
+\begin{definition}\cite[definition 2]{DeFeo1}
+An \emph{effective group action} is a triplet $(G,X,\cdot)$ where $G$ is a finite group, $X$ a finite set $\cdot : G\times X\longrightarrow X$ a transitive and faithful group action, such that:
+\begin{description}
+\item[(i)] There are efficient algorithms on $G$ to test membership, equality,  to sample elements (with uniform distribution), compute the product of two elements and the inverse of one element.
+\item[(ii)] There is an efficient algorithm to test membership in $X$ and every element of $X$ admits a unique (bitstring) representation.
+\item[(iii)] We know (the bitstring representation of) an element $x_0\in X$ called the \emph{origin}.
+\item[(iv)] There exists an efficient algorithm computing $g\cdot x$ when $g\in G$ and $x\in X$ are given.
+\end{description}
+\end{definition}
+
+In the context of OSIDH, we don't know how to efficiently compute the action of the whole group but only on a subset. The definition can be adapted to this case:
+
+\begin{definition}\cite[definition 6]{DeFeo1}
+A \emph{restricted effective group action} is a triplet $(G,X,\cdot,g)$ where $G$ is a finite group, $X$ a finite set $\cdot : G\times X\longrightarrow X$ a transitive and faithful group action, and $\m{G}:=\{g_1,\cdots, g_t\}$ a generating set of $G$ such that:
+\begin{description}
+\item[(i)] $t$ is polynomial in $\log(|G|)$.
+\item[(ii)] There is an efficient algorithm to test membership in $X$ and every element of $X$ admits a unique (bitstring) representation.
+\item[(iii)] We know (the bitstring representation of) an element $x_0\in X$ called the \emph{origin}.
+\item[(iv)] There exist efficient algorithms computing $g_i\cdot x$ and $g_i^{-1}\cdot x$ when $i\in\i{1}{t}$ and $x\in X$ are given.
+\end{description}
+\end{definition}
+
+\begin{remark}\label{remark 3}
+We assume $G$ is abelian. Knowing the generating set $\m{G}=\{g_1,\cdots, g_t\}$ of $G$,  we can represent elements $g\in G$ as tuples of $\Z^t$ via the map:
+\[\phi : e:=(e_1,\cdots, e_t)\in\Z^t\longmapsto g^e:=\prod_{i=1}^t g_i^{e_i}\in G\]
+and compute the action of $g^e$ on $X$ when $e\in\Z^t$ has components of polynomial size. We can even sample on $G$ with distributions statistically closed to the uniform by sampling $e\in \Z^t$ with Gaussian distribution with standard deviation sufficiently greater than the smoothing parameter of the lattice $\ker(\phi)\subseteq \Z^t$ (see \cite[sections 3 and 4]{MaccianoRegev}). 
+\end{remark}
+
+\begin{definition}
+A group action $(G,X,\cdot)$ is said \emph{weak-pseudorandom} if given a randomly chosen secret $g\in G$, one cannot distinguish between the distribution of $(x,g\cdot x)$ and $(x, y)$, where $x$ and $y$ are chosen uniformly in $X$.
+\end{definition}
+
+Let $(G,X,\cdot)$ be an abelian weak-pseudorandom  (restricted) effective group action. We can construct a hash proof system with it as follows: we fix $x_0, x_1\in X$ with $x_1=s\cdot x_0$ with $s\in G$ secret. Let: 
+\[\Sigma:=\{(g_0\cdot x_0,g_1\cdot x_1)\mid g_0, g_1\in G\}\quad \mbox{and} \quad L:=\{(g\cdot x_0,g\cdot x_1)\mid g\in G\}\]
+$W:=G$, $\m{K}:=G\times\{0,1\}$ and $\m{P}=\Gamma:=X$.  We define the hash function $\Lambda : (G\times\{0,1\})\times\Sigma\longrightarrow X$ as follows:
+\[\forall (h, b)\in G\times\{0,1\}, (y_0,y_1)\in \Sigma, \quad \Lambda((h,b),(y_0,y_1)):=h\cdot y_b\]
+and set:
+\[\forall (h, b)\in G\times\{0,1\}, \quad \pi(h,b):=h\cdot x_b\]
+\[\forall (x,g)\in X\times G, \quad \ProjEval(x,g):=g\cdot x\]
+\[\forall g\in G, \quad \omega((g\cdot x_0,g\cdot x_1)):=g\]
+so that $\Lambda=\ProjEval\circ(\pi\times \omega)$ on $\m{K}\times L$.
+
+\begin{theorem}\cite[theorem 1]{DeFeo1}\label{theorem 5}
+The system $\Pi:=(\Lambda,\pi,\ProjEval,L,\Sigma,G,G\times\{0,1\},X,X)$ defined above is a $2^{-1}$-universal hash proof system.
+\end{theorem}
+
+\begin{proof}
+Under the hypothesis we made, the non-trivial points to prove are subset membership problem and universality.  
+
+Since the group action of $G$ on $X$ is transitive and faithful, sampling an element $(y_0,y_1)\in L$ with uniform distribution is equivalent to sampling $g\in G$ with uniform distribution and returning $(g\cdot x_0, g\cdot x_1)$. Writing $y_0:=g\cdot x_0$, we get that $g\cdot x_1=g\cdot s\cdot x_0=s\cdot g\cdot x_0=s\cdot y_0$ because $G$ is abelian. Since $y_0$ is uniform, $(g\cdot x_0, g\cdot x_1)=(y_0,s\cdot y_0)$ is indistinguishable from $(y_0,y_1)$ sampled with uniform distribution from $X^2$. by weak-pseudorandomness. But $X^2=\Sigma$ by transitivity of the group action. Hence, the uniform distributions on $L$ and $\Sigma$ are undistinguishable.
+
+Let $(h,b)\in G\times\{0,1\}$ be a key (secret and sampled with uniform distribution) and $(y_0,y_1)=(g_0\cdot x_0, g_1\cdot x_1)\in \Sigma\setminus L$ be sampled with uniform distribution. Let us assume that an attacker with unbounded capabilities knows $(y_0,y_1)$ and $\pi(h,b)=h\cdot x_b$ and wants to recover $\Lambda((h,b),(y_0,y_1))=h\cdot y_b$. Since $\pi(h,b)=h\cdot x_b=hs^{2b-1}\cdot x_{1-b}$, the knowledge of $(y_0,y_1)$ and $\pi(h,b)$ enables the unbounded attacker to infer that $\Lambda((h,b),(y_0,y_1))=h\cdot y_b=hg_b\cdot x_b$ or:
+\[\Lambda((h,b),(y_0,y_1))=hs^{2b-1}\cdot y_{1-b}=hs^{2b-1}g_{1-b}\cdot x_{1-b}=hs^{2b-1}g_{1-b}s^{1-2b}\cdot x_b=hg_{1-b}\cdot x_b\neq hg_b\cdot x_b\]
+Hence, the attacker has a probability $\frac{1}{2}$ to guess the right value. It follows that:
+\[H_\infty(\Lambda((h,b),(y_0,y_1))|(\pi(h,b),(y_0,y_1)))=-\log\(\frac{1}{2}\)\]
+so that $\Pi$ is $2^{-1}$-universal.
+\end{proof}
+
+Using the OSIDH framework, we can take $G:=\Cl(\mO_n)$ (or the subgroup generated by the ideals $\mf{q}_1, \cdots, \mf{q}_t$) and $X:=\rho(\Ell(\mO_n))$. To simplify the computation of the group action using the techniques of paragraph \ref{paragraph 1}, we could represent elements of $X$ as descending $\ell$-isogeny chains $(E_i)_{0\leq i\leq n}$. However, in that case, weak-pseudorandomness would not hold because of the attacks of paragraph \ref{paragraph 7}.  Indeed, let us fix two descending $\ell$-isogeny chains $(E_{0,i})_{0\leq i\leq n}$ and $(E_{1,i})_{0\leq i\leq n}:=\mf{s}\cdot (E_{0,i})_{0\leq i\leq n}$, where $\mf{s}$ is a secret randomly chosen ideal of $\mO_n$. Then, sampling $[\mf{a}],[\mf{b}]\in\Cl(\mO_n)$ uniformly (using Gaussian distributions as explained in remark \ref{remark 3} if necessary) we can distinguish the distribution of pairs $([\mf{a}]\cdot(E_{0,i}),[\mf{a}]\cdot(E_{1,i}))$ and $([\mf{a}]\cdot(E_{0,i}),[\mf{b}]\cdot(E_{1,i}))$ by recovering $[\mf{a}]$ and $[\mf{b}]$. 
+
+To correct this, we use the same technique introduced in paragraph \ref{paragraph 8}. Given an descending $\ell$-isogeny chain $(E_i)_{0\leq i\leq n}$, we give away $E_n\in\rho(\Ell(\mO_n))$ together with the additional data:
+\[E_{n,j}^{(-r)}:=(\mf{q}_j^{(n)})^{-r}\cdot E_n\longrightarrow \cdots \longrightarrow E_{n}\longrightarrow \cdots\longrightarrow E_{n,j}^{(r)}:=(\mf{q}_j^{(n)})^{r}\cdot E_n\]
+for all $j\in\i{1}{t}$. Under assumption ???, weak-pseudorandomness still holds but the subset membership problem remains vulnerable to a subexponential attack (see paragraph ???). In the following, we construct a hash proof system with enhanced subset membership security combining Supersingular Isogeny Diffie Hellman (SIDH) due to \cite{DeFeoSIDH} and OSIDH.
+
+\subsection{An original hash proof system combining SIDH with OSIDH}
+
+Attempts have been made to construct a hash proof system using SIDH only which has stronger security than OSIDH. If the subset membership problem is indeed stronger, these constructions fail to ensure universality, which is a direct consequence of the transitivity and faithfulness of the class group action in the OSIDH framework.  Actually, combining the strengths of both frameworks proves to be fruitful.  The main idea of the hash proof system we propose here is to make the projection $\pi$ act horizontally by ideal class group action (OSIDH component) and make $\ProjEval$ act vertically as quotient by cyclic kernels (SIDH component).   
+
+Let $K$ be a quadratic imaginary number field such that $\Cl(\mO_K)$ is trivial.  Let $r\neq \ell$ be a small prime inert in $K$ (\ie such that $\(\frac{\Delta_K}{r}\)=-1$). Let $\ell$ be a small prime and $\mO_i:=\Z+\ell^i\mO_K$ and $\mO_{i,j}:=\Z+\ell^ir^j\mO_K$ for all $i, j\in\N$. We chose $p$ of the form $p:=f r^e\pm 1$ with $e\in\N^*$ big enough (to ensure SIDH security) and $f$ big enough to construct descending $\ell$-ladders and $r$-ladders efficiently with the techniques of paragraph \ref{paragraph 1}. Actually:
+\[p>\max_{1\leq j\leq t}(q_j)\ell^{2n}r^{2e}|\Delta_K|\qquad (\mbox{see lemma \ref{lemma 6}})\]
+We also impose that $p$ does not split in $K$ (see proposition \ref{proposition 2}). 
+
+\begin{lemma}\label{lemma 7}
+Let $E/\F_{p^2}$ such that $|E(\F_{p^2})|=(f r^e)^2$. Then:
+\begin{description}
+\item[(i)] $E(\F_{p^2})=E[fr^e]$. In particular, $E[r^e]\subseteq E(\F_{p^2})$.
+\item[(ii)] Assume that $E\in\rho(\Ell(\mO_n))$ and let $P\in E[r^e]$ be of order $r^e$. Then $E/\langle P\rangle\in \rho(\Ell(\mO_{n,e}))$ (we recall that $\mO_{n,e}=\Z+r^e\mO_n=\Z+\ell^n r^e\mO_K$).
+\end{description}
+\end{lemma}
+
+\begin{proof}
+\textbf{(i)} Since $|E(\F_{p^2})|=(f r^e)^2=(p\mp 1)^2$, the trace of the $p^2$-th Frobenius $\pi_2$ is $\mp 2p$, so we have $\pi_2^2\pm [2p]\pi_2+[p^2]=0$ \ie $(\pi_2\pm[p])^2=0$ \ie $\pi=\mp[p]$. 
+
+Let $P\in E[fr^e]$. Then for all $Q\in E[fr^e]$, we have:
+\[e_{fr^e}(\pi_2(P),Q)=e_{fr^e}(\mp[p]P,Q)= e_{fr^e}(P,Q)^{\mp p}=e_{fr^e}(P,Q)^{\mp fr^e+1}=e_{fr^e}(P,Q)\]
+so that $e_{fr^e}(\pi_2(P)-P,Q)=1$. It follows that $\pi_2(P)=P$ \ie $P\in E(\F_{p^2})$. Hence $E[fr^e]\subseteq E(\F_{p^2})$ and we have an equality since both sets have cardinality $(fr^e)^2$.
+
+\textbf{(ii)} Let $\phi : E\longrightarrow E/\langle P\rangle$ the isogeny of kernel $\langle P\rangle$. Then, we have $\phi=\phi_e\circ\cdots\circ\phi_0$ with $\phi_0=[1]_E$ and for all $i\in\i{1}{e}$, $\phi_i :E_{i-1}\longrightarrow E_i$ ($E_0:=E$, $E_e:=E/\langle P\rangle$) has kernel generated by $\phi_{i-1}\circ\cdots\circ\phi_0(r^{e-i}P)$. For all $i\in\i{1}{r}$, $\phi_i$ has degree $r$, so it suffices to prove that $\phi_i$ is descending.  Since $r$ is inert in $K$, by proposition \ref{proposition 5}.(i), $\phi_1$ is descending. Let $i\in\i{2}{e}$. Assume that $\phi_1, \cdots, \phi_{i-1}$ are descending. By proposition \ref{proposition 5}.(ii), $\phi_i$ is either descending or ascending. If it was ascending, since there is only one ascending isogeny, from $E_{i-1}$, we would have $\phi_i=\widehat{\phi_{i-1}}$ so that $\phi$ factors through $[r]$ and $E[r]\subseteq \ker(\phi)$. But $\ker(\phi)$ is cyclic and $E[r]$ is not. Contradiction. Hence, $\phi_i$ is descending. This completes the proof.
+\end{proof}
+
+Let $q$ be a prime $\neq r,\ell, p$ splitting in $K$ and $\mf{q}$ a prime ideal of $\mO_K$ lying above $q$. Let $\mf{q}^{(i,j)}:=\mf{q}\cap\mO_{i,j}$ for all $i, j\in\N$. To lighten the notations, the exponent $(i,j)$ will often be omitted. Let $E\in\rho(\Ell(\mO_n))$, such that $|E(\F_{p^2})|=(f r^e)^2$ and let $P\in E[r^e]$ of order $r^e$. For our construction, we need to compute the action of $\mf{q}^{(n,e)}$ on $E/\langle P\rangle$ (with its induced $\mO_{n,e}$-orientation).  This computation uses descending $r$-ladders and the ideas of paragraph \ref{paragraph 1}.
+
+\begin{lemma}\label{lemma 8}
+There is a descending $r$-ladder of length $n$ and degree $q$:
+\[\xymatrix{
+E_0 \ar[d]^{\psi_0} \ar[r]^{\phi_1} & E_1\ar[d]^{\psi_1} \ar[r]^{\phi_{2}}& \cdots \ar[r]^{\phi_{e-1}} & E_{e-1} \ar[d]^{\psi_{e-1}} \ar[r]^{\phi_{e}} & E_e \ar[d]^{\psi_e}\\
+F_0:=\mf{q}\cdot E_0 \ar[r]^-{\phi'_1} & F_1:=\mf{q}\cdot E_1 \ar[r]^-{\phi'_{2}}& \cdots \ar[r]^-{\phi'_{e-1}} & F_{e-1}:=\mf{q}\cdot E_{e-1} \ar[r]^-{\phi'_{e}} & F_e:=\mf{q}\cdot E_e
+}\]
+such that: 
+\begin{description}
+\item[(i)] $E_0=E$ and $E_e=E/\langle P\rangle$.
+\item[(ii)] $\phi:=\phi_e\circ\cdots\circ\phi_1$ has kernel $\langle P\rangle$.
+\item[(iii)] $\ker(\psi_i)=E_i[\mf{q}]$ for all $i\in\i{0}{e}$.
+\item[(iv)] $\phi':=\phi'_e\circ\cdots\circ\phi'_1$ has kernel $\langle \psi_0(P)\rangle$ or equivalently, $\mf{q}\cdot(E/\langle P\rangle)=(\mf{q}\cdot E)/\langle \psi_0(P)\rangle$.
+\end{description}
+\end{lemma}
+
+\begin{proof}
+As in the proof of lemma \ref{lemma 7}, point (ii), we define $\phi_0=[1]_E$ and for all $i\in\i{1}{e}$, $\phi_i :E_{i-1}\longrightarrow E_i$ as the $r$-isogeny of kernel generated by $Q_i:=\phi_{i-1}\circ\cdots\circ\phi_0(r^{e-i}P)$, so that points (i) and (ii) are satisfied. For all $i\in\i{0}{e}$, $\psi_i:E_i\longrightarrow \mf{q}\cdot E_i$ is the isogeny associated to $\mf{q}$ ($\ker(\psi_i)=E_i[\mf{q}]$), so that point (iii) is satisfied. 
+
+To prove the existence of the $r$-ladder satisfying point (iv), we simply prove that for all $i\in\i{1}{e}$, $\psi_i\circ\phi_i$ factors through $\psi_{i-1}$ by an isogeny $\phi'_i$ of kernel $\langle \psi_{i-1}(Q_i)\rangle$.  By \cite[corollary III.4.11]{Silverman1}, it suffices to prove that $\ker(\psi_{i-1})\subseteq \ker(\psi_i\circ\phi_i)$. The equality $\ker(\phi'_i)=\langle \psi_{i-1}(Q_i)\rangle$ will then follow from $\psi_i\circ\phi_i=\phi'_i\circ\psi_{i-1}$. 
+
+Let $\iota_{i-1}$ be the primitive $\mO_{n,i-1}$-orientation defined on $E_{i-1}$. Then, $\iota_i:={\phi_{i}}_{*}(\iota_{i-1})$ is a primitive $\mO_{n,i}$-orientation because $\phi_{i}$ is vertical, as we saw when we proved lemma \ref{lemma 7}, point (ii). Let $P\in\ker(\psi_{i-1})=E_{i-1}[\mf{q}^{(n,i-1)}]$. Then, we have $\iota_{i-1}(\alpha)(P)=0$ for all $\alpha\in\mf{q}^{(n,i-1)}$, so that:
+\[\iota_{i}(\alpha)(\phi_i(P))=\frac{1}{r}\phi_i\iota_{i-1}(\alpha)\widehat{\phi_i}\phi_i(P)=\frac{1}{r}\phi_i\iota_{i-1}(\alpha)[r](P)=\phi_i\iota_{i-1}(\alpha)(P)=0\]
+for all $\alpha\in \mf{q}^{(n,i)}\subseteq \mf{q}^{(n,i-1)}$. Hence $\phi_i(P)\in E_i[ \mf{q}^{(n,i)}]$ \ie $\psi_i\circ\phi_i(P)=0$. This completes the proof.
+\end{proof}
+
+We can construct the $r$-ladder of lemma \ref{lemma 7} with the techniques of paragraph \ref{paragraph 1}. For all $i\in\i{1}{e}$, $j(F_i)$ is solution of:
+\[\left\{\begin{array}{c}
+\Phi_q(j(E_i),x)=0\\
+\Phi_r(j(F_{i-1}),x)=0
+\end{array}\right. \Longleftrightarrow \quad \gcd(\Phi_q(j(E_i),x),\Phi_r(j(F_{i-1}),x))=0\quad (E_i)\]
+
+\begin{lemma}\label{lemma 6}
+Conversely, consider a descending $r$-ladder of length $e$ and degree $q$:
+\[\xymatrix{
+E_0 \ar[d]^{\psi_0} \ar[r]^{\phi_1} & E_1\ar[d]^{\psi_1} \ar[r]^{\phi_{2}}& \cdots \ar[r]^{\phi_{e-1}} & E_{e-1} \ar[d]^{\psi_{e-1}} \ar[r]^{\phi_{e}} & E_e \ar[d]^{\psi_e}\\
+F_0 \ar[r]^-{\phi'_1} & F_1 \ar[r]^-{\phi'_{2}}& \cdots \ar[r]^-{\phi'_{e-1}} & F_{e-1} \ar[r]^-{\phi'_{e}} & F_e
+}\]
+and assume that:
+\begin{description}
+\item[(i)] $E_0=E$ and $\ker(\phi_i)=\langle\phi_{i-1}\circ \cdots\circ\phi_0(r^{e-i}P)\rangle$ for all $i\in\i{1}{e}$ (with $\phi_0=[1]_{E_0}$).
+\item[(ii)] $p>q\ell^{2n}r^{2e}|\Delta_K|$.
+\item[(iii)] $F_0=\mf{q}\cdot E_0$
+\item[(iv)] $j(F_i)$ is solution of $(E_i)$ for all $i\in\i{1}{e}$.
+\item[(v)] $\mf{q}^2$ is not principal in $\mO_n$. 
+\end{description}
+Then $\ker(\psi_i)=E_i[\mf{q}]$ and $F_i=\mf{q}\cdot E_i$ for all $i\in\i{1}{e}$.
+\end{lemma}
+
+\begin{proof}
+See proposition \ref{proposition 9}. The same ideas stand.
+\end{proof}
+
+In the following, we shall work under the hypothesis of lemma \ref{lemma 6}.
+
+\subsubsection{Settings and public data}
+
+\textbf{1. Two supersingular elliptic curves $E_0$ and $E_1$.}
+We fix $E_0\in\rho(\Ell(\mO_n))$ and $E_1:=[\mf{s}]\cdot E_0$ for a secret ideal class $[\mf{s}]\in\Cl(\mO_n)$ such that $|E_0(\F_{p^2})|=|E_1(\F_{p^2})|=(f r^e)^2=(p\mp 1)^2$ (to ensure that $E_b[r^e]\subseteq E_b(\F_{p^2})$ for $b\in\{0,1\}$, by lemma \ref{lemma 7}.(i)). $E_0$ can be constructed as the ending curve of a descending $\ell$-isogeny chain $(E_{0,i})_{0\leq i\leq n}$ obtained by random descent of the $\ell$-isogeny graph from a known curve $E_{0,0}\in\rho(\Ell(\mO_K))$.  Unfortunately, this process does not guarantee the cardinality of $E_0(\F_{p^2})$, which can be in a limited set of values $\{(p-1)^2,p^2-p+1,p^2+1,p^2+p+1,(p+1)^2\}$. Since $|E(\F_{p^2})|$ is roughly uniform when $E/\F_{p^2}$ is sampled uniformly among elliptic curves defined over $\F_{p^2}$ as \cite[theorem 1.1]{Howe} seems to indicate, there is heuristically a probability of success close to $\frac{1}{5}$. By repeating the descent of the $\ell$-isogeny graph we may then reach the desired cardinality.  For, $E_1$ we take the ending curve of $(E_{1,i})_{0\leq i\leq n}:=\mf{s}\cdot (E_{0,i})_{0\leq i\leq n}$ where $\mf{s}$ is uniformly sampled among the $\mO_n$-ideals of norm prime to $r$ and $\ell$, until $|E_1(\F_{p^2})|=(f r^e)^2$. 
+
+\textbf{2. Basis of the $r^e$ torsion of $E_0$ and $E_1$.}
+We fix $(P_0, Q_0)$, a basis of $E_0[r^e]$. To do that, we execute a slightly modified version of algorithm \ref{algorithm 5}, using the fact that $E_0[r^e]\subseteq E_0(\F_{p^2})$. First, we sample $P\in E_0(\F_{p^2})$ with uniform distribution and compute $fP$. Then $fP\in E_0[r^e]$ since $E_0(\F_{p^2})=E_0[fr^e]$ by lemma \ref{lemma 7}.(i) and $fP$ has order $r^e$ with probability $1-\frac{1}{r}$ (it can be checked by multiplying $fP$ by $r$ successively). If it is the case, we set $P_0:=fP$. Otherwise, we repeat this step. Then, we sample $Q\in E_0(\F_{p^2})$ in a similar way and compute $fQ$, until $e_{r^e}(P_0,fQ)$ has order $r^e$ and set $Q_0:=fQ$ when this condition is met.  
+
+Then, we know that every point $R\in E_0[r^e]$ of order $r^e$ is of the form $R=\lambda P_0+\mu Q_0$ with $\lambda,\mu\in\Z/r^e\Z$ such that $\lambda$ or $\mu$ is invertible modulo $r^e$.  If $R':=\lambda'P_0+\mu'Q_0$ is another point of order $r^e$, then $\langle R\rangle=\langle R'\rangle$ if and only if there exists $\nu\in(\Z/r^e\Z)^\times$ such that $R'=\nu R$ \ie  $\lambda'=\nu\lambda$ and $\mu'=\nu\mu$. Hence, the cyclic subgroups of order $r^e$ of $E_0$ are in bijection with $\P^1(\Z/r^e\Z)$ via the map:
+\[(\lambda:\mu)\in\P^1(\Z/r^e\Z)\longmapsto \langle \lambda P_0+\mu Q_0\rangle\]
+For all $\alpha:=(\lambda:\mu)\in\P^1(\Z/r^e\Z)$, we shall denote by $\langle\alpha\rangle$ the image subgroup $\langle \lambda P_0+\mu Q_0\rangle$. Given an ideal $\mf{a}\subseteq \mO_n$, of norm prime to $r$ and $\ell$, and $\varphi_{\mf{a}}: E_0\longrightarrow \mf{a}\cdot E_0$, the isogeny of kernel $E_0[\mf{a}]$, $B_{\mf{a}}:=(\varphi_{\mf{a}}(P_0), \varphi_{\mf{a}}(Q_0))$ is a basis of $\mf{a}\cdot E_0[r^e]$, since:
+\[e_{r^e}(B_{\mf{a}})=e_{r^e}(\varphi_{\mf{a}}(P_0), \varphi_{\mf{a}}(Q_0))=e_{r^e}(P_0,Q_0)^{\deg(\varphi_{\mf{a}})}=e_{r^e}(P_0,Q_0)^{N(\mf{a})}\]
+with $N(\mf{a})\wedge r=1$, so that $e_{r^e}(B_{\mf{a}})$ is still a primitive $r^e$-th root of unity.  For all $\alpha:=(\lambda:\mu)\in\P^1(\Z/r^e\Z)$, we shall also denote by $\langle \alpha\rangle_{B_{\mf{a}}}$ or simply $\langle \alpha\rangle$ the subgroup of $\mf{a}\cdot E_b$ generated by $\lambda\varphi_{\mf{a}}(P_0)+\mu\varphi_{\mf{a}}(Q_0)$. By lemma \ref{lemma 8}, we know that $\mf{a}\cdot E_0/\langle\alpha\rangle=(\mf{a}\cap\mO_{n,e})\cdot(E_0/\langle\alpha\rangle)$. 
+
+In particular, we can consider $E_1/\langle\alpha\rangle=\mf{s}\cdot E_0/\langle\alpha\rangle=(\mf{s}\cap\mO_{n,e})\cdot(E_0/\langle\alpha\rangle)$ and the basis $(P_1,Q_1):=(\varphi_{\mf{s}}(P_0), \varphi_{\mf{s}}(Q_0))$ of $E_1[r^e]$. We assume that this basis is public along with $(P_0,Q_0)$. 
+
+\textbf{3. Public chains to compute the action of $\Cl(\mO_n)$ horizontally and the action of $\P^1(\Z/r^e\Z)$ vertically on $E_0$ and $E_1$.}
+To have a restricted effective group action, we assume that $\Cl(\mO_{n,e})$ is generated by $\mf{q}_1^{(n,e)}, \cdots, \mf{q}_t^{(n,e)}$, where $\mf{q}_1, \cdots, \mf{q}_t$ are prime ideals of $\mO_K$ lying above small splitting primes $q_1, \cdots, q_t$ distinct from $r,\ell,p$. We even assume that every ideal of $\Cl(\mO_{n,e})$ can be written as a product of these primes with exponents in $\i{-s}{s}$, $s\in\N^*$ being relatively small (negative exponents meaning exponentiation of the conjugate ideal). We assume that the chains $(E_{b,i})_{0\leq i\leq n}$ associated to $E_b=E_{b,n}$ for $b\in\{0,1\}$ remain secret but that the chains:
+\[E_{b,j}^{(-s)}:=(\mf{q}_j^{(n)})^{-s}\cdot E_b\longrightarrow \cdots \longrightarrow E_{b}\longrightarrow \cdots\longrightarrow E_{b,j}^{(s)}:=(\mf{q}_j^{(n)})^{s}\cdot E_b\]
+are public for all $j\in\i{1}{t}$. Note that these chains can efficiently be computed with the techniques of paragraph \ref{paragraph 1}.  For all $\mO_n$-ideal $\mf{a}$, we denote by $\varphi_{b,\mf{a}}:E_b\longrightarrow \mf{a}\cdot E_b$, the isogeny of kernel $E_b[\mf{a}]$. We assume that the basis $(P_{b,j}^{(k)},Q_{b,j}^{(k)}):=(\varphi_{b,\mf{q}_j^{k}}(P_b),\varphi_{b,\mf{q}_j^{k}}(Q_b))$ of $E_{b,j}^{(k)}[r^e]$ is known for all $k\in\i{-s}{s}$ and $j\in\i{1}{t}$. It can be computed by expressing every isogeny of the chain above by exhaustive search among the $q_j+1$ possible $q_j$-isogenies to match the $j$-invariant of the codomain.
+
+\subsubsection{The Hash Proof System HashOSIDH}
+
+Now, we construct the following hash proof system, that we will call HashOSIDH. Let:
+\[\Sigma:=\left\{\(((E_{0,j}^{(k)}/\langle\alpha\rangle)_{\substack{1\leq j\leq t\\ -s\leq k\leq s}}, (E_{1,j}^{(k)}/\langle\beta \rangle)_{\substack{1\leq j\leq t\\ -s\leq k\leq s}}\)\mid \alpha,\beta\in\P^1(\Z/r^e\Z)\right\}\]
+and:
+\[L:=\left\{\(((E_{0,j}^{(k)}/\langle\alpha\rangle)_{\substack{1\leq j\leq t\\ -s\leq k\leq s}}, (E_{1,j}^{(k)}/\langle\alpha \rangle)_{\substack{1\leq j\leq t\\ -s\leq k\leq s}}\)\mid \alpha\in\P^1(\Z/r^e\Z)\right\}\]
+To lighten the notations, the elements of $\Sigma$ will be denoted $(E_0/\langle\alpha\rangle, E_1/\langle\beta\rangle)$ (and similarly for the elements of $L$), omitting the chains which are implicitly known. 
+
+The definition of the projection space $\m{P}$ is more subtle and will become natural later (see the definition of $\pi$ and lemma \ref{lemma 9}). We consider the set $\m{S}$ of tuples $(E,\iota,P,Q)$ where $(E,\iota)$ is a primitively $\mO_n$-oriented elliptic curve whose $K$-equivalence class is in $\rho(\Ell(\mO_n))$ and $(P,Q)$ is a basis of $E[r^e]$. We consider the equivalence relation $\sim$ over $\m{S}$ defined as follows: $(E,\iota,P,Q)\sim (E',\iota',P',Q')$ if and only if there exists an isomorphism $\lambda : E\overset{\sim}{\longrightarrow} E'$ such that $\lambda_*(\iota)=\iota'$ and $x, y\in\mO_{n,e}$ of norm prime to $p r\ell$ such that $\lambda\circ\iota(x)(P)=\iota'(y)(P')$ and $\lambda\circ\iota(x)(Q)=\iota'(y)(Q')$; and set $\m{P}:=\m{S}/\sim$. The elements of $\m{P}$ will be denoted by $[E,P,Q]$, omitting the $\mO_n$-orientation, which is unique on $E$ under hypothesis (ii) of lemma \ref{lemma 6}, by theorem \ref{theorem 4}. 
+
+We also set $\m{K}:=\Cl(\mO_{n,e})\times\{0,1\}$, $W:=\P^1(\Z/r^e\Z)$ and $\Gamma:=\rho(\Ell(\mO_{n,e}))$. We define the functions:
+\[\begin{array}{rcl}
+\Lambda : \Cl(\mO_{n,e})\times\{0,1\}\times \Sigma & \longrightarrow & \rho(\Ell(\mO_{n,e}))\\
+(([\mf{a}], b),(F_0,F_1)) & \longmapsto & [\mf{a}]\cdot F_b
+\end{array}\]
+\[\begin{array}{rcl}
+\pi : \Cl(\mO_{n,e})\times\{0,1\} & \longrightarrow & \m{P}\\
+([\mf{a}], b) & \longmapsto & [[\mf{a}\mO_n]\cdot E_b,\varphi_{b,\mf{a}}(P_b),\varphi_{b,\mf{a}}(Q_b)]
+\end{array}\]
+where $\varphi_{b,\mf{a}}: E_b\longrightarrow (\mf{a}\mO_n)\cdot E_b$ is the isogeny of kernel $E_b[\mf{a}\mO_n]$, for all ideal $\mf{a}\subseteq\mO_{n,e}$ of norm prime to $r$ and $\ell$ and $b\in\{0,1\}$. Note that, by the definition of $\m{P}$, $\pi$ is well defined, meaning that the class $\pi([\mf{a}],b)$ does not depend on the representative $\mf{a}$ chosen in the class $[\mf{a}]$.  In practice, the computed value of $\pi([\mf{a}],b)$ is the value of a representative. Finally, we define:
+\[\begin{array}{rcl}
+\ProjEval :\m{P}\times \P^1(\Z/r^e\Z) & \longrightarrow & \rho(\Ell(\mO_{n,e}))\\
+([E,P,Q],\alpha:=(a:b)) & \longmapsto & E/\langle\alpha\rangle_{(P,Q)}:=E/\langle aP+bQ\rangle
+\end{array}\]
+and:
+\[\begin{array}{rcl}
+\omega : L & \longrightarrow & \P^1(\Z/r^e\Z)\\
+(E_0/\langle\alpha\rangle,E_1/\langle\alpha\rangle) & \longmapsto & \alpha
+\end{array}\]
+The well definition of $\ProjEval$ is a consequence of the following lemma:
+
+\begin{lemma}\label{lemma 9}
+Let $(E,P,Q), (E',P',Q')\in \m{S}$ such that $(E,P,Q)\sim (E',P',Q')$ and $\alpha\in\P^1(\Z/r^e\Z)$.  Then $E/\langle\alpha\rangle_{(P,Q)}\simeq E'/\langle\alpha\rangle_{(P',Q')}$.
+\end{lemma}
+
+\begin{proof}
+Since $(E,P,Q)\sim (E',P',Q')$, there exists an isomorphism $\lambda:E\overset{\sim}{\longrightarrow} E'$ and $x, y\in\mO_{n,e}$ of norm prime to $pr\ell$ such that $\lambda\circ\iota(x)(P)=\iota'(y)(P')$ and $\lambda\circ\iota(x)(Q)=\iota'(y)(Q')$, where $\iota$ and $\iota'$ are the primitive $\mO_n$-orientations of $E$ and $E'$ respectively.  We set $\alpha:=(a:b)$. Then, we have:
+\begin{align*}
+E'/\langle\alpha\rangle_{(P,Q)}&\simeq [y\mO_{n,e}]\cdot(E'/\langle\alpha\rangle_{(P',Q')}) \quad (\mbox{since } y\in\mO_{n,e})\\
+&=[y\mO_{n,e}]\cdot(E'/\langle aP'+bQ' \rangle)\simeq [y\mO_n]\cdot E'/\langle \iota'(y)(aP'+bQ')\rangle \quad (\mbox{by lemma \ref{lemma 8}.(iv)})\\
+&= E'/\langle \iota'(y)(aP'+bQ')\rangle=E'/\langle \lambda(a\iota(x)(P)+b\iota(x)(Q))\rangle \\
+&\simeq E/\langle \iota(x)(aP+bQ)\rangle\quad (\mbox{since } \lambda \mbox{ is an isomorphism})\\
+&=[x\mO_n]\cdot E/\langle \iota(x)(aP+bQ)\rangle\simeq [x\mO_{n,e}]\cdot (E/\langle aP+bQ \rangle) \quad (\mbox{by lemma \ref{lemma 8}.(iv)})\\
+&=E/\langle aP+bQ \rangle=E/\langle\alpha\rangle_{(P,Q)} \quad (\mbox{since } x\in\mO_{n,e})
+\end{align*}
+\end{proof}
+
+We now justify that $\Pi:=(\Lambda,\pi,\ProjEval,L,\Sigma,W,\m{K},\m{P},\Gamma)$ is indeed a hash proof system.
+
+\begin{lemma}
+The following diagram is commutative:
+\[\xymatrix{
+(\Cl(\mO_{n,e})\times\{0,1\})\times L  \ar[r]^-{\Lambda} \ar[d]_{\pi\times\omega} & \rho(\Ell(\mO_{n,e}))\\
+\m{P}\times \P^1(\Z/r^e\Z) \ar[ru]_{\ProjEval} &
+}\]
+\end{lemma}
+
+\begin{proof}
+This is a direct consequence of lemma \ref{lemma 8}.
+\end{proof}
+
+\begin{lemma}
+$\Lambda$, $\pi$ and $\ProjEval$ are efficiently computable (\ie computable in polynomial time in the parameters $n, e,\ell, r, q_1, \cdots, q_t,s$).
+\end{lemma}
+
+\begin{proof}
+$\ProjEval((E,P,Q),\alpha)$ is efficiently computable by computing the chain of $r$-isogenies whose product is the isogoneny of kernel $\langle\alpha\rangle_{(P,Q)}$ for all $[E,P,Q]\in \m{P}$ and $\alpha\in\P^1(\Z/r^e\Z)$. This computation can be optimized with computation trees, as in \cite[section 4.2.2]{DeFeoSIDH}.
+
+Let $b\in\{0,1\}$. The chain:
+\[(E_{b,j}^{(-s)},P_{b,j}^{(-s)},Q_{b,j}^{(-s)})\longrightarrow \cdots \longrightarrow (E_{b},P_b,Q_b)\longrightarrow \cdots\longrightarrow (E_{b,j}^{(-s)},P_{b,j}^{(s)},Q_{b,j}^{(s)})\]
+is public for all $j\in\i{1}{t}$. Hence, under the hypothesis of lemma \ref{lemma 6}, we can compute efficiently the chain:
+\[E_{b,j}^{(-s)}/\langle\alpha\rangle:=(\mf{q}_j^{(n)})^{-s}\cdot (E_b/\langle\alpha\rangle)\longrightarrow \cdots \longrightarrow E_b/\langle\alpha\rangle\longrightarrow \cdots\longrightarrow E_{b,j}^{(s)}/\langle\alpha\rangle:=(\mf{q}_j^{(n)})^{s}\cdot(E_b/\langle\alpha\rangle)\]
+for all $j\in\i{1}{t}$ and $\alpha\in\P^1(\Z/r^e\Z)$, by computing the chain of $r$-isogenies whose product is the isogoneny of kernel $\langle\alpha\rangle_{(P_b,Q_b)}$ and using the techniques of paragraph \ref{paragraph 1} to construct ladders on the right and on the left of this chain, whose last elements correspond to the chain above. Hence, given $\mf{a}\subseteq\mO_{n,e}$ expressed as a product of the $\mf{q}_j$: $\mf{a}=\prod_{j=1}^t\mf{q}_j^{e_j}$, with $e_1, \cdots, e_t\in\i{-s}{s}$, and $\alpha_0,\alpha_1\in\P^1(\Z/r^e\Z)$:
+\[\Lambda(([\mf{a}],b),(E_0/\langle\alpha_0\rangle,E_1/\langle\alpha_1\rangle))=[\mf{a}]\cdot (E_b/\langle\alpha_b\rangle)\] 
+is efficiently computable with the method of paragraph \ref{paragraph 8}, using the chains computed above. 
+
+Knowing the chain:
+\[E_{b,j}^{(-s)}\longrightarrow \cdots \longrightarrow E_{b}\longrightarrow \cdots\longrightarrow E_{b,j}^{(-s)}\]
+is public for all $j\in\i{1}{t}$, we can easily compute $[\mf{a}\mO_n]\cdot E_b$ using the methods of paragraph \ref{paragraph 8}.  To compute $\pi([\mf{a}],b)$, we still have to compute the image of the basis $(P_b,Q_b)$ by $\varphi_{b,\mf{a}}$, the isogeny associated to $\mf{a}$.  $\varphi_{b,\mf{a}}$ is obtained by composition of $e_j$ $q_j$-isogenies for $j\in\i{1}{t}$.  Each $q_j$-isogeny can be computed using V\'{e}lu's formulas by an exhaustive search among the $q_j+1$ possible isogenies in order to map the $j$-invariant of the domain to the $j$-invariant of the codomain. The complexity of this exhaustive search is $O(s(q_j+1))$ uses of V\'{e}lu's formulas for all $j\in\i{1}{t}$, which is costly but still polynomial.
+\end{proof}
+
+\begin{lemma}
+HashOSIDH is $2^{-1}$-universal.
+\end{lemma}
+
+\begin{proof}
+Let $([\mf{a}],b)\in \Cl(\mO_{n,e})\times\{0,1\}$ be a key (secret and sampled with uniform distribution). Let $(F_0,F_1)=(E_0/\langle\alpha_0\rangle, E_1/\langle\alpha_1\rangle)\in \Sigma\setminus L$ be sampled with uniform distribution.  Since $(F_0,F_1)\not\in L$, we have $\alpha_0\neq\alpha_1$. Let us assume that an attacker with unbounded capabilities knows $(F_0,F_1)$ and $\pi([\mf{a}],b)=[[\mf{a}\mO_n]\cdot E_b, \varphi_{b,\mf{a}}(P_b),\varphi_{b,\mf{a}}(Q_b)]$ and wants to recover $\Lambda(([\mf{a}],b),(F_0,F_1))=\mf{a}\cdot F_b$.  
+
+We assume that $b=0$. Let $\mf{b}:=\mf{a}\cdot (\overline{\mf{s}}\cap\mO_{n,e})$. We prove that $\pi([\mf{a}],0)=\pi([\mf{b}],1)$. Let $(E,\iota, P,Q)$ and $(E',\iota',P',Q')$ be representatives of $\pi([\mf{a}],0)$ and $\pi([\mf{b}],1)$ respectively. It suffices to prove that $(E,\iota, P,Q)\sim(E',\iota',P',Q')$.  We know that there exists two isomorphisms $\lambda : E\overset{\sim}{\longrightarrow} [\mf{a}\mO_n]\cdot E_0$ and $\lambda' : E'\overset{\sim}{\longrightarrow} [\mf{b}\mO_n]\cdot E_1$ and $x, y, x',y'\in\mO_{n,e}$ of norm prime to $pr\ell$ such that:
+\[\left\{\begin{array}{c}
+\lambda\circ\iota(x)(P)=\iota_{0,\mf{a}}(y)\circ\varphi_{0,\mf{a}}(P_0)\\
+\lambda\circ\iota(x)(Q)=\iota_{0,\mf{a}}(y)\circ\varphi_{0,\mf{a}}(Q_0)
+\end{array}\right.\qquad \mbox{and}\qquad \left\{\begin{array}{c}
+\lambda'\circ\iota'(x')(P')=\iota_{1,\mf{b}}(y')\circ\varphi_{1,\mf{b}}(P_1)\\
+\lambda'\circ\iota'(x')(Q')=\iota_{1,\mf{b}}(y')\circ\varphi_{1,\mf{b}}(Q_1)
+\end{array}\right.\quad (\star)\]
+where $\iota_{0,\mf{a}}$ and $\iota_{1,\mf{b}}$ are the $\mO_n$-orientations of $[\mf{a}\mO_n]\cdot E_0$ and $[\mf{b}\mO_n]\cdot E_1$ respectively. Since $E_1=[\mf{s}]\cdot E_0$, we have $E_0=[\overline{\mf{s}}]\cdot E_1$, so that $[\mf{a}\mO_n]\cdot E_0=[\mf{b}\mO_n]\cdot E_1$ and $\varphi_{1,\mf{b}}=\varphi_{0,\mf{a}}\circ\varphi_{1,\overline{\mf{s}}}$.  Under hypothesis (ii) of lemma \ref{lemma 6}, we then have $\iota_{0,\mf{a}}=\iota_{1,\mf{b}}$ by theorem \ref{theorem 4}.  Furthermore, $P_1=\varphi_{0,\mf{s}}(P_0)$, so that:
+\[\varphi_{1,\mf{b}}(P_1)=\varphi_{0,\mf{a}}\circ\varphi_{1,\overline{\mf{s}}}\circ\varphi_{0,\mf{s}}(P_0)=N(\mf{s})\varphi_{0,\mf{a}}(P_0)\]
+and by the same argument $\varphi_{1,\mf{b}}(Q_1)=N(\mf{s})\varphi_{0,\mf{a}}(Q_0)$.  Combining that with $(\star)$, we get:
+\[\left\{\begin{array}{c}
+\lambda^{-1}\circ\lambda\circ\iota(x'y)(P')=\iota(N(\mf{s})xy')(P)\\
+\lambda^{-1}\circ\lambda\circ\iota(x'y)(Q')=\iota(N(\mf{s})xy')(Q)
+\end{array}\right.\]
+so that $(E',\iota',P',Q')\sim (E,\iota, P,Q)$.
+
+By similar arguments, we get that $\pi([\mf{a}],b)=\pi([\mf{b}],0)$, with $\mf{b}:=\mf{a}\cdot(\overline{\mf{s}}\cap\mO_{n,e})$, when $b=1$. Hence, the attacker can guess $([\mf{a}],b)$ or $([\mf{b}],1-b)$.
+
+With its unbounded capabilities, the attacker can also guess $\alpha_0$ and $\alpha_1$ from $(F_0,F_1)=(E_0/\langle\alpha_0\rangle, E_1/\langle\alpha_1\rangle)$.  We also have:
+\begin{align*}\Lambda(([\mf{a}],b),(F_0,F_1))&=[\mf{a}]\cdot F_b=[\mf{a}\mO_n]\cdot E_b/\langle\alpha_b\rangle=[\mf{b}\mO_n]\cdot E_{1-b}/\langle\alpha_b\rangle\\
+&\neq [\mf{b}\mO_n]\cdot E_{1-b}/\langle\alpha_{1-b}\rangle=\Lambda(([\mf{b}],1-b),(F_0,F_1))
+\end{align*}
+since $\alpha_b\neq\alpha_{1-b}$, the inequality is a consequence of the following lemma. Hence, the attacker finds the value of the hash function with $1$ bit of indetermination, so that:
+\[H_\infty(\Lambda(([\mf{a}],b),(F_0,F_1))|(\pi([\mf{a}],b),(F_0,F_1)))=-\log\(\frac{1}{2}\)\]
+\end{proof}
+
+\begin{lemma}
+Let $E\in \rho(\Ell(\mO_n))$. Then, the map:
+\[\begin{array}{rcl}
+\{\mbox{cyclic subbroups of order } r^e \mbox{ in } E[r^e]\}& \longrightarrow & \rho(\Ell(\mO_{n,e}))\\
+H & \longmapsto & E/H 
+\end{array}\]
+\end{lemma}
+
+\begin{remark}
+Note that under hypothesis (ii) of lemma \ref{lemma 6},  we can omit the $\mO_{n,e}$-orientation when considering elements of $\rho(\Ell(\mO_{n,e}))$, and see these elements as elliptic curves up to isomorphism, or equivalently, as $j$-invariants.  Hence, we even have an injective map when considering $j$-invariants.
+\end{remark}
+
+\begin{proof}
+Let $H, H'$ be two cyclic subgroups of order $r^e$ in $E$ such that $E/H=E/H'$. Then, as in the proof of lemma \ref{lemma 7}.(ii), we have descending $r$-isogeny chains $(E_i)_{0\leq i\leq e}$ and $(E'_i)_{0\leq i\leq e}$ whose composition are the isogenies $E\longrightarrow E/H$ and $E\longrightarrow E/H'$ respectively. We assume that these chains are distinct. Then, there exists $i\in\i{1}{e}$ such that $E_i=E'_i$ and $E_{i-1}\neq E'_{i-1}$. Hence, $E_i$ has two $r$-ascending isogenies, which contradicts proposition \ref{proposition 5}. Then, the two chains are the same and we have $H=H'$.
+\end{proof}
+
+Due to the strength of the SIDH framework, we can assume that the subset membership problem for HashOSIDH is hard (\ie has exponential complexity).
+
+\begin{theorem}
+Assuming that uniform distributions on $\Sigma$ and $L$ are computationally indistinguishable (subset membership problem), HashOSIDH is a hash proof system.
+\end{theorem}
 
 \end{document}
