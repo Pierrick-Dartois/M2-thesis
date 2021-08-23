@@ -17,7 +17,7 @@ pages={7068+vi}
 }
 
 @misc{OSIDH,
-    author = {Leonardo Colò and David Kohel},
+    author = {Leonardo Col\`{o} and David Kohel},
     title = {Orienting supersingular isogeny graphs},
     howpublished = {Cryptology ePrint Archive, Report 2020/985},
     year = {2020},
@@ -115,6 +115,35 @@ pages={7068+vi}
     howpublished = {Cryptology ePrint Archive, Report 2020/120},
     year = {2020},
     note = {\url{https://eprint.iacr.org/2020/120}},
+}
+
+@misc{CSIDH,
+  author =       "Wouter Castryck and
+                  Tanja Lange and
+                  Chloe Martindale and
+                  Lorenz Panny and
+                  Joost Renes",
+  title =        "{CSIDH}: An Efficient Post-Quantum Commutative Group Action",
+  year =         2018,
+  howpublished = "Cryptology ePrint Archive, Report 2018/383",
+  note =         "\url{https://eprint.iacr.org/2018/383}",
+}
+
+@misc{Couveignes,
+  author =       "Jean-Marc Couveignes",
+  title =        "Hard Homogeneous Spaces",
+  year =         2006,
+  howpublished = "Cryptology ePrint Archive, Report 2006/291",
+  note =         "\url{https://eprint.iacr.org/2006/291}",
+}
+
+@misc{RosSto,
+  author =       "Alexander Rostovtsev and
+                  Anton Stolbunov",
+  title =        "{Public-Key} {Cryptosystem} {Based} {On} {Isogenies}",
+  year =         2006,
+  howpublished = "Cryptology ePrint Archive, Report 2006/145",
+  note =         "\url{https://eprint.iacr.org/2006/145}",
 }
 
 @misc{MyGithub,
@@ -538,7 +567,7 @@ doi = {10.1109/FOCS.2004.72}
 }
 
 @inproceedings{DeFeoSIDH,
-author = {Jao, David and Feo, Luca},
+author = {Jao, David and De Feo, Luca},
 year = {2011},
 month = {11},
 pages = {19-34},
@@ -565,6 +594,24 @@ doi = {10.1137/1.9781611974331.ch2}
   year={1985}
 }
 
+@InProceedings{SQISign,
+author="De Feo, Luca
+and Kohel, David
+and Leroux, Antonin
+and Petit, Christophe
+and Wesolowski, Benjamin",
+editor="Moriai, Shiho
+and Wang, Huaxiong",
+title="SQISign: Compact Post-quantum Signatures from Quaternions and Isogenies",
+booktitle="Advances in Cryptology -- ASIACRYPT 2020",
+year="2020",
+publisher="Springer International Publishing",
+address="Cham",
+pages="64--93",
+abstract="We introduce a new signature scheme, SQISign, (for Short Quaternion and Isogeny Signature) from isogeny graphs of supersingular elliptic curves. The signature scheme is derived from a new one-round, high soundness, interactive identification protocol. Targeting the post-quantum NIST-1 level of security, our implementation results in signatures of 204 bytes, secret keys of 16 bytes and public keys of 64 bytes. In particular, the signature and public key sizes combined are an order of magnitude smaller than all other post-quantum signature schemes. On a modern workstation, our implementation in C takes 0.6 s for key generation, 2.5 s for signing, and 50 ms for verification.",
+isbn="978-3-030-64837-4"
+}
+
 @conference{WM,
   author       = {W.C. Waterhouse and J.S. Milne}, 
   title        = {Abelian varieties over finite fields},
@@ -581,6 +628,14 @@ doi = {10.1137/1.9781611974331.ch2}
   Title        = {{S}ageMath, the {S}age {M}athematics {S}oftware {S}ystem ({V}ersion 9.2)},
   note         = {{\tt https://www.sagemath.org}},
   Year         = {2021},
+}
+
+@techreport{SIKE,
+  author       = {David Jao and Reza Azarderakhsh and Matthew Campagna and Craig Costello and Luca {De Feo} and Basil Hess and Amir Jalali and Brian Koziel and Brian {LaMacchia} and Patrick Longa and Michael Naehrig and Joost Renes and Vladimir Soukharev and David Urbanik and Geovandro Pereira and Koray Karabina and Aaron Hutchinson},
+  title        = {{SIKE}},
+  institution  = {{N}ational {I}nstitute of {S}tandards and {T}echnology},
+  year         = 2020,
+  note         = {available at \url{https://csrc.nist.gov/projects/post-quantum-cryptography/round-3-submissions}},
 }
 
 @unpublished{fpylll,
