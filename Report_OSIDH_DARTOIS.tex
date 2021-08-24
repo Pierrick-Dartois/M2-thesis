@@ -1,4 +1,4 @@
-\documentclass[a4paper,10pt]{report}
+\documentclass[a4paper,10pt,notitlepage]{report}
 
 \usepackage{stackrel, amsmath,amsthm,amsfonts,amssymb, stmaryrd}
 %\usepackage{amsthm}
@@ -147,7 +147,12 @@ primitives , events , complexity , asymptotics , keys
 \setlength{\@fptop}{0pt}
 \makeatother
 
+% to get abstract and title on the same page
+\usepackage{titling}
+
 \begin{document}
+
+\begin{titlingpage}
 
 \begin{center}
 
@@ -177,14 +182,24 @@ primitives , events , complexity , asymptotics , keys
 
 \vspace{2cm}
 
-{\bfseries Abstract:} The goal of this thesis is to present and give an implementation of the new isogeny based cryptosystem Oriented Supersingular Isogeny Diffie-Hellman (OSIDH) due to Kohel and Col\`{o} \cite{OSIDH}.  We will also present the complementary proofs and improvements of Onuki \cite{Onuki}.
+\begin{abstract}
+Shor discovered in 1995 \cite{Shor} that quantum computers powerful enough could break all cryptographic primitives based on discrete logarithm and integer factorization such as the widespread RSA and commonly used elliptic curve cryptography.  Ever since, efforts have been made to find quantum-safe cryptographic primitives. Since the foundational works of Couveignes in the end of the 1990's \cite{Couveignes} and the discovery of Supersingular Isogeny Diffie-Hellman (SIDH) by De Feo, Jao and Pl\^{u}t in 2011 \cite{DeFeoSIDH}, isogeny-based cryptography has become a promising area of research in post-quantum cryptography.   The Oriented Supersingular Isogeny Diffie-Hellman (OSIDH) due to Kohel and Col\`{o} \cite{OSIDH} is a key exchange protocol generalizing the ideas of Commutative Supersingular Isogeny Diffie-Hellman (CSIDH) due to Castryck et. al.  (2018) \cite{CSIDH}, itself inspired from Couveignes' cryptosystem.  The goal of this master's thesis is to study OSIDH. We conduct a cryptanalysis and propose an original attack running on a classical computer. We implement this attack with \verb?SageMath? \cite{sagemath} for toy parameters. We come to the conclusion that OSIDH is not secure if its parameters are not chosen carefully. Unfortunately, a secure choice of parameters impedes new cryptographic constructions based on the OSIDH framework.
+\end{abstract}
 
-
-Shor discovered in 1996 that quantum computers powerful enough could break all cryptographic primitives based on discrete logarithm and integer factorization such as the widespread RSA and commonly used elliptic curve cryptography.  Ever since, efforts have been made to find quantum-safe cryptographic primitives. Since the foundational works of Couveignes at the end of the 1990's and De Feo, Jao and Pl\^{u}t in 2011, isogeny-based cryptography has become a promising area of research in post-quantum cryptography.   The Oriented Supersingular Isogeny Diffie-Hellman (OSIDH) is a key exchange protocol generalizing the ideas of Commutative Supersingular Isogeny Diffie-Hellman (CSIDH) due to Castryck et. al.  (2018) itself based on the ideas of Couveignes.  We conduct a cryptanalysis of OSIDH and reach the conclusion that this cryptosystem is not secure, not only against quantum attacks but also against classical attacks.
+\end{titlingpage}
 
 \newpage
 
 \tableofcontents
+
+\newpage
+
+\section*{Acknowledgements}
+
+I am particularly grateful to my supervisor Luca De Feo.  Early on, had he not placed his trust in me and fought the bureaucratic obstacles, my internship with IBM would not have been possible. Thank you Luca for your patience, your kindness, your rigour and your pedagogical qualities all along this internship. Thank you as well for giving me the opportunity to discover the beautiful landscapes of Switzerland on the week-ends.
+
+I also would like to thank the IBM cryptography team for their warm welcome. I think about Romain Gay, Jonathan Bootle, Julia Hesse, Bertram Poettering, Vadim Lyubashevsky and Michael Osborne in particular. I am also very grateful to my professor Elisa Lorenzo Garcia for her strong support.
+
 
 \chapter*{Introduction}
 
@@ -1743,37 +1758,6 @@ We can also reduce morphisms but the mathematical foundations of this reduction 
 This map is in fact injective.  But it is not always surjective : for instance,  when $E=F$ are defined over a number field and $\overline{E}=\overline{F}$ is supersingular.  See the results of Deuring (\cite[chapter 13]{Lang_EF}) for more about this topic.   
 
 This definition is functorial,  meaning that the reduction of the composite of two isogenies is the composite of the reductions of these isogenies.  
-
-\section{Rational endomorphisms}
-
-Let $E$ be an elliptic curve defined over a field $k$.  We denote by $\End(E)$ the full endomorphism ring of $E$ (over $\overline{k}$) and $\End_k(E)$ the ring of endomorphisms defined \emph{over $k$}.  In general,  $\End_k(E)\neq\End(E)$ except when $k$ is algebraically closed.  However,  in cryptography,  $k$ is a finite field so we would like to have the equality $\End_k(E)=\End(E)$ for a finite extension $k/\F_p$.
-
-If $E$ is supersingular,  we already know by \cite[Theorem V.3.1]{Silverman1} that $E$ can be defined on $\F_{p^2}$ (up to $\overline{\F_p}$-isomorphism).  The following results provide finite extensions $k/\F_{p^2}$ such that $\End_k(E)=\End(E)$.
-
-\begin{Lemma}
-Let $E/\F_{p^2}$ be a supersingular elliptic curve.  Then there exists a finite extension $k/\F_{p^2}$ such that $\End(E)=\End_k(E)$.  The minimal possible values of $k$ depend on the trace of the Frobenius $t:=|E(\F_{p^2})|-p^2-1$ over $F_{p^2}$ as follows:
-\[[k:\F_{p^2}]=\left\{
-\begin{array}{cl}
-2 & \mbox{if } t=0\\
-3 & \mbox{if } t=\pm p\\
-1 & \mbox{if } t=\pm 2p. 
-\end{array}
-\right.\]
-\end{Lemma}
-
-\begin{proof}
-Since $E$ is supersingular,  $p|t$ by \cite[Theorem V.4.1.a]{Silverman1} so $p\in\{0,\pm p, \pm 2p\}$ by Hasse-Weil's bound \cite[Theorem V.1.1]{Silverman1}.  Let $n:=[k:\F_{p^2}]$, $q:=|k|=p^{2n}$ and $t_n:=|E(\F_{q})|-q-1$ the trace of the Frobenius over $\F_q$.  By \cite[Theorem 4.1]{Waterhouse1969},  to ensure that $\End(E)=\End_k(E)$,  it is necessary and sufficient that $t_n^2-4q=0$. 
-
-According to \cite[Theorem V.2.3.1.a]{Silverman1},  we have $t_n=\alpha^n+\beta^n$ where $\alpha$ and $\beta$ are roots of the $\F_{p^2}$-Frobenius characteristic polynomial $X^2-tX+p^2$.  Then,  it follows that:
-\[t_n=\(\frac{-t-\sqrt{t^2-4p^2}}{2}\)^n+\(\frac{-t+\sqrt{t^2-4p^2}}{2}\)^n=\left\{
-\begin{array}{cl}
-i^np^n(1+(-1)^n) & \mbox{if } t=0\\
-2(\pm 1)^n\cos\(\frac{n\pi}{3}\)& \mbox{if } t=\pm p\\
-2(\pm 1)^n & \mbox{if } t=\pm 2p. 
-\end{array}
-\right.\]
-Hence $t_n^2-4q=0$ if and only if $n\equiv 0 \ [2]$ in the first case,  $n\equiv 0 \ [3]$ in the second case and without condition in the third case.  The result follows immediately.
-\end{proof}
 
 \section{The Deuring correspondence}\label{Paragraph 2}
 
