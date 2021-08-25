@@ -183,7 +183,7 @@ primitives , events , complexity , asymptotics , keys
 \vspace{2cm}
 
 \begin{abstract}
-Shor discovered in 1995 \cite{Shor} that quantum computers powerful enough could break all cryptographic primitives based on discrete logarithm and integer factorization such as the widespread RSA and commonly used elliptic curve cryptography.  Ever since, efforts have been made to find quantum-safe cryptographic primitives. Since the foundational works of Couveignes in the end of the 1990's \cite{Couveignes} and the discovery of Supersingular Isogeny Diffie-Hellman (SIDH) by De Feo, Jao and Pl\^{u}t in 2011 \cite{DeFeoSIDH}, isogeny-based cryptography has become a promising area of research in post-quantum cryptography.   The Oriented Supersingular Isogeny Diffie-Hellman (OSIDH) due to Kohel and Col\`{o} \cite{OSIDH} is a key exchange protocol generalizing the ideas of Commutative Supersingular Isogeny Diffie-Hellman (CSIDH) due to Castryck et. al.  (2018) \cite{CSIDH}, itself inspired from Couveignes' cryptosystem.  The goal of this master's thesis is to study OSIDH. We conduct a cryptanalysis and propose an original attack running on a classical computer. We implement this attack with \verb?SageMath? \cite{sagemath} for toy parameters. We come to the conclusion that OSIDH is not secure if its parameters are not chosen carefully. Unfortunately, a secure choice of parameters impedes new cryptographic constructions based on the OSIDH framework.
+Shor discovered in 1995 \cite{Shor} that quantum computers powerful enough could break all cryptographic primitives based on discrete logarithm and integer factorization such as the widespread RSA and commonly used elliptic curve cryptography.  Ever since, efforts have been made to find quantum-safe cryptographic primitives. Since the foundational works of Couveignes in the end of the 1990's \cite{Couveignes} and the discovery of Supersingular Isogeny Diffie-Hellman (SIDH) by De Feo, Jao and Pl\^{u}t in 2011~\cite{DeFeoSIDH}, isogeny-based cryptography has become a promising area of research in post-quantum cryptography.   Oriented Supersingular Isogeny Diffie-Hellman (OSIDH) is a key exchange protocol due to Kohel and Col\`{o} \cite{OSIDH}, generalizing the ideas of Commutative Supersingular Isogeny Diffie-Hellman (CSIDH) due to Castryck et. al.  (2018) \cite{CSIDH}, itself inspired from Couveignes' cryptosystem.  The goal of this master's thesis is to study OSIDH. We conduct a cryptanalysis and propose an original attack running on a classical computer. We implement this attack with \verb?SageMath? \cite{sagemath} for toy parameters. We come to the conclusion that OSIDH is not secure if its parameters are not chosen carefully. Unfortunately, a secure choice of parameters impedes new cryptographic constructions based on the OSIDH framework.
 \end{abstract}
 
 \end{titlingpage}
@@ -198,7 +198,7 @@ Shor discovered in 1995 \cite{Shor} that quantum computers powerful enough could
 
 I am particularly grateful to my supervisor Luca De Feo.  Early on, had he not placed his trust in me and fought the bureaucratic obstacles, my internship with IBM would not have been possible. Thank you Luca for your patience, your kindness, your rigour and your pedagogical qualities all along this internship. Thank you as well for giving me the opportunity to discover the beautiful landscapes of Switzerland on the week-ends.
 
-I also would like to thank the IBM cryptography team for their warm welcome. I think about Romain Gay, Jonathan Bootle, Julia Hesse, Bertram Poettering, Vadim Lyubashevsky and Michael Osborne in particular. I am also very grateful to my professor Elisa Lorenzo Garcia for her strong support.
+I also would like to thank the IBM cryptography team for their warm welcome. I think about Romain Gay, Jonathan Bootle, Julia Hesse, Bertram Poettering, Vadim Lyubashevsky and Michael Osborne in particular. Last but not least, I am also very grateful to my professor Elisa Lorenzo Garcia for her strong support.
 
 
 \chapter*{Introduction}
@@ -207,11 +207,11 @@ In the incoming years, quantum computers might threaten mainstream cryptographic
 
 The goal of this thesis is to study Oriented Supersingular Isogeny Diffie Hellman (OSIDH), a new isogeny based primitive due to Col\`{o} and Kohel \cite{OSIDH}. OSIDH is a generalization of Commutative Supersingular Isogeny Diffie Hellman (CSIDH) \cite{CSIDH} due to Castryck, Lange, Martindale, Panny and Renes based itself on the foundational isogeny based protocol of Couveignes \cite{Couveignes}, rediscovered by Rostovtsev and Stolbunov \cite{RosSto}. 
 
-As the latter, OSIDH relies on a \emph{cryptographic group action}, as defined in \cite{DeFeo1}. Namely, it means that we have a group $G$ acting faithfully and transitively on a set $X$ with the following security property: if $x\in X$ and $g\in G$, it is computationally hard to recover $g$ with the knowledge of $(x,g\cdot x)$ only. \footnote{Alternate (but similar) security assumptions can be made. For instance, there is a decisional security hypothesis: given a secret element $g\in G$, an attacker cannot distinguish tuples $(x_i, g\cdot x_i)$ with $x_i\in X$ sampled uniformly from tuples $(x_i,y_i)$ with $y_i\in X$ sampled uniformly.} In the case of CSIDH and OSIDH, the cryptographic group action is \emph{restricted}, meaning that we can only compute the action of a set $S$ of group elements and their inverse. However, this restriction is not an issue in general when $S$ generates $G$.One can naturally define a Diffie-Hellman protocol in a cryptographic group action $(G,X,\cdot)$, provided that $G$ is abelian. Indeed, if we fix a public element $x_0\in X$, Alice and Bob will select random elements $g$ and $h\in G$ respectively (or random products of elements of a generating set $S$ and their inverse if the action is restricted). Alice will compute $g\cdot x_0$ and Bob $h\cdot x_0$. Alice will transmit $g\cdot x_0$ to Bob and Bob will transmit $h\cdot x_0$ to Alice. Then Alice will act on Bob's data with $g$ and Bob will act on Alice's data $h$, so that they both recover the shared secret:
+As the latter, OSIDH relies on a \emph{cryptographic group action} (also called effective group action), as defined in \cite{DeFeo1}. Namely, it means that we have a group $G$ acting faithfully and transitively on a set $X$ with the following security property: if $x\in X$ and $g\in G$, it is computationally hard to recover $g$ with the knowledge of $(x,g\cdot x)$ only\footnote{Alternate (but similar) security assumptions can be made. For instance, there is a decisional security hypothesis: given a secret element $g\in G$, an attacker cannot distinguish tuples $(x_i, g\cdot x_i)$ with $x_i\in X$ sampled uniformly at random from tuples $(x_i,y_i)$ with $y_i\in X$ sampled uniformly at random.}. In the case of CSIDH and OSIDH, the cryptographic group action is \emph{restricted}, meaning that we can only compute the action of a set $S$ of group elements and their inverse. However, this restriction is not an issue in general when $S$ generates $G$. One can naturally define a Diffie-Hellman protocol in a cryptographic group action $(G,X,\cdot)$, provided that $G$ is abelian. Indeed, if we fix a public element $x_0\in X$, Alice and Bob will select random elements $g$ and $h\in G$ respectively (or random products of elements of a generating set $S$ and their inverse if the action is restricted). Alice will compute $g\cdot x_0$ and Bob $h\cdot x_0$. Alice will transmit $g\cdot x_0$ to Bob and Bob will transmit $h\cdot x_0$ to Alice. Then Alice will act on Bob's data with $g$ and Bob will act on Alice's data $h$, so that they both recover the shared secret:
 \[g\cdot(h\cdot x_0)=h\cdot(g\cdot x_0)=(gh)\cdot x_0.\]
 The security of such a protocol relies on the hardness to recover $g$ knowing $(x,g\cdot x)$.
 
-In CSIDH,  $X$ is the set of supersingular elliptic curves defined over $\F_p$ for $p\equiv 3 \ [8]$ and $G$ is the ideal class group $\mbox{Cl}(\mO)$ of the ring $\mO:=\Z[\sqrt{-p}]$ isomorphic to the ring of $\F_p$-rational endomorphisms for all $E\in X$. The group action is given by $\mf{a}\cdot E:=E/E[\mf{a}]$ for all $\mO$-ideal $\mf{a}$ and $E\in X$. $S$ is a set of splitting prime ideals $\mf{l}_1, \cdots, \mf{l}_t$ respectively lying above primes $\ell_1, \cdots, \ell_t$ such that $|E(\F_p)|=p+1=4\prod_{i=1}^t\ell_i$ for all $E\in X$, so that the action of $\mf{l}_i$ and $\overline{\mf{l}_i}$ on $E$ are efficiently computable by V\'{e}lu's formulas \cite{Velu} because the $\ell_i$-torsion is $\F_p$-rational.  See \cite{CSIDH} for details.  
+In CSIDH,  $X$ is the set of supersingular elliptic curves defined over $\F_p$ for $p\equiv 3 \ [8]$ and $G$ is the ideal class group $\mbox{Cl}(\mO)$ of the ring $\mO:=\Z[\sqrt{-p}]$ isomorphic to the ring of $\F_p$-rational endomorphisms for all $E\in X$. The group action is given by $\mf{a}\cdot E:=E/E[\mf{a}]$ for every $\mO$-ideal $\mf{a}$ and $E\in X$. $S$ is a set of splitting prime ideals $\mf{l}_1, \cdots, \mf{l}_t$ respectively lying above primes $\ell_1, \cdots, \ell_t$ such that $|E(\F_p)|=p+1=4\prod_{i=1}^t\ell_i$ for all $E\in X$, so that the action of $\mf{l}_i$ and $\overline{\mf{l}_i}$ on $E$ are efficiently computable by V\'{e}lu's formulas \cite{Velu} because the $\ell_i$-torsion is $\F_p$-rational.  See \cite{CSIDH} for details.  
 
 In CSIDH, the elliptic curves $E$ in $X$ are all oriented by the quadratic order $\mO=\Z[\sqrt{-p}]\simeq\End_{\F_p}(E)$, meaning that we have an embedding $\mO\hookrightarrow \End(E)$, mapping $\sqrt{-p}$ to the Frobenius endomorphism.  In OSIDH, we do not restrict to supersingular elliptic curves defined over $\F_p$ and consider different orientations than the ring of $\F_p$-rational endomorphisms but the idea is roughly the same. What really changes is that the orientation used $\mO$ is no longer the maximal order of $K:=\mO\otimes\Q=\Q(\sqrt{-p})$, the field of discriminant $-4p$. In OSIDH, $K$ has a very small discriminant $\ll p$ and $\mO$ has a huge prime power conductor $\ell^n$. As in CSIDH, we have a restricted class group action by splitting prime ideals of $\mO$, $\mf{q}_1, \cdots, \mf{q}_t$, but the effective computation of the action by these primes is significantly different and involves $\ell$-isogeny chains of length $n$. However, unfortunately, the security of OSIDH is weaker than that of CSIDH.
 
@@ -237,7 +237,7 @@ Let $E/k$ be an elliptic curve defined over a field $k$.  We denote by $\End^0(E
 A $K$-\emph{orientation} of $E$ is an embedding $\iota : K\hookrightarrow \End^0(E)$.  If $\mO$ is an order of $K$,  we say that $(E, \iota)$ is an $\mO$-\emph{orientation} if $\iota(\mO)\subseteq \End(E)$.  An $\mO$-orientation is \emph{primitive} if $\iota(\mO)=\End(E)\cap\iota(K)$.
 \end{Definition}
 
-This definition only makes sense when $E$ is a supersingular elliptic curve, otherwise, we always have $\iota(K)=\End^0(E)$, so there is (up to complex conjugation), only one such orientation (see \cite[Corollary III.9.4 and Theorem V.3.1]{Silverman1}). Hence, in the following, we will always work with supersingular elliptic curves defined over $k=\F_{p^2}$.
+This definition only makes sense when $E$ is a supersingular elliptic curve, otherwise, we always have $\iota(K)=\End^0(E)$, so there is (up to complex conjugation), only one such orientation (see \cite[Corollary III.9.4 and Theorem V.3.1]{Silverman1}). Hence, in the following, we shall always work with supersingular elliptic curves defined over $k=\F_{p^2}$.
 
 \begin{Lemma}
 Let $(E,\iota)$ be a $K$-oriented elliptic curve.  Then :
@@ -391,7 +391,7 @@ $\Longrightarrow$ Suppose that $\SS_{\mO}^{pr}(p)\neq\emptyset$ and let $(F,\iot
 and an injective ring homomorphism $\mO\longrightarrow\End(E)$ mapping $\alpha$ to $\varphi$. Whence $\End(E)\simeq \mO$ so by Theorem \ref{Theorem 1}, $p$ does not divide the conductor of $\mO$.  Moreover, $p$ does not split in $K$ because $F=\overline{E}$ is supersingular.
 \end{proof}
 
-In the following, we assume that $p$ does not split in $K$ and does not contain the conductor of $\mO$, so that $\SS_\mO^{pr}(p)$ is not empty.  Let $\Ell(\mO)$ be the set of isomorphism classes of elliptic curves defined over $\C$ with complex multiplication by $\mO$ (\ie  with endomorphism ring isomorphic to $ \mO$). As we saw, every class $[E]\in\Ell(\mO)$ admits a representative $E$ defined over a number field $L_E$ containing $K$ and any place $\mfp$ lying above $p$ has potential good reduction modulo $\mfp$, so there is a finite field extension $L'/L_E$ and a place $\mf{P}$ lying above $\mfp$ such that $E$ has good reduction modulo $\mf{P}$. Let $L'_E$ be the field generated by the union of these extensions when $\mfp$ varies.  It is still a number field because there are finitely many places in $\mO_L$ lying above $p$ ($\mO_L$ is Dedekind).  Moreover,  $\Ell(\mO)$ is finite (by \cite[Proposition II.2.1.(b)]{Silverman2}). Then, the field $L$ generated by all the fields $L'_E$ is a number field (containing $K$) and every elliptic curve $E$ with complex multiplication by $\mO$ is defined over $L$ (up to isomorphism) and has good reduction modulo any place $\mfp$ of $L$ lying above $p$.  We will fix $L$ and $\mfp$ in the following.  Then, we have a map given by the reduction modulo $\mfp$:
+In the following, we assume that $p$ does not split in $K$ and does not contain the conductor of $\mO$, so that $\SS_\mO^{pr}(p)$ is not empty.  Let $\Ell(\mO)$ be the set of isomorphism classes of elliptic curves defined over $\C$ with complex multiplication by $\mO$ (\ie  with endomorphism ring isomorphic to $ \mO$). As we saw, every class $[E]\in\Ell(\mO)$ admits a representative $E$ defined over a number field $L_E$ containing $K$ and any place $\mfp$ lying above $p$ has potential good reduction modulo $\mfp$, so there is a finite field extension $L'/L_E$ and a place $\mf{P}$ lying above $\mfp$ such that $E$ has good reduction modulo $\mf{P}$. Let $L'_E$ be the field generated by the union of these extensions when $\mfp$ varies.  It is still a number field because there are finitely many places in $\mO_L$ lying above $p$ ($\mO_L$ is Dedekind).  Moreover,  $\Ell(\mO)$ is finite (by \cite[Proposition II.2.1.(b)]{Silverman2}). Then, the field $L$ generated by all the fields $L'_E$ is a number field (containing $K$) and every elliptic curve $E$ with complex multiplication by $\mO$ is defined over $L$ (up to isomorphism) and has good reduction modulo any place $\mfp$ of $L$ lying above $p$.  We shall fix $L$ and $\mfp$ in the following.  Then, we have a map given by the reduction modulo $\mfp$:
 \[\begin{array}{rcl} \rho : \Ell(\mO)& \longmapsto& \SS_\mO^{pr}(p)\\ 
 E&\longmapsto&(\overline{E},[.]_{\overline{E}})
 \end{array}.\]
@@ -440,7 +440,7 @@ we get that the reduction of $(E^{\sigma},[.]_{E^\sigma})$ modulo $\mf{P}$ is $(
 
 \section{The ideal class group action}
 
-We shall now define a group action of $\Cl(\mO)$ on $\rho(\Ell(\mO))$, as announced previously, and prove that it is faithful and transitive. Let $\mf{a}$ be a non-zero ideal of $\mO$. According to \cite[Corollary 7.17]{Cox}, we can assume that $N(\mf{a})$ is prime to $p$ without changing the class $[\mf{a}]\in\Cl(\mO)$. We will always work under this assumption in the following. We define the $\mf{a}$-torison of $E$ by:
+We shall now define a group action of $\Cl(\mO)$ on $\rho(\Ell(\mO))$, as announced previously, and prove that it is faithful and transitive. Let $\mf{a}$ be a non-zero ideal of $\mO$. According to \cite[Corollary 7.17]{Cox}, we can assume that $N(\mf{a})$ is prime to $p$ without changing the class $[\mf{a}]\in\Cl(\mO)$. We shall always work under this assumption in the following. We define the $\mf{a}$-torison of $E$ by:
 \[E[\mf{a}]=\bigcap_{\alpha\in\mf{a}}\ker(\iota(\alpha)).\]
 $E[\mf{a}]$ is finite, so \cite[Proposition III.4.12]{Silverman1} ensures that there exists an elliptic curve $E'$ and a separable isogeny $\varphi:E\longrightarrow E'$ such that $\ker(\varphi)=E[\mf{a}]$. $(E',\varphi)$ is unique up to isomorphism. Indeed, if $\varphi':E\longrightarrow E''$ has the kernel, then there exists an isomorphism $\lambda : E'\longrightarrow E''$ such that $\varphi'=\lambda\circ\varphi$. Then, we have $\varphi'_*(\iota)=\lambda_*(\varphi_*(\iota))$ and $\lambda$ being an endomorphism, $(E',\varphi_*(\iota))$ is $K$-isomorphic to $(E'',\varphi'_*(\iota))$. Then, $(E',\varphi_*(\iota))$ is uniquely determined by $\mf{a}$ up to $K$-isomorphism. In the following, for a given ideal $\mf{a}$ of $\mO$ we shall refer to  $E'$, $\varphi$ and $(E',\varphi_*(\iota))$ as $E/E[\mf{a}]$, $\varphi_{\mf{a}}$ and $\mf{a}\cdot(E,\iota)$ respectively.
 
@@ -455,11 +455,11 @@ Let $(E,\iota)$ be a primitively $\mO$-oriented elliptic curve and $\mf{a}$ an i
 \end{Proposition}
 
 \begin{proof}
-\textbf{(i)} This is a difficult result beyond the scope of this thesis that becomes natural with the framework of abelian varieties. The classical reference for this fact is Waterhouse's thesis \cite[Proposition 3.12]{Waterhouse1969} but I found the proof of Milne given in his lecture notes on complex multiplication \cite[Proposition 7.28]{Milne_CM} easier to follow.
+\textbf{(i)} This is a difficult result, beyond the scope of this thesis, that becomes natural with the framework of abelian varieties. The classical reference for this fact is Waterhouse's thesis \cite[Proposition 3.12]{Waterhouse1969} but the proof of Milne given in his lecture notes on complex multiplication \cite[Proposition 7.28]{Milne_CM} may be easier to follow.
 
 \textbf{(ii)} See \cite[Theorem 3.15]{Waterhouse1969} or \cite[Proposition 7.29]{Milne_CM}.
 
-\textbf{(iii)} We may assume that $E[\mf{a}]$ is cyclic. Indeed, we suppose that this is not the case. The theorem of finite abelian group structure and the Chinese remainder theorem ensure that $E[\mf{a}]$ is isomorphic to a product of its Sylow subgroups. Since $E[\mf{a}]$ is not cyclic, it contains a non cyclic $q$-Sylow subgroup (otherwise, it would be cyclic by the Chinese remainder theorem). Hence, the $q$-torsion subgroup of $E[\mf{a}]$ is of the form $(\Z/q\Z)^b$ with $b\geq 2$, so that $E[q]\simeq(\Z/q\Z)^2\subseteq E[\mf{a}]\subseteq\ker(\iota(\alpha))$ for all $\alpha\in\mf{a}$. Since $E[q]\simeq(\Z/q\Z)^2$ here, $[q]=\iota(q)$ is separable and for all $\alpha\in\mf{a}$, we have a factorization $\iota(\alpha)=\lambda_\alpha\circ \iota(q)$ with $\lambda_\alpha=\iota(\alpha/q)\in\End(E)$ by \cite[Corollary III.4.11]{Silverman1}. Hence, $\mf{a}$ is divisible by $q$and furthermore $E[q]\subseteq \ker(\varphi_{\mf{a}})$ so $\varphi_{\mf{a}}$ factors through $[q]=\iota(q)$ which is horizontal, so we may replace it by $\mf{a}/q$. Applying this process iteratively, we make $E[\mf{a}]$ cyclic. 
+\textbf{(iii)} We may assume that $E[\mf{a}]$ is cyclic. Indeed, we suppose that this is not the case. The theorem of finite abelian group structure and the Chinese remainder theorem ensure that $E[\mf{a}]$ is isomorphic to a product of its Sylow subgroups. Since $E[\mf{a}]$ is not cyclic, it contains a non cyclic $q$-Sylow subgroup (otherwise, it would be cyclic by the Chinese remainder theorem). Hence, the $q$-torsion subgroup of $E[\mf{a}]$ is of the form $(\Z/q\Z)^b$ with $b\geq 2$, so that $E[q]\simeq(\Z/q\Z)^2\subseteq E[\mf{a}]\subseteq\ker(\iota(\alpha))$ for all $\alpha\in\mf{a}$. Since $E[q]\simeq(\Z/q\Z)^2$ here, $[q]=\iota(q)$ is separable and for all $\alpha\in\mf{a}$, we have a factorization $\iota(\alpha)=\lambda_\alpha\circ \iota(q)$ with $\lambda_\alpha=\iota(\alpha/q)\in\End(E)$ by \cite[Corollary III.4.11]{Silverman1}. Hence, $\mf{a}$ is divisible by $q$, and furthermore, $E[q]\subseteq \ker(\varphi_{\mf{a}})$ so $\varphi_{\mf{a}}$ factors through $[q]=\iota(q)$ which is horizontal, so we may replace it by $\mf{a}/q$. Applying this process iteratively makes $E[\mf{a}]$ cyclic. 
 
 Let $n:=\deg(\varphi_{\mf{a}})=N(\mf{a})$. Then $E[\mf{a}]\subseteq E[n]$. Since $\varphi_{\mf{a}}$ is separable by construction, $|E[\mf{a}]|=n$ so that $E[\mf{a}]\simeq\Z/n\Z$ and $p$ does not divide $n$ so that $E[n]\simeq (\Z/n\Z)^2$.  Hence there exists a $\Z/n\Z$-basis $(P,Q)$ of $E[n]$ such that $P$ generates $E[\mf{a}]$, according to the following lemma.
 
@@ -557,7 +557,7 @@ By the last cardinality argument, we also obtain that the reduction map $\rho$ i
 
 We fix a quadratic imaginary number field $K$, and a prime number such that $p$ does not split in $K$.  We want to study isogeny graphs of $K$-oriented supersingular elliptic curves. 
 
-%To be able to use the ideal class group action, we restrict to the good reductions of elliptic curves with complex multiplication by an order of $K$ modulo a prime ideal lying over $p$ in a field of definition of these curves.  We already defined these reduction maps when the order $\mO$ is fixed. The definition of these reductions can be made coherent when the order of $K$ varies. More precisely, we can construct a sequence $(L_f,\mf{p}_f)_{f\in\N^*}$, where for all $f\in\N^*$, $L_f$ is a number field containing $K$ and $\mf{p}_f$ a prime ideal of $\mO_{L_f}$ lying above $p$ such that all elliptic curve isomorphism classes defined over $\C$ with complex multiplication by $\mO_f:=\Z+f\mO_K$ have a representative defined over $L_f$ with good reduction modulo $\mf{p}_f$ and such that $L_f\subseteq L_{f'}$ and $\mf{p}_f\subseteq \mf{p}_{f'}$ every time $f|f'$.  We can associate to this sequence a sequence of reduction maps $(\rho_f : \Ell(\mO_f)\longrightarrow\SS_{\mO_f}^{pr}(p))_{p\nmid f}$, with the restriction of the set of indices that $p$ should not divide the conductor $f=[\mO_K:\mO_f]$ (see Proposition \ref{Proposition 2}).  Without ambiguity, we will write $\rho$ instead of $\rho_f$. 
+%To be able to use the ideal class group action, we restrict to the good reductions of elliptic curves with complex multiplication by an order of $K$ modulo a prime ideal lying over $p$ in a field of definition of these curves.  We already defined these reduction maps when the order $\mO$ is fixed. The definition of these reductions can be made coherent when the order of $K$ varies. More precisely, we can construct a sequence $(L_f,\mf{p}_f)_{f\in\N^*}$, where for all $f\in\N^*$, $L_f$ is a number field containing $K$ and $\mf{p}_f$ a prime ideal of $\mO_{L_f}$ lying above $p$ such that all elliptic curve isomorphism classes defined over $\C$ with complex multiplication by $\mO_f:=\Z+f\mO_K$ have a representative defined over $L_f$ with good reduction modulo $\mf{p}_f$ and such that $L_f\subseteq L_{f'}$ and $\mf{p}_f\subseteq \mf{p}_{f'}$ every time $f|f'$.  We can associate to this sequence a sequence of reduction maps $(\rho_f : \Ell(\mO_f)\longrightarrow\SS_{\mO_f}^{pr}(p))_{p\nmid f}$, with the restriction of the set of indices that $p$ should not divide the conductor $f=[\mO_K:\mO_f]$ (see Proposition \ref{Proposition 2}).  Without ambiguity, we shall write $\rho$ instead of $\rho_f$. 
 
 Let $\mbox{Ell}(K)$ be the union of $\mbox{Ell}(\mO)$ for every order $\mO$ of $K$ with conductor prime to $p$ and $\mbox{SS}_K(p)$ be the set of $K$-oriented supersingular elliptic curves up to $K$-oriented isomorphism.  Then, we have an injective map: 
 \[\rho:\mbox{Ell}(K)\longrightarrow \mbox{SS}_K(p)\] 
@@ -571,7 +571,7 @@ We say that two $K$-oriented isogenies $\varphi: (E,\iota_E)\longrightarrow (F,\
 Let $\ell\neq p$ be a prime number. The \emph{$K$-oriented supersingular $\ell$-isogeny graph} $G_\ell(K,p)$ is the graph whose set of vertices is $\rho(\mbox{Ell}(K))$ and whose edges are $K$-oriented $\ell$-isogenies up to $K$-equivalence.
 \end{Definition}
 
-Considering dual isogenies, we see that this graph is undirected. Note that two vertices of this graph may have the same $j$-invatiant but not the same $K$-orientation up to $K$-isomorphism, that is why they are distinct in $G_\ell(K,p)$ (see Figures \ref{figure 4} and \ref{figure 5}). Hence, $G_\ell(K,p)$ is very different from the supersingular $\ell$-isogeny graph over $\F_{p^2}$. In particular, unlike the latter whose cardinality is close to $p/12$ (by \cite[Theorem V.4.1.(c)]{Silverman1}), $G_\ell(K,p)$ is infinite (since $K$ has infinitely many orders of conductor prime to $p$). However, we have the following result:
+Considering dual isogenies, we see that this graph is undirected. Note that two vertices of this graph may have the same $j$-invatiant but not the same $K$-orientation up to $K$-isomorphism, that is why they are distinct in $G_\ell(K,p)$ (see Figures \ref{Figure 4} and \ref{Figure 5}). Hence, $G_\ell(K,p)$ is very different from the supersingular $\ell$-isogeny graph over $\F_{p^2}$. In particular, unlike the latter whose cardinality is close to $p/12$ (by \cite[Theorem V.4.1.(c)]{Silverman1}), $G_\ell(K,p)$ is infinite (since $K$ has infinitely many orders of conductor prime to $p$). However, we have the following result:
 
 \begin{Proposition}\label{Proposition 15}
 Let $G_\ell(K)$ be the graph whose vertices are elliptic curves with complex multiplication by an order of $K$ with conductor prime to $p$, defined over $\C$ up to isomorphism and whose edges are $\ell$-isogenies up to composition by isomorphisms. Then $\rho$ induces a graph isomorphism between $G_\ell(K)$ and $G_\ell(K,p)$ and $G_\ell(K,p)$ is stable by $\ell$-isogenies.
@@ -591,7 +591,7 @@ It follows from the previous result that every connected component of $G_\ell(K,
 Let $(E,\iota)\in G_\ell(K,p)$ be a supersingular primitively $\mO$-oriented elliptic curve and $\Delta_K:=\disc(K)$. Then:
 \begin{description}
 \item[(i)] If $\ell\nmid [\mO_K:\mO]$, there are $1+\(\frac{\Delta_K}{\ell}\)$ horizontal, $1/[\mO^\times:(\Z+\ell\mO)^\times]\(\ell-\(\frac{\Delta_K}{\ell}\)\)$ descending and no ascending $\ell$-isogenies with origin $(E,\iota)$ up to $K$-isomorphism.
-\item[(ii)] If $\ell|[\mO_K:\mO]$, then there are no horizontal, $\ell/[\mO^\times:(\Z+\ell\mO)^\times]$ descending and one ascending $\ell$-isogenies.
+\item[(ii)] If $\ell|[\mO_K:\mO]$, then there are no horizontal, $\ell$ descending and one ascending $\ell$-isogenies up to $K$-isomorphism.
 \end{description}
 
 Here, $\(\frac{.}{\ell}\)$ denotes the Kronecker symbol, given for $\ell\neq 2$ by:
@@ -602,9 +602,9 @@ Here, $\(\frac{.}{\ell}\)$ denotes the Kronecker symbol, given for $\ell\neq 2$ 
 \end{array}\right.\]
 and for $\ell=2$ by:
 \[\forall a\in\Z, \quad \(\frac{a}{\ell}\):=\left\{\begin{array}{cl}
-0 & \mbox{if } a\equiv 0 \mod 4 \\
-1 & \mbox{if } a\equiv 1 \mod 8\\
--1 & \mbox{otherwise.}\\
+0 & \mbox{if } a\equiv 0 \mod 2 \\
+1 & \mbox{if } a\equiv \pm 1 \mod 8\\
+-1 & \mbox{if } a\equiv \pm 3 \mod 8.\\
 \end{array}\right.\]
 \end{Proposition}
 
@@ -660,7 +660,9 @@ E' \ar[r]^{\varphi_{\mf{a}'}} & E'_0
 }.\]
 By \cite[Corollary III.4.11]{Silverman1}, it suffices to prove that $\ker(\varphi_{\mf{a}'}\circ\varphi)=\ker(\varphi_0\circ \varphi_{\mf{a}})$. We clearly have $\ker(\varphi_{\mf{a}'}\circ\varphi)\subseteq \ker(\varphi_0\circ \varphi_{\mf{a}})$ and we conclude because both $\varphi_{\mf{a}'}\circ\varphi$ and $\varphi_0\circ \varphi_{\mf{a}}$ have degree $\ell q$.  $\varphi_{\mf{a}}$ and $\varphi_{\mf{a}'}$ are horizontal so $\varphi$ is ascending, horizontal or descending if and only if $\varphi_0$ is too. Since $E_0\simeq\C/\mO$, we conclude by the case we treated above.
 
-To conclude, it remains to identify descending $\ell$-isogenies with the same domains and codomains (to explain the factor $[\mO^\times:\mO'^\times]$). Let $\varphi, \psi : E\longrightarrow E'$ be two descending $\ell$-isogenies. Then $\varphi$ and $\psi$ are represented by the complex multiplication by $\alpha$ and $\beta\in K$ respectively.  By \cite[exercise 6.10.(b)]{Silverman1},  the endomorphisms $\psi\circ\widehat{\varphi}$ and $\varphi\circ\widehat{\psi}\in\End(E')$ are represented by $\ell\beta\alpha^{-1}$ and $\ell\alpha\beta^{-1}\in\mO'=[1,\ell\tau]$ respectively.  Let us write $\ell\beta\alpha^{-1}=a+b\ell\tau$, $\ell\alpha\beta^{-1}=c+d\ell\tau$, with $a,b,c,d\in\Z$, $\tau^2-t\tau+n=0$, with $t:=\Tr_{K/\Q}(\tau)\in \Z$ and $n:=N_{K/\Q}(\tau)\in \Z$.  Then, we have:
+To conclude, it remains to identify descending $\ell$-isogenies with the same domains and codomains. This will explain the factor $[\mO^\times:\mO'^\times]$ in case $(i)$ ($\ell\nmid [\mO_K:\mO]$).In case $(ii)$ ($\ell|[\mO_K:\mO]$), this factor will not appear because we will have $\mO^\times=\mO'^\times=\{\pm 1\}$ since the only orders with non-trivial unit group are maximal in $K=\Q(i)$ or $K=\Q(\sqrt{-3})$ by \cite[Exercise 5.9]{Cox}.
+
+Let $\varphi, \psi : E\longrightarrow E'$ be two descending $\ell$-isogenies. Then $\varphi$ and $\psi$ are represented by the complex multiplication by $\alpha$ and $\beta\in K$ respectively.  By \cite[exercise 6.10.(b)]{Silverman1},  the endomorphisms $\psi\circ\widehat{\varphi}$ and $\varphi\circ\widehat{\psi}\in\End(E')$ are represented by $\ell\beta\alpha^{-1}$ and $\ell\alpha\beta^{-1}\in\mO'=[1,\ell\tau]$ respectively.  Let us write $\ell\beta\alpha^{-1}=a+b\ell\tau$, $\ell\alpha\beta^{-1}=c+d\ell\tau$, with $a,b,c,d\in\Z$, $\tau^2-t\tau+n=0$, with $t:=\Tr_{K/\Q}(\tau)\in \Z$ and $n:=N_{K/\Q}(\tau)\in \Z$.  Then, we have:
 \[\ell^2=\ell\beta\alpha^{-1}\ell\alpha\beta^{-1}=(a+b\ell\tau)(c+d\ell\tau)=ac+\ell(bc+ad)\tau+\ell^2bd\tau^2=ac+tbd\ell^2+\ell(bc+ad-\ell n bd)\tau.\]
 It follows that $\ell^2|ac$.  If $\ell\nmid c$, then $\ell^2|a$ and $bc+ad-\ell n bd=0$ so $\ell^2|b$ so $\ell^2|\ell\beta\alpha^{-1}$ \ie  $\psi\circ\widehat{\varphi}$ factors through $[\ell^2]$, which is impossible because $\deg(\psi\circ\widehat{\varphi})=\ell^2$ and $\deg([\ell^2])=\ell^4$. Hence $\ell|c$. For the same reason, $\ell|a$. Hence, $\beta\alpha^{-1}\in\mO$ and $\alpha\beta^{-1}\in\mO$ so that $\alpha\beta^{-1}\in\mO^\times$.  $\varphi$ and $\psi$ are already considered up to multiplication by an element of $\Aut(E')$. But $\Aut(E')$ corresponds to $\mO'^\times$ by complex multiplication. Hence, there are $[\mO^\times:\mO'^\times]$ descending $\ell$-isogenies $E\longrightarrow E'$.
 \end{proof}
@@ -671,7 +673,11 @@ In the course of this proof, we obtained that every horizontal $\ell$-isogeny co
 
 \subsection{Graph refolding and the forgetful map}
 
-Forgetting the $K$-orientation, one can always consider supersingular $\ell$-isogeny graphs whose set of vertices is $\SS(p)$, the set of isogeny classes of supersingular elliptic curves. We have a natural map $\mbox{Ell}(K)\longrightarrow\SS(p)$, called the \emph{forgetful map}. This map cannot be injective since $\mbox{Ell}(K)$ is infinite (since $K$ has infinitely many orders of conductor prime to $p$) and $\SS(p)$ is finite of cardinality close to $\frac{p}{12}$ (by \cite[Theorem V.4.1.(c)]{Silverman1}).  As a consequence, $K$-oriented supersingular isogeny graphs refold when we forget the orientation (see Figures \ref{Figure 4} and \ref{Figure 5}).
+Forgetting the $K$-orientation, one can always consider supersingular $\ell$-isogeny graphs whose set of vertices is $\SS(p)$, the set of isogeny classes of supersingular elliptic curves. We have a natural map $\mbox{Ell}(K)\longrightarrow\SS(p)$, called the \emph{forgetful map}. This map cannot be injective since $\mbox{Ell}(K)$ is infinite (because $K$ has infinitely many orders of conductor prime to $p$) and $\SS(p)$ is finite of cardinality close to $\frac{p}{12}$ (by \cite[Theorem V.4.1.(c)]{Silverman1}).  As a consequence, $K$-oriented supersingular isogeny graphs refold when we forget the orientation (see Figures \ref{Figure 4} and \ref{Figure 5}).
+
+However, the cryptographic constructions of OSIDH use $j$-invariants alone so the $\mO$-orientations we consider on a given elliptic curves might be ambiguous.  That is why we look for partial injectivity results of the forgetful map.  Indeed, we can always restrict the set of vertices to the finite subset:
+\[\SS_{\mO}(p)\cap\im(\rho)=\bigcup_{\mO\subseteq\mO'}\rho(\Ell(\mO'))\]
+formed of (not necessarily primitively) $\mO$-oriented supersingular elliptic curves obtained by the reduction map $\rho$.
 
 \begin{figure}[h!]
 \centering
@@ -769,11 +775,7 @@ Forgetting the $K$-orientation, one can always consider supersingular $\ell$-iso
 \caption{Supersingular $2$-isogeny graph over $\F_{79^2}$.}\label{Figure 5}
 \end{figure}
 
-However, the cryptographic constructions of OSIDH use $j$-invariants alone so the $\mO$-orientations we consider on a given elliptic curves might be ambiguous.  That is why we look for partial injectivity results of the forgetful map.  Indeed, we can always restrict the set of vertices to the finite subset:
-\[\SS_{\mO}(p)\cap\im(\rho)=\bigcup_{\mO\subseteq\mO'}\rho(\Ell(\mO'))\]
-formed of (not necessarily primitively) $\mO$-oriented supersingular elliptic curves obtained by the reduction map $\rho$.
-
-%Let $\mO_0$ be an order of $K$ and $\ell$ be a prime $\neq p$ such that neither $\ell$ nor $p$ divide the conductor of $\mO_0$.  Then, by Propositions \ref{Proposition 2} and \ref{Proposition 6}, $\rho(\Ell(\mO_0))$ is not empty so we can consider the subgraph given by the reunion of the connected components of ellements in $\rho(\Ell(\mO_0))$, that we will denote by $G_\ell(\mO_0,p)$. We have:
+%Let $\mO_0$ be an order of $K$ and $\ell$ be a prime $\neq p$ such that neither $\ell$ nor $p$ divide the conductor of $\mO_0$.  Then, by Propositions \ref{Proposition 2} and \ref{Proposition 6}, $\rho(\Ell(\mO_0))$ is not empty so we can consider the subgraph given by the reunion of the connected components of ellements in $\rho(\Ell(\mO_0))$, that we shall denote by $G_\ell(\mO_0,p)$. We have:
 %\[G_\ell(\mO_0,p)=\bigcup_{n\in\N}\rho(\Ell(\mO_n))\]
 %with $\mO_n:=\Z+\ell^n\mO_0$ for all $n\in\N$.Since the reduction map $\rho$ is injective, this graph is infinite but we can restrict to depth $n\in\N$ and consider:
 %\[G_{\ell,\leq n}(\mO_0,p):=\bigcup_{i=0}^n\rho(\Ell(\mO_i))\]
@@ -792,15 +794,17 @@ Let $E/\F_{p^2}$ be a supersingular elliptic curve admitting two distinct $K$-or
 \end{Proposition}
 
 \begin{proof}
+This proof uses quaternion arithmetic (especially in case 2). We refer to \cite{Voight} and Appendix \ref{Paragraph 24} for the prerequisites.
+
 \textbf{Case 1:} Suppose that $\iota_1(\mO_1)=\iota_2(\mO_2)$. Then, $\iota_2^{-1}\circ\iota_1$ is a field automorphism of $K$ inducing an isomorphism $\mO_1\overset{\sim}{\longrightarrow}\mO_2$. Hence $\mO_1=\mO_2$ and we either have $\iota_2(\alpha)=\iota_1(\alpha)$ or $\iota_2(\alpha)=\iota_1(\overline{\alpha})$ for all $\alpha\in K$.  Since $\iota_1$ and $\iota_2$ are distinct, the latter equation holds. Considering Galois action like in the proof of Proposition \ref{Proposition 6}, we get that $(E,\iota_2)=(E^{(p)},\iota_1^{(p)})$. In particular, $E=E^{(p)}$. Then, we have $(E,\iota_1),(E,\iota_1^{(p)})\in\rho(\Ell(\mO))$, where $\mO:=\mO_1=\mO_2$. Since the action of $\Cl(\mO)$ on $\rho(\Ell(\mO))$ is transitive by Theorem \ref{Theorem 3}, there exists an invertible ideal $\mf{a}\subseteq\mO$ of norm prime to $p$ such that $\mf{a}\cdot(E,\iota_1)=(E,\iota_1^{(p)})$.  Let $\varphi:=\varphi_{\mf{a}}$ and $\phi_p$ the $p$-th power Frobenius endomorphism. Then $\iota_2={\phi_p}_*(\iota_1)=\varphi_*(\iota_1)$. It follows that:
 \[\forall\alpha\in K, \quad \frac{1}{p}\phi_p\iota(\alpha)\widehat{\phi_p}=\frac{1}{d}\varphi\iota(\alpha)\widehat{\varphi},\]
 with $d:=\deg(\varphi)$. Multiplying by $\widehat{\varphi}$ on the left and by $\phi_p$ on the left, we get that $\widehat{\varphi}\circ\phi_p$ commutes with $\iota(K)$, so the exists $\alpha\in\mO$ such that $\widehat{\varphi}\circ\phi_p=\iota(\alpha)$ (otherwise, $\iota(K)$ and $\widehat{\varphi}\circ\phi_p$ would generate the quaternion algebra $\End^0(E)$, which would be commutative). Hence, $N(\alpha)=\deg(\widehat{\varphi}\circ\phi_p)=dp$, so $p|N(\alpha)=\alpha\overline{\alpha}$. Hence, if $p$ is inert, then $p\mO$ is prime so $\alpha\in p\mO$ or $\overline{\alpha}\in\mO$. Either way $\alpha\in p\mO$, so $p^2|N(\alpha)$ and $p|d$. But $d=N(\mf{a})$ by point (ii) of Proposition \ref{Proposition 3} and $N(\mf{a})$ is prime to $p$. Contradiction. Since $p$ does not split in $K$, $p$ ramifies so we have $\(\frac{\Delta_K}{p}\)=0$ \ie $p|\Delta_K|\Delta$ by Lemma \ref{Lemma 1}.  Hence, $|\Delta|\geq p$, so $\Delta_1\Delta_2=\Delta^2\geq p^2$.
 
-\textbf{Case 2:} Suppose that $\iota_1(\mO_1)\neq\iota_2(\mO_2)$. Then, $\iota_1(\mO_1)$ and $\iota_2(\mO_2)$ do not commute (the commutativity implies the equality, by arguments we already gave).  Let $\alpha_i$ be the image by $\iota_i$ of a generator of $\mO_i$ for all $i\in\{1,2\}$. Then, the commutator $\beta:=[\alpha_1,\alpha_2]=\alpha_1\alpha_2-\alpha_2\alpha_1$ is not zero.  By computation, we get the following expression for the norm of $\beta$:
-\[N(\beta)=\frac{\Delta_1\Delta_2-T^2}{4}\quad (\star),\]
+\textbf{Case 2:} Suppose that $\iota_1(\mO_1)\neq\iota_2(\mO_2)$. Then, $\iota_1(\mO_1)$ and $\iota_2(\mO_2)$ do not commute (the commutativity implies the equality, by arguments we already gave).  Let $\alpha_i$ be the image by $\iota_i$ of a generator of $\mO_i$ for all $i\in\{1,2\}$. Then, the commutator $\beta:=[\alpha_1,\alpha_2]=\alpha_1\alpha_2-\alpha_2\alpha_1$ is not zero.  By computation, we get the following expression for the reduced norm of $\beta$:
+\[\nrd(\beta)=\frac{\Delta_1\Delta_2-T^2}{4}\quad (\star),\]
 with $T:=2\Tr(\alpha_1\alpha_2)-\Tr(\alpha_1)\Tr(\alpha_2)$. By \cite[Theorem 42.1.19]{Voight}, $\End^0(E)=\End(E)\otimes_\Z \Q$ is a quaternion algebra that ramifies at $p$ and $\infty$ and $\End(E)$ is a maximal order in $\End^0(E)$. Since $\End^0(E)$ ramifies at $p$, $B_p:=\End^0(E)\otimes_\Q\Q_p$ is the unique division quaternion algebra over $\Q_p$, so we have an embedding $\End^0(E)\hookrightarrow B_p$ mapping $\End(E)$ to the valuation ring $O_p$ of $B_p$ formed of elements with non-negative $p$-adic valuation.  Furthermore, there is a unique maximal two sided ideal $P_p\subseteq O_p$ (see \cite[Theorem 13.3.11]{Voight}). $P_p$ is formed of elements of positive $p$-adic valuation:
-\[P_p=\{\alpha\in O_p\mid v_p(N(\alpha))>0\}=\{\alpha\in O_p\mid N(\alpha)\equiv 0 \ [p]\}.\]
-By \cite[Theorem 13.3.11.(b)]{Voight} again, the quotient $O_p/P_p$ is the finite field $\F_{p^2}$ so it is commutative. It follows that $\beta=[\alpha_1,\alpha_2]\in P_p$, so that $N(\beta)\equiv 0 \ [p]$. 
+\[P_p=\{\alpha\in O_p\mid v_p(\nrd(\alpha))>0\}=\{\alpha\in O_p\mid \nrd(\alpha)\equiv 0 \ [p]\}.\]
+By \cite[Theorem 13.3.11.(b)]{Voight} again, the quotient $O_p/P_p$ is the finite field $\F_{p^2}$ so it is commutative. It follows that $\beta=[\alpha_1,\alpha_2]\in P_p$, so that $\nrd(\beta)\equiv 0 \ [p]$. 
 
 By $(\star)$, it follows that $\sqrt{\Delta_1\Delta_2}+|T|\equiv 0 \ [2p]$ or $\sqrt{\Delta_1\Delta_2}-|T|\equiv 0 \ [2p]$ ($\sqrt{\Delta_1\Delta_2}\in\Z$ since $\mO_1,\mO_2\subseteq K$). Moreover, $\End^0(E)$ ramifies at $\infty$ so the norm is a positive definite function by \cite[Exercise 2.4]{Voight} and we have $N(\beta)>0$ since $\beta\neq 0$. It follows that $\sqrt{\Delta_1\Delta_2}>|T|$, so that $2p\leq\sqrt{\Delta_1\Delta_2}+|T|\leq 2\sqrt{\Delta_1\Delta_2}$ \ie  $\Delta_1\Delta_2\geq p^2$.
 \end{proof}
@@ -821,7 +825,7 @@ We say that it is $K$-oriented if all elliptic curves $E_i$ ($0\leq i\leq n$) an
 A $K$-oriented $\ell$-isogeny chain $(\varphi_i : E_i\longrightarrow E_{i+1})_{0\leq i\leq n-1}$ is \emph{descending}, \emph{horizontal} or \emph{ascending} if all the $\varphi_i$ are respectively descending, horizontal or ascending.
 \end{Definition}
 
-In the following, we shall only consider $K$-oriented isogeny chains, so we will omit to mention that they are $K$-oriented.
+In the following, we shall only consider $K$-oriented isogeny chains, so we shall omit to mention that they are $K$-oriented.
 
 \begin{Definition}
 An \emph{$\ell$-ladder} of length $n$ and degree $q$ is a commutative diagram of $\ell$-isogeny chains $(\varphi_i:E_i\longrightarrow E_{i+1})_{0\leq i\leq n-1}$ and $(\varphi'_i:F_i\longrightarrow F_{i+1})_{0\leq i\leq n-1}$:
@@ -905,7 +909,7 @@ Let $i\in\i{1}{n-1}$.  Let us assume that $(F_i,\iota'_i)=\mf{q}^{(i)}\cdot(E_{i
 \[(\varphi'_i\circ\psi_i)_*(\iota_i)=(\psi_{i+1}\circ\varphi_i)_*(\iota_i).\]
 Let $\phi:=\varphi'_i\circ\psi_i$ and $\psi:=\psi_{i+1}\circ\varphi_i$. Then, $\widehat{\psi}\circ\phi$ commutes with $\iota_i(K)$ (since $\psi$ and $\phi$ have the same degree) and there exists $\alpha\in\mO_i$ such that $\widehat{\psi}\circ\phi=\iota_i(\alpha)$. 
 
-We will prove that $\alpha=q\ell$, so that $\varphi'_i\circ\psi_i=\psi_{i+1}\circ\varphi_i$, whence $\ker(\psi_{i+1})=\varphi_i(\ker(\varphi'_i\circ\psi_i))=E_{i+1}[\mfq^{(i+1)}]$ and the proof will be complete.
+We shall prove that $\alpha=q\ell$, so that $\varphi'_i\circ\psi_i=\psi_{i+1}\circ\varphi_i$, whence $\ker(\psi_{i+1})=\varphi_i(\ker(\varphi'_i\circ\psi_i))=E_{i+1}[\mfq^{(i+1)}]$ and the proof will be complete.
 
 Let $\iota'_{i+1}:=\phi_*(\iota_i)=\psi_*(\iota_i)$.  Since $\varphi'_i$ has degree $\ell$ and $\psi_{i+1}$ has degree $q\neq \ell$, the argument given in the proof of Lemma \ref{Lemma 2} ensures that $\psi_{i+1}$ is horizontal, \ie that ${\iota'_{i+1}}^{-1}(\End(F_{i+1}))=\mO_{i+1}$.  $\psi_{i+1}$ being horizontal of degree $q$, Remark \ref{Remark 2} ensures that $\psi_{i+1}$ is given by an invertible ideal of norm $q$, that is to say $\mfq^{(i)}$ or $\overline{\mfq}^{(i)}$, so we either have $\ker(\psi_{i+1})=E_{i+1}[\mfq^{(i+1)}]$ or $\ker(\psi_{i+1})=E_{i+1}[\overline{\mfq}^{(i+1)}]$.  We assume that the latter holds.
 
@@ -1045,13 +1049,13 @@ The key exchange protocol is illustrated in Figure \ref{Figure 2}.
 \caption{Naive Oriented Supersingular Isogeny Diffie-Hellman key exchange protocol. Public data in black, Alice's secret data in green, Bob's secret data in blue, shared secret in red.}\label{Figure 2}
 \end{figure}
 
-Unfortunately, this protocol is insecure because the the attacker can recover the secret ideal class $[\mf{a}]$ with the knowledge of the chains $(E_i,\iota_i)_{0\leq i\leq n}$ and $\mf{a}\cdot(E_i,\iota_i)_{0\leq i\leq n}$.  This attack due to Col\'{o} and Kohel \cite[§ 5.1]{OSIDH} is presented in Section \ref{Paragraph 7}.  That is why the authors came up with a more secure way to perform the key exchange that do not involve an explicit exchange of the chains.
+Unfortunately, this protocol is insecure because the the attacker can recover the secret ideal class $[\mf{a}]$ with the knowledge of the chains $(E_i,\iota_i)_{0\leq i\leq n}$ and $\mf{a}\cdot(E_i,\iota_i)_{0\leq i\leq n}$.  We present two attacks due to Col\`{o} and Kohel \cite[§ 5.1]{OSIDH} in Sections \ref{Paragraph 7} and \ref{Paragraph 21}.  To secure OSIDH, the authors came up with a way to perform the key exchange that does not involve an explicit exchange of the chains.
 
 \section{The OSIDH protocol}\label{Paragraph 8}
 
 OSIDH is basically the Diffie-Hellmann key exchange presented in the previous section. However,  the parties do not exchange the chains $(E_{A,i},\iota_{A,i})$ and $(E_{B,i},\iota_{B,i})$ (which makes them vulnerable to an attack) while still giving enough data to recover $(E_{AB,i},\iota_{AB,i})$.  
 
-Alice still computes $(E_{A,i},\iota_{A,i}):=\mf{a}\cdot (E_i,\iota_i)$ but only transmits the end of the chain $E_{A,n}$, which is the most interesting part (since $\Cl(\mO_n)$ is the biggest class group).  Bob wants to compute $E_{AB,n}=\mf{b}\cap\mO_n\cdot E_{A,n}$ but without any further information, he cannot do this computation. Indeed, he needs at least to know the $\mO_n$-orientation of $E_{A,n}$ to determine the class group action (computing the kernels and using V\'{e}lu's formulas) and this information is contained in the whole isogeny chain $(E_{A,i},\iota_{A,i})$ (since $\iota_{A,n}$ could be obtained with the knowledge $\iota_{A,0}$ and the $\ell$-isogenies $E_{A,i}\longrightarrow E_{A,i+1}$ for all $i\in\i{0}{n-1}$). Otherwise, to compute $\mfq_j\cdot E_{A,n}=E_{A,n}/E_{A,n}[\mfq_j]$, for instance, Bob does not know how to chose between the $q+1$ possible values of $E_{A,n}[\mfq_j]$.  Actually, the action of powers of $\mfq_j$ and $\overline{\mfq}_j$ on $E_{A,n}$ for all $j\in\i{1}{t}$ is enough to determine $E_{AB,n}$.
+Alice still computes $(E_{A,i},\iota_{A,i}):=\mf{a}\cdot (E_i,\iota_i)$ but only transmits the end of the chain $E_{A,n}$, which is the most interesting part (since $\Cl(\mO_n)$ is the biggest class group).  Bob wants to compute $E_{AB,n}=\mf{b}\cap\mO_n\cdot E_{A,n}$ but without any further information, he cannot do this computation. Indeed, he needs at least to know the $\mO_n$-orientation of $E_{A,n}$ to determine the class group action (computing the kernels and using V\'{e}lu's formulas) and this information is contained in the whole isogeny chain $(E_{A,i},\iota_{A,i})$ (since $\iota_{A,n}$ could be obtained with the knowledge $\iota_{A,0}$ and the $\ell$-isogenies $E_{A,i}\longrightarrow E_{A,i+1}$ for all $i\in\i{0}{n-1}$). Otherwise, to compute $\mfq_j\cdot E_{A,n}=E_{A,n}/E_{A,n}[\mfq_j]$, Bob does not know how to chose between the $q_j+1$ possible values of $E_{A,n}[\mfq_j]$.  Actually, the action of powers of $\mfq_j$ and $\overline{\mfq}_j$ on $E_{A,n}$ for all $j\in\i{1}{t}$ is enough to determine $E_{AB,n}$.
 
 We recall that $\mf{a}$ and $\mf{b}$ can be written:
 \[\mf{a}=\prod_{j=1}^t \mf{q}_j^{e_j} \qquad \mbox{and} \qquad \mf{b}=\prod_{j=1}^t \mf{q}_j^{f_j},\]
@@ -1099,7 +1103,7 @@ starting from the chain:
 \[E_{A,n}\longrightarrow \cdots\longrightarrow [\mfq_{j+1}]^{f_{j+1}}\cdot E_{A,n}\]
 on the left side for $k=1$. The result for $k=j$ on the right side of the diagram is:
 \[\prod_{k=1}^{j} [\mfq_k]^{f_k}\cdot E_{A,n}\longrightarrow \(\prod_{k=1}^{j} [\mfq_k]^{f_k}\)[\mf{q}_{j+1}]\cdot E_{A,n}\longrightarrow \cdots\longrightarrow \prod_{k=1}^{j+1} [\mfq_k]^{f_k}\cdot E_{A,n},\]
-making it possible to repeat the procedure once again at rank $j+1$. For $j=t$, Bob finally obtain at the end of the chain:
+making it possible to repeat the procedure once again at rank $j+1$. For $j=t$, Bob finally obtains at the end of the chain:
 \[\prod_{k=1}^{t} [\mfq_k]^{f_k}\cdot E_{A,n}=[\mf{b}]\cdot E_{A,n}.\]
 In parallel, Alice performs the symmetric process with the data sent by Bob.
 
@@ -1110,7 +1114,7 @@ The real OSIDH protocol as introduced in \cite[§ 5.2]{OSIDH} is presented in Fi
 
 \begin{tikzpicture}
   % Public parameter:
-  \node[draw=none,fill=none,align=center] (public) at (0,1) {Public parameter:\\ $(E_i,\iota_i)_{0\leq i\leq n}, \ \mf{q}_1, \cdots, \mf{q}_t$};
+  \node[draw=none,fill=none,align=center] (public) at (0,1) {Public parameters:\\ $(E_i,\iota_i)_{0\leq i\leq n}, \ \mf{q}_1, \cdots, \mf{q}_t$};
   
   % Alice
   \node[draw] (Alice) at (-3.5,0) {Alice}; 
@@ -1145,23 +1149,25 @@ The real OSIDH protocol as introduced in \cite[§ 5.2]{OSIDH} is presented in Fi
 
 \chapter{Cryptanalysis of OSIDH}
 
-This chapter studies different attacks against the OSIDH cryptosystem. In the first two sections, we present two different attacks on the naive Diffie Hellman protocol of Paragraph \ref{Paragraph 15}, recovering the secret ideal classes when the chains are explicitely exchanged. These attacks are due to \cite[§ 5.1]{OSIDH} but we provide more details.  In particular, both attacks include a lattice reduction step that was not suggested in the original article. and that we use in another attack. 
+This chapter studies different attacks against the OSIDH cryptosystem. In the first two sections, we present two attacks on the naive Diffie Hellman protocol of Paragraph \ref{Paragraph 15}, recovering the secret ideal classes when the chains are explicitely exchanged. These attacks are due to \cite[§ 5.1]{OSIDH} but we provide more details.  In particular, both attacks include a lattice reduction step that was not suggested in the original article and that we use in another attack. 
 
-The three next sections study attacks on the real OSIDH key exchange. Section 3 presents an attack due to Onuki explaining how to recover a descending $\ell$-isogeny chain with the knowledge of a $K$-oriented endomorphism at each level. Section 4 presents an original attack based on this approach and coupled with a lattice reduction. Finally, Section 5 presents Kuperberg's quantum attack.
+The three next sections study attacks on the real OSIDH key exchange. Section \ref{Paragraph 22} presents an attack due to Onuki \cite[§ 6.3]{Onuki} exploiting the fact that one can recover a descending $\ell$-isogeny chain with the knowledge of a $K$-oriented endomorphism at each level. Section \ref{Paragraph 9} presents an original attack based on this approach and coupled with a lattice reduction. Finally, Section \ref{Paragraph 23} presents Kuperberg's quantum attack.
 
-We also provide implementations of the attacks of Sections 2 and 4 in \verb?SageMath? \cite{sagemath} for toy parameters. The source code can be found on my Github repository \cite{MyGithub}.
+We also provide implementations of the attacks of Sections \ref{Paragraph 23} and \ref{Paragraph 9} in \verb?SageMath? \cite{sagemath} for toy parameters. The source code can be found on Github \cite{MyGithub}.
 
 \section{A first attack using quaternions}\label{Paragraph 7}
 
-We recall here the problem we have to solve: given a chain $(E_i,\iota_i)_{0\leq i\leq n}$ and a chain $(F_i,\iota'_i)_{0\leq i\leq n}=\mf{a}\cdot(E_i,\iota_i)_{0\leq i\leq n}$ with a secret ideal class $[\mf{a}]\in\Cl(\mO_n)$, we want to recover $[\mf{a}]$, or more exactly, exponents $e_1,\cdots, e_t\in\Z$ (relatively small) such that $[\mf{a}]=\prod_{j=1}^t[\mf{q}_j]^{e_j}$, so that the action of $[\mf{a}]$ on descending $\ell$-isogeny chains of length $n$ can be easily computed. The attack follows the following steps:
+This section makes an intensive use of quaternion arithmetic. We refer to Appendix \ref{Paragraph 24} and to the lecture notes of Voight \cite{Voight} for results and vocabulary. 
+
+We recall here the problem we have to solve: given a chain $(E_i,\iota_i)_{0\leq i\leq n}$ and a chain $(F_i,\iota'_i)_{0\leq i\leq n}=\mf{a}\cdot(E_i,\iota_i)_{0\leq i\leq n}$ with a secret ideal class $[\mf{a}]\in\Cl(\mO_n)$, we want to recover $[\mf{a}]$, or more exactly, exponents $e_1,\cdots, e_t\in\Z$ (relatively small) such that $[\mf{a}]=\prod_{j=1}^t[\mf{q}_j]^{e_j}$, so that the action of $[\mf{a}]$ on descending $\ell$-isogeny chains of length $n$ can be easily computed. The attack consists in the following steps:
 \begin{enumerate}
 \item Recover $\End(E_n)$ and $\End(F_n)$ from the chains $(E_i,\iota_i)_{0\leq i\leq n}$ and $(F_i,\iota'_i)_{0\leq i\leq n}$.
 \item Compute a connecting ideal $I$ between $\End(E_n)$ and $\End(F_n)$, defining an isogeny $E_n\longrightarrow F_n$ by the Deuring correspondence.
 \item Find an equivalent ideal $J$ to $I$ that is generated by a prime ideal $\mf{N}$ of $\mO_n$ norm $N\neq\ell$.
-\item Find an ideal $\mf{a}\subseteq \mO_n$ equivalent to $\mf{N}$ and decompose its class $[\mf{a}]$ in $\Cl(\mO_n)$ as a product of the prime ideal classes $[\mf{q}_j]$.
+\item Find an ideal $\mf{a}\subseteq \mO_n$ equivalent to $\mf{N}$ and decompose its class $[\mf{a}]$ in $\Cl(\mO_n)$ as a product of powers of the prime ideal classes $[\mf{q}_j]$.
 \end{enumerate}
 
-\subsection{Step 1: computing $\End(E_n)$ and $\End(F_n)$}\label{Paragraph 6}
+\subsection{Step 1: compute $\End(E_n)$ and $\End(F_n)$}\label{Paragraph 6}
 
 If $E/\F_{p^2}$ is a supersingular elliptic curve, we know that $\End(E)$ is a maximal order in the quaternion algebra $B_{p,\infty}$ ramifying at $p$ and $\infty$ (by \cite[Theorem 42.1.9]{Voight}).  We have an explicit description of $B_{p,\infty}$ as $B_{p,\infty}=H(a,b)$ ($a,b\in\Q$), with $H(a,b)=\Q+\Q i+\Q j+\Q k$ and:
 \[i^2=a, \quad j^2=b, \quad k=ij,\quad ij=-ji.\]
@@ -1174,9 +1180,9 @@ H(-q,-p)  & \mbox{if } p\equiv 1 \ [8]\\
 \end{array}\right.\]
 with $q\equiv 3 \ [4]$ and $\(\frac{q}{p}\)=-1$. Using an isomorphism $\End^0(E):=\End(E)\otimes_\Z\Q\simeq B_{p,\infty}$, one can express a $\Z$-basis of $\End(E)$ in terms of $i$,$j$,$k$. However, given an endomorphism of $E$ expressed in the $\Z$-basis of $\End(E)$ or equivalently, in terms of $1$, $i$,$j$, $k$ it is not trivial in general to know how to evaluate it on points of $E$, but this evaluation will be necessary to find the endomorphism rings of the elleptic curves in the chains  $(E_i,\iota_i)_{0\leq i\leq n}$ and $(F_i,\iota'_i)_{0\leq i\leq n}$. 
 
-More precisely, following \cite{LP_merged}, we will need to evaluate in polynomial time in $\log(p)$ any element of the $\Z$-basis of $\End(E)$ at points of $E$ defined over a field extension of $\F_p$ of polynomial degree in $\log(p)=\Theta(n)$. If it is the case,  any linear combination of elements of such a basis with coefficients in polynomial size in $\log(p)$ can be evaluated in polynomial time in $\log(p)$.  Such a basis will be said \emph{useful}.  We may restrict the possibility to evaluate to points with \textbf{known order} prime to a certain integer $f\in\Z$,  in which case the basis will be said $f$-\emph{useful}. We also want this basis to be \emph{concise}, that is to say storable polynomial space in $\log(p)$, \eg with an expression in terms of $1$, $i$,$j$, $k$ (via the isomorphism $\End^0(E)\simeq B_{p,\infty}$) of polynomial size in $\log(p)$. 
+More precisely, following \cite{LP_merged}, we shall need to evaluate in polynomial time in $\log(p)=\Theta(n)$ any element of the $\Z$-basis of $\End(E)$ at points of $E$ defined over a field extension of $\F_p$ of polynomial degree in $\log(p)$. If it is the case,  any linear combination of elements of such a basis with coefficients in polynomial size in $\log(p)$ can be evaluated in polynomial time in $\log(p)$.  Such a basis will be said \emph{useful}.  We may restrict the possibility to evaluate to points with \textbf{known order} prime to a certain integer $f\in\Z$,  in which case the basis will be said $f$-\emph{useful}. We also want this basis to be \emph{concise}, that is to say storable in polynomial space in $\log(p)$, \eg with an expression in terms of $1$, $i$,$j$, $k$ (via the isomorphism $\End^0(E)\simeq B_{p,\infty}$) of polynomial size in $\log(p)$. 
 
-In the following of this section, for symplicity, we will mean polynomial in $\log(p)$ everytime we use the term polynomial.
+In the following of this section, for symplicity, we shall mean polynomial in $\log(p)$ everytime we use the term polynomial.
 
 \begin{Definition}\label{Definition 3}
 The data given by an isomorphism $\Phi : B_{p,\infty} \overset{\sim}{\longrightarrow}\End^0(E)$ together with a basis of $\End(E)$ that is ($f$-)useful and concise (relatively to $\Phi$) is called an ($f$-)\emph{compact representation} of $\End(E)$.
@@ -1220,9 +1226,9 @@ Assume that $E_0$ admits a compact representation.  Then, $E_i$ admits an $\ell$
 \begin{proof}
 Let $i\in\i{0}{n}$ and let $\alpha_1,\cdots,\alpha_4$, $\beta_1^{(i)},\cdots,\beta_4^{(i)}$ be respectively a concise and useful $\Z$-basis of $\End(E_0)$ and a $\Z$-basis of $\End(E_i)$. Without loss of generality, we can assume that $\alpha_1=[1]_{E_0}$ and $\beta_1^{(i)}=[1]_{E_i}$. Let $\phi_i:=\varphi_{i-1}\circ\cdots\circ\varphi_0$. Then, by Lemma \ref{Lemma 3}, $\Z+\phi_i\End(E_0)\widehat{\phi_i}$ has index $\ell^{3i}$ in $\End(E_i)$ so that:
 \[\beta_r^{(i)}=\frac{1}{\ell^{3i}}\sum_{s=1}^4 c_{r,s}\circ \phi_i\circ \alpha_s\widehat{\phi_i},\]
-with $c_{r,1},\cdots,c_{r,4}\in\Z$ for all $r\in\i{1}{4}$.  Assuming, the $c_{r,s}$ have polynomial size (in $\log(p)$), we get a compact representation of $\End(E_i)$. Indeed,  $(\beta_1^{(i)},\cdots,\beta_4^{(i)})$ is clearly concise.  
+with $c_{r,1},\cdots,c_{r,4}\in\Z$ for all $r\in\i{1}{4}$.  Assuming, the $c_{r,s}$ have polynomial size (in $\log(p)$), we get a compact representation of $\End(E_i)$. Indeed,  $(\beta_1^{(i)},\cdots,\beta_4^{(i)})$ is clearly concise so we only need to prove the $\ell$-usefulness of this basis. 
 
-We prove the $\ell$-usefulness of this basis. Let $P\in E(k)$ with $[k:\F_p]$ polynomial and order prime to $\ell$.  To evaluate $\beta_r^{(i)}(P)$, we first evaluate $[\ell^{3i}]\beta_r^{(i)}(P)=\sum_{s=1}^4 c_{r,s}\circ \phi_i\circ \alpha_s\widehat{\phi_i}(P)$.  First, since $\varphi_j$ has degree $\ell$ for all $j\in\i{0}{i-1}$, the $\varphi_j$ and $\widehat{\varphi_j}$ can be evaluated with $O(\ell)$ operations over $k$ (using V\'{e}lu's formulas \cite{Velu} for instance), so it can be performed in polynomial time.  Using efficient scalar multiplication techniques like double and add,  sliding windows, $w$-NAF or Yao's method, the scalar multiplication by the $c_{r,s}$ can be performed in time $O(\log(|c_{r,s}|)$, which is polynomial. $(\alpha_1,\cdots,\alpha_4)$ being useful, $[\ell^{3i}]\beta_r^{(i)}(P)$ can be evaluated in polynomial time. Knowing the order $m$ of $P$, we find an inverse $u$ of $\ell^{3i}$ modulo $m$ in time $O(\min(\log(m),\log(\ell^{3i})))$ using extended euclidean algorithm. But $\log(m)$ is polynomial (in $\log(p)$) by Hasse-Weil's bound and $\log(\ell^{3i})=O(\log(p))$ since $p>|\Delta_K|\ell^{2n}$ by Proposition \ref{Proposition 9}, so we may find $u$ in polynomial time and obtain $[u][\ell^{3i}]\beta_r^{(i)}(P)=\beta_r^{(i)}(P)$.  Hence, the $\ell$-usefulness follows.
+Let $P\in E(k)$ with $[k:\F_p]$ polynomial and order prime to $\ell$.  To evaluate $\beta_r^{(i)}(P)$, we first evaluate $[\ell^{3i}]\beta_r^{(i)}(P)=\sum_{s=1}^4 c_{r,s}\circ \phi_i\circ \alpha_s\widehat{\phi_i}(P)$.  First, since $\varphi_j$ has degree $\ell$ for all $j\in\i{0}{i-1}$, the $\varphi_j$ and $\widehat{\varphi_j}$ can be evaluated with $O(\ell)$ operations over $k$ (using V\'{e}lu's formulas \cite{Velu} for instance), so it can be performed in polynomial time.  Using efficient scalar multiplication techniques like double and add,  sliding windows, $w$-NAF or Yao's method, the scalar multiplication by the $c_{r,s}$ can be performed in time $O(\log(|c_{r,s}|)$, which is polynomial. $(\alpha_1,\cdots,\alpha_4)$ being useful, $[\ell^{3i}]\beta_r^{(i)}(P)$ can be evaluated in polynomial time. Knowing the order $m$ of $P$ which is prime to $\ell$, we find an inverse $u$ of $\ell^{3i}$ modulo $m$ in time $O(\min(\log(m),\log(\ell^{3i})))$ using extended euclidean algorithm. But $\log(m)$ is polynomial (in $\log(p)$) by Hasse-Weil's bound and $\log(\ell^{3i})=O(\log(p))$ since $p>|\Delta_K|\ell^{2n}$ by Proposition \ref{Proposition 9}, so we may find $u$ in polynomial time and obtain $[u][\ell^{3i}]\beta_r^{(i)}(P)=\beta_r^{(i)}(P)$.  Hence, the $\ell$-usefulness follows.
 
 The fact that $c_{r,s}$ can be chosen in polynomial size remains to be proved. It will follow naturally from the algorithm computing $\End(E_{i+1})$ from $\End(E_i)$. Let $\m{R}:=\End(E_{i+1})$ and $\m{R}':=\Z+\varphi_i\End(E_i)\widehat{\varphi_i}$.  Let $\gamma_r^{(i)}:=\varphi_i\circ\beta_r^{(i)}\circ\widehat{\varphi_i}$ for all $r\in\i{1}{4}$. Then, $(\gamma_1^{(i)},\cdots, \gamma_4^{(i)})$ is a $\Z$-basis of $\m{R}'$ and $[\m{R}:\m{R}']=\ell^3$ so if we fix a $\Z$-basis $(\beta_1^{(i+1)},\cdots, \beta_4^{(i+1)})$ of $\m{R}$, there is a matrix $M\in M_4(\Z)$ of determinant $\ell^3$ such that:
 \[\,^t (\gamma_1^{(i)},\cdots, \gamma_4^{(i)})=M \,^t(\beta_1^{(i+1)},\cdots, \beta_4^{(i+1)})\]
@@ -1265,19 +1271,30 @@ Return $E$\;
 
 \subsection{Step 2: find a connecting ideal between $\End(E_n)$ and $\End(F_n)$}
 
-Knowing $\ell$-concise representations $\m{R}$ and $\m{R}'$ (as maximal order of $B_{p,\infty}$) of $\End(E_n)$ and $\End(F_n)$ respectively, we obtain an $\ell$-concise representation of their product $I:=\m{R}\m{R}'$ which is a connecting left-$\m{R}$-ideal.  We compute a $\Z$-basis of $I$ in polynomial time in $\log(p)$ by Gauss reduction. To make $I$ integral, we may multiply this basis by an integer of size $O(\log(p))$, so that the basis remains $\ell$-concise.
+Knowing $\ell$-concise representations $\m{R}$ and $\m{R}'$ (as maximal order of $B_{p,\infty}$) of $\End(E_n)$ and $\End(F_n)$ respectively, we obtain an $\ell$-concise representation of their product $I:=\m{R}\m{R}'$ which is a connecting left-$\m{R}$-ideal, meaning that:
+\[O_L(I):=\{\alpha\in B_{p,\infty}\mid \alpha\cdot I \subseteq I\}=\m{R} \quad \mbox{and} \quad O_R(I)=\{\alpha\in B_{p,\infty}\mid I\cdot\alpha \subseteq I\}=\m{R}'.\]
+To make $I$ integral (\ie such that $I\subseteq \m{R}$) we may multiply this basis by an integer of size $O(\log(p))$, so that the basis remains $\ell$-concise. We compute a $\Z$-basis of $I$ in polynomial time in $\log(p)$ by computing the hermite normal form of the matrix of a generating set of $I$ in a basis of $\m{R}$. 
 
 \subsection{Step 3: find an equivalent ideal $J$ to $I$ that is generated by a prime ideal $\mf{N}$ of $\mO_n$}
 
+This paragraph is a bit technical and makes intensive use of the quaternion arithmetic ideas of KLPT (see Appendix \ref{Paragraph 3}). The reader could either skip it or read Appendix \ref{Paragraph 3} before.
+
 As in step a of KLPT (Algorithm \ref{Algorithm 2}), we can find $\delta\in I$ of norm $N\nrd(I)$ with $N\neq p$ prime and $N=O(\sqrt{p}\log^2(p))$ (in general), in time $O(\log(p))$. By Lemma \ref{Lemma 5}, $J:=I\overline{\delta}/\nrd(I)\sim I$ is integral and $\nrd(J)=N$.
 
-We now prove that $J$ is generated by a prime ideal of $\mO_n$ lying above $N$. We may assume that $\m{R}\simeq\End(E_n)$ is special as defined in \ref{Definition 2} with $R=\mO_n$. Indeed,  we usually take for $E_0$ the elliptic curve of equation $y^2=x^3+x$ with $p\equiv 3 \ [4]$, $K=\Q(i)$ with $i^2=-1$ and $\mO_K=\Z[i]\subseteq \End(E_0)\simeq \langle 1,j, \frac{i+j}{2},\frac{1+k}{2}\rangle$ (see Example \ref{Example 3}). Since $\mO_K\subseteq (j\mO_K)^\bot$, $\End(E_0)$ is special for $R=\mO_K$. The inclusion $\Z+\ell^n\End(E_0)\hookrightarrow \End(E_n)\simeq \m{R}$ ensures that $\m{R}$ is special with $R=\Z+\ell^n\mO_K=\mO_n$.
+We now prove that $J$ is generated by a prime ideal of $\mO_n$ lying above $N$. We may assume that $\m{R}\simeq\End(E_n)$ is special with respect to $R=\mO_n$, in the sense of the following definition:
+
+\begin{Definition}
+We say that a maximal order $\m{R}\subseteq B_{p,\infty}$ is \emph{special} if $j\in \m{R}$ (with $j^2=-p$) and there exists a subring of rank $2$, $R\subset\m{R}$, such that $R^\bot\subseteq Rj$, where $R^\bot$ is the orthogonal of $R$ for the scalar product given by:
+\[(\alpha,\beta)\in B_{p,\infty}^2\longmapsto (\alpha|\beta):=\nrd(\alpha+\beta)-\nrd(\alpha)-\nrd(\beta)=\Tr(\alpha\overline{\beta}).\]
+\end{Definition}
+
+Indeed,  we usually take for $E_0$ the elliptic curve of equation $y^2=x^3+x$ with $p\equiv 3 \ [4]$, $K=\Q(i)$ with $i^2=-1$ and $\mO_K=\Z[i]\subseteq \End(E_0)\simeq \langle 1,j, \frac{i+j}{2},\frac{1+k}{2}\rangle$ (see Example \ref{Example 3}). Since $\mO_K\subseteq (j\mO_K)^\bot$, $\End(E_0)$ is special for $R=\mO_K$. The inclusion $\Z+\ell^n\End(E_0)\hookrightarrow \End(E_n)\simeq \m{R}$ ensures that $\m{R}$ is special with $R=\Z+\ell^n\mO_K=\mO_n$.
 
 Let $\m{S}$ be the suborder $\mO_n\oplus j\mO_n$ in $\m{R}$. Then, $J\cap\m{S}=J\cap\mO_n\oplus(J\cap j\mO_n)$ is a left $\m{S}$-ideal and we have a natural injective ring homomorphism $\m{S}/J\cap\m{S}\hookrightarrow \m{R}/J$. It follows that $[\m{S}:J\cap\m{S}]|[\m{R}:J]=N^2$. Besides, by orthogonality of $\mO_n$ and $j\mO_n$, we have a group homomorphism: 
 \[\m{S}/J\cap\m{S}\simeq \mO_n/J\cap\mO_n\times j\mO_n/J\cap j\mO_n,\]
 so that $[\m{S}:J\cap\m{S}]=[\mO_n:J\cap\mO_n][j\mO_n:J\cap j\mO_n]$. We obviously have, $[\mO_n:J\cap\mO_n]>1$, otherwise, $1\in J$ so $J=\m{R}$ and $\nrd(J)=1\neq N$, so $[\mO_n:J\cap\mO_n]=N$ or $N^2$. In the latter case, $[j\mO_n:J\cap j\mO_n]=1$ so $j\in J$. But $\nrd(j)=p$ and $N\nmid p$. Contradiction.  So $[\mO_n:J\cap\mO_n]=N$ and $J\cap\mO_n$ is a prime ideal of norm $N$ in $\mO_n$.
 
-Hence, according to the following lemma, we can find an element $\alpha\in J\cap \mO_n$ such that $\gcd(\nrd(\alpha),N^2)=N$ in polynomial time in $\log(p)$.  It follows that $J=\m{R}N+\m{R}\alpha=\m{R}\cdot J\cap\mO_n$ as in step b of KLPT (Algorithm~\ref{Algorithm 2}).
+Hence, according to the following lemma, we can find an element $\alpha\in J\cap \mO_n$ such that $\gcd(\nrd(\alpha),N^2)=N$ in polynomial time in $\log(p)$.  It follows that $J=\m{R}N+\m{R}\alpha=\m{R}\cdot J\cap\mO_n$ as in step b of KLPT.
 
 \begin{Lemma}
 Let $\mf{N}$ be an ideal of $\mO_n$ of prime norm $N$. Then, there exists $\alpha\in \mf{N}$ such that $\gcd(N(\alpha),N^2)=N$ and $\mf{N}=\langle N,\alpha\rangle$. One can find $\alpha$ in time $O(\log^4(N))$.
@@ -1290,7 +1307,7 @@ Since $\ell\nmid N$, if $N(\alpha)\equiv 0 \ [N^2]$, then $\Pi_\theta(\lambda)\e
 \[N(\alpha+N)=\ell^{2n}((\lambda+N)^2-t(\lambda+N)+s)=\ell^{2n}(\Pi_\theta(\lambda)+N\Pi'_\theta(\lambda)+N^2)\equiv \ell^{2n}N\Pi'_\theta(\lambda) \ [N^2],\]
 but $\Pi'_\theta(\lambda)\neq 0 \ [N]$, since $N$ does not divide $\Delta_K$ (recall that $N=\Omega(\sqrt{p})$ is big and that $\Delta_K$ is small). Hence, $\gcd(N(\alpha+N),N^2)=N$.  
 
-To find $\alpha$, the dominant operation is finding the roots of $\Pi_\theta$ modulo $N$.  This can be done with Tonelli-Shanks \cite[Algorithm 1.5.1]{Cohen1} algorithm, computing a square root of $\Delta_K$, in time $O(\log^4(N))$.
+To find $\alpha$, the dominant operation is finding the roots of $\Pi_\theta$ modulo $N$.  This can be done with Tonelli-Shanks \cite[Algorithm 1.5.1]{Cohen1} algorithm, computing a square root of $\Delta_K$ modulo $N$, in time $O(\log^4(N))$.
 \end{proof}
 
 \subsection{Step 4: express $[\mf{N}]$ as a product of the $[\mf{q}_j]$ with small exponents}\label{Paragraph 11}
@@ -1330,7 +1347,7 @@ We want to make the vector $e:=(e_1, \cdots, e_t)$ as short as possible, which c
 Knowing a basis of $\Cl(\mO_n)$ and an algorithm to efficiently compute discrete logarithms, a $\Z$-basis of this lattice could be computed in polynomial time in $t$ and $n$ (actually, in time $O(t^3+tn^2)$) using Algorithm \ref{Algorithm 11}.
 
 An approximation of the closest vector $c$ is sufficient, because the search for such a vector may be very costly. There is a tradeoff between the norm of the vector $e':=e-c$ and the the cost of this approximation. Computing the action of $[\mf{N}]=\prod_{j=1}^t[\mf{q}_j]^{e'_j}$ has time complexity:
-\[\theta\(n\sum_{j=1}P(q_j,n)|e'_j|\),\]
+\[\Theta\(n\sum_{j=1}P(q_j,n)|e'_j|\),\]
 where $P$ is a polynomial. Since:
 \[\|e'\|_2\leq \sum_{j=1}P(q_j,n)|e'_j|\leq \|e'\|_2\sqrt{\sum_{j=1}^tP(q_j,n)^2},\]
 the time complexity of the action of $[\mf{N}]$ is $\|e'\|_2$, up to a polynomial factor in $n$, $t$ and the $q_j$. Hence, we can optimize $e'$ in $\ell_2$ norm. There is a trade-off between the tightness of our approximation to optimize the performance of  the action of $[\mf{N}]$ and the time complexity of finding a close vector.
@@ -1350,13 +1367,13 @@ The best known algorithm for CVP (with preprocessing) is due to \cite{Ducas2020}
 \begin{Corollary}\label{Corollary 1}
 Applying the algorithm of Theorem \ref{Theorem 7}, one can recover an ideal $\mf{a}\subseteq \mO_n$ which is a product of the $\mf{q}_j$ with small exponents such that $(F_i)_{0\leq i\leq n}=\mf{a}\cdot (E_i)_{0\leq i\leq n}$ in time: 
 \[2^{c_2k+o(k)}P(k,n,t,\max_{1\leq j\leq t}q_j),\]
-where $P$ is a polynomial.  One can compute the action of $[\mf{a}]$ on any chain in time: 
+where $P$ is a polynomial and $k\in\i{1}{\lceil t/2\rceil-1}$, a parameter to be chosen.  For this value of $k$, one can compute the action of $[\mf{a}]$ on any chain in time: 
 \[GH(k)^{\frac{t}{2k}}\ell^{\frac{n}{t}}Q(n,t,\max_{1\leq j\leq t}q_j),\] 
 where $Q$ is a polynomial.
 \end{Corollary} 
 
 \begin{proof}
-The corollary is a restatement of what has been said before. We simply apply the algorithm of Theorem \ref{Theorem 7} to $\Lambda=L$ and get the desired complexity, since $\Covol(L)=h(\mO_n)$.  Indeed, since the $[\mf{q}_j]$ generate $\Cl(\mO_n)$, we have an exact sequence:
+The corollary is a restatement of what we have seen before. We simply apply the algorithm of Theorem \ref{Theorem 7} to $\Lambda=L$ and get the desired complexity, since $\Covol(L)=h(\mO_n)$.  Indeed, since the $[\mf{q}_j]$ generate $\Cl(\mO_n)$, we have an exact sequence:
 \[\{0\}\longrightarrow L\hookrightarrow \Z^t\overset{\varphi}{\longrightarrow} \Cl(\mO_n)\longrightarrow\{0\},\]
 where $ L\hookrightarrow \Z^t$ is the natural inclusion and $\varphi : (e_1,\cdots,e_t)\in\Z^t\longmapsto \prod_{j=1}^t[\mf{q}_j]^{e_j}\in \Cl(\mO_n)$. It follows that:
 \[\Covol(L)=|\Z^t/L|=h(\mO_n).\]
@@ -1364,7 +1381,7 @@ where $ L\hookrightarrow \Z^t$ is the natural inclusion and $\varphi : (e_1,\cdo
 
 This attack is still subexponential, but much more damaging to the cryptosystem. To ensure a security level of $\lambda=128$ bits, we need $t\geq 16064$, which is utterly unrealistic. 
 
-For smaller parameters, like those Col\'{o} and Kohel proposed in \cite[Section 6]{OSIDH} ($t=74$ for $n=256$, $\ell=2$ and $r=5$), the closest vector approximation can be computed with polynomial algorithms such as Babai's nearest plane algorithm \cite{Babai} running in $O(t^6)$ because the outputted exponents will have reasonable size. 
+For smaller and more realistic parameters, like those Col\`{o} and Kohel proposed in \cite[Section 6]{OSIDH} ($t=74$ for $n=256$, $\ell=2$ and $r=5$), the closest vector approximation can be computed with polynomial algorithms such as Babai's nearest plane algorithm \cite{Babai} running in $O(t^6)$ because the outputted exponents will have reasonable size. 
 
 \section{A second attack using the class group action only}\label{Paragraph 21}
 
@@ -1382,7 +1399,7 @@ whose cardinality is $\ell$ for $i\geq 1$ and $\frac{1}{[\mO_K^\times:\mO_1^\tim
 
 However, we have to make sure that all the values of $\mf{b}$ to be tested can be easily expressed in terms of the $\mf{q}_j$ and that the exponents $e_{i+1,j}$ of $\mf{a}_i\cdot \mf{b}$ are short enough to make the computation of $[\mf{a}_i\cdot \mf{b}\cap\mO_{i+1}]\cdot E_{i+1}$ practical.  
 
-\subsubsection{Expressing $\ker(\Cl(\mO_{i+1})\relbar\joinrel\twoheadrightarrow\Cl(\mO_{i}))$ in terms of the $\mfq_j$}
+\subsection{Expressing $\ker(\Cl(\mO_{i+1})\relbar\joinrel\twoheadrightarrow\Cl(\mO_{i}))$ in terms of the $\mfq_j$}
 
 By Lemma \ref{Lemma 20}, we know that $\Cl(\mO_n)$ is either cyclic or of the form $\Cl(\mO_n)\simeq(\Z/\ell\Z)\times(\Z/h_{n-1}\Z)$ with $h_{n-1}:=|\mbox{Cl}(\mO_{n-1})|$.
 
@@ -1390,13 +1407,13 @@ We describe how to proceed when $\Cl(\mO_n)$ is cyclic. If we assume that the $\
 \[\ker(\Cl(\mO_{i+1})\relbar\joinrel\twoheadrightarrow\Cl(\mO_{i}))=\langle [\mf{g}\cap\mO_{i+1}]^{h_i}\rangle,\]
 with $h_i:=|\Cl(\mO_i)|$. 
 
-Now, if $\Cl(\mO_n)\simeq(\Z/\ell\Z)\times(\Z/h_{n-1}\Z)$.  In that case, as previously, we obtain easily an ideal $\mf{g}$ expressed as one of the $\mf{q}_j$ or as a product of some $\mf{q}_j$ such that $[\mf{g}\cap\mO_n]$ has order $h_{n-1}$. We also obtain that $[\mf{g}\cap\mO_i]$ has order $h_{i-1}$ for all $i\in\i{2}{n}$ (for instance by Lemma \ref{Lemma 18}.(iv)).  As previously, it follows that:
+Now, we assume that $\Cl(\mO_n)\simeq(\Z/\ell\Z)\times(\Z/h_{n-1}\Z)$.  In that case, as previously, we obtain easily an ideal $\mf{g}$ expressed as one of the $\mf{q}_j$ or as a product of some $\mf{q}_j$ such that $[\mf{g}\cap\mO_n]$ has order $h_{n-1}$. We also obtain that $[\mf{g}\cap\mO_i]$ has order $h_{i-1}$ for all $i\in\i{2}{n}$ (for instance by Lemma \ref{Lemma 18}.(iv)).  As previously, it follows that:
 \[\ker(\Cl(\mO_{i+1})\relbar\joinrel\twoheadrightarrow\Cl(\mO_{i}))=\langle [\mf{g}\cap\mO_{i+1}]^{h_{i-1}}\rangle\]
 for all $i\in\i{2}{n-1}$. For $i=0,1$, the kernel can be very easily computed because the class groups are small. 
 
 Either way, we can easily express every ideal $\mf{b}$ such that $\mf{b}\cap\mO_{i+1}$ lies in the above kernel in terms of the $\mf{q}_j$.
 
-\subsubsection{Reducing the exponents of $\mf{a}_i\cdot \mf{b}$}
+\subsection{Reducing the exponents of $\mf{a}_i\cdot \mf{b}$}
 
 Once $\mf{b}$ is expressed in terms of the $\mf{q}_j$, \ie when the $d_j$ are known, we still have to make sure that the exponents $e_{i+1,j}=e_{i,j}+d_j$ of $\mf{a}_i\cdot \mf{b}$ are small.  Actually, $e_{i+1}:=(e_{i+1,j})_{1\leq j\leq t}$ is determined up to translation by an element of the lattice:
 \[L_{i+1}:=\left\{(e_1,\cdots,e_{t})\in\Z^{t} \middle| \  \prod_{j=1}^t[\mf{q}_j]^{e_j}=[1] \quad \mbox{in} \ \Cl(\mO_{i+1}) \right\}.\]
@@ -1410,7 +1427,7 @@ One can recover the secret ideal class $\mf{a}$ in time:
 where $T_{CL}$ is the time complexity of the computation of the class group action on a given elliptic curve by the method of Paragraph \ref{Paragraph 1} when exponents are outputted by Babai's nearest plane algorithm and where the $O$ constant depends only on $\ell$.
 \end{Theorem}
 
-\subsubsection{Implementation of this attack}\label{Paragraph 18}
+\subsection{Implementation}\label{Paragraph 18}
 
 We implemented the attack described above with \verb?SageMath? \cite{sagemath}.  The source code can be found in \cite{MyGithub}, more specifically in the files \verb?OSIDH_protocol.py? and \verb?OSIDH_attack.py?.
 
@@ -1421,11 +1438,11 @@ covers the whole class group $\Cl(\mO_n)$.
 
 Given two chains $(E_i,\iota_i)_{0\leq i\leq n}$ and $(F_i,\iota'_i)_{0\leq i\leq n}=\mf{a}\cdot(E_i,\iota_i)_{0\leq i\leq n}$ with a secret ideal class $[\mf{a}]\in\Cl(\mO_n)$, our attack found $[\mf{a}]$ in 90 s.\footnote{The running times provided here were extracted from a single test so they are subject to some statistical variation. However, all other tests performed were consistent with these results.  Obviously, the reproducibility of these results depend on the machine used to run the tests.  Here, we used a MacBook Pro Retina 2015 with a 2.5 GHz quad-core processor and 16 GB RAM.} The drawback of our performance is not the attack itself but rather the class group action on the chains. Indeed, computing with modular polynomials is very costly.  For that reason, the protocol runs very slowly: with our parameters, the naive Diffie Hellman key exchange runs in 37 s and the strong version of OSIDH runs in 83 s, which is almost the running time of the attack. 
 
-Testing the attack with realistic parameters like those Col\'{o} and Kohel proposed ($t=74$ for $n=256$, $\ell=2$ and $r=5$) would require us to manage modular polynomials much more efficiently of to find an alternative method to compute the class group action.
+Testing the attack with realistic parameters like those Col\`{o} and Kohel proposed ($t=74$ for $n=256$, $\ell=2$ and $r=5$) would require us to manage modular polynomials much more efficiently of to find an alternative method to compute the class group action.
 
-\section{Onuki's attack}
+\section{Onuki's attack}\label{Paragraph 22}
 
-As we saw in Paragraph \ref{Paragraph 7}, the knowledge of the chains $(E_i,\iota_i)_{0\leq i\leq n}$ and $(E_{A,i},\iota_{A,i})_{0\leq i\leq n}=\mf{a}\cdot (E_i,\iota_i)_{0\leq i\leq n}$, gives away enough information to the attacker to recover the secret ideal class $[\mf{a}]\in\Cl(\mO_n)$ in polynomial time on a quantum computer, and in subexponential time on a classical computer.  We present an attack due to Onuki \cite[§ 6.3]{Onuki} recovering the chain of $\ell$-isogenies $(\varphi_i : E_i\longrightarrow E_{i+1})_{0\leq i\leq n-1}$  given $E_0$ and $E_n$ together with the chains:
+As we saw in Paragraph \ref{Paragraph 7}, the knowledge of the chains $(E_i,\iota_i)_{0\leq i\leq n}$ and $(E_{A,i},\iota_{A,i})_{0\leq i\leq n}=\mf{a}\cdot (E_i,\iota_i)_{0\leq i\leq n}$, gives away enough information to recover the secret ideal class $[\mf{a}]\in\Cl(\mO_n)$.  We present an attack due to Onuki \cite[§ 6.3]{Onuki} recovering the chain of $\ell$-isogenies $(\varphi_i : E_i\longrightarrow E_{i+1})_{0\leq i\leq n-1}$  given $E_0$ and $E_n$ together with the chains:
 \[\mf{q}_j^{-r}\cdot E_n\longrightarrow \cdots \longrightarrow E_n\longrightarrow \cdots\longrightarrow \mf{q}_j^{r}\cdot E_n\]
 for all $j\in\i{1}{n}$. There is a variant of this attack based on the shortest vector problem (SVP) in a lattice of dimension $t$ (see Paragraph \ref{Paragraph 9}).
 
@@ -1438,17 +1455,23 @@ $G=\ker(\widehat{\varphi}_{n-1})$.
 \begin{proof}
 We have:
 \[\iota_n(\beta)=\iota_n(b\ell^n\theta)=[\ell]\iota_n(b\ell^{n-1}\theta)=\varphi_{n-1}\iota_{n-1}(b\ell^{n-1}\theta)\widehat{\varphi}_{n-1}\]
-and $b\ell^{n-1}\theta\in\mO_{n-1}$, so that $\iota_{n-1}(b\ell^{n-1}\theta)\in\End(E_{n-1})$, and consequently, $\ker(\widehat{\varphi}_{n-1})\subseteq\ker(\iota_n(\beta))$. Since $\deg(\varphi_{n-1})=\ell$, we have also $\ker(\widehat{\varphi}_{n-1})\subseteq E_{n}[\ell]$ so that $\ker(\widehat{\varphi}_{n-1})\subseteq G$.  So $G$ is either cyclic of order $\ell$ and equal to $\ker(\widehat{\varphi}_{n-1})$ or of order $\ell^2$ and equal to the entire $\ell$-torsion subgroup $E_n[\ell]$. If the latter holds, $\iota_n(\beta)$ factors through $[\ell]$ by \cite[Corollary III.4.11]{Silverman1} and $\beta/\ell=b\ell^{n-1}\theta\in\mO_n$, so $\ell|b$. Contradiction. Hence, $G=\ker(\widehat{\varphi}_{n-1})$.
+and $b\ell^{n-1}\theta\in\mO_{n-1}$, so that $\iota_{n-1}(b\ell^{n-1}\theta)\in\End(E_{n-1})$, and consequently, $\ker(\widehat{\varphi}_{n-1})\subseteq\ker(\iota_n(\beta))$. Since $\deg(\varphi_{n-1})=\ell$, we have also $\ker(\widehat{\varphi}_{n-1})\subseteq E_{n}[\ell]$ so that $\ker(\widehat{\varphi}_{n-1})\subseteq G$.  So $G$ is either cyclic of order $\ell$ and equal to $\ker(\widehat{\varphi}_{n-1})$ or of order $\ell^2$ and equal to the whole $\ell$-torsion subgroup $E_n[\ell]$. If the latter holds, $\iota_n(\beta)$ factors through $[\ell]$ by \cite[Corollary III.4.11]{Silverman1} and $\beta/\ell=b\ell^{n-1}\theta\in\mO_n$, so $\ell|b$. Contradiction. Hence, $G=\ker(\widehat{\varphi}_{n-1})$.
 \end{proof}
 
 Hence, we can compute $\widehat{\varphi}_{n-1}$ using V\'{e}lu's formulas in $O(\ell)$ operations over the field of definition of $E_n[\ell]$. With this information, we can recover $\varphi_{n-1}$ easily, by evaluating $\widehat{\varphi}_{n-1}$ on $E_{n-1}[\ell]$, since $\ker(\varphi_{n-1})=\widehat{\varphi}_{n-1}(E_{n-1}[\ell])$, and using V\'{e}lu's formulas again.
 
+With the knowledge of $\widehat{\varphi}_{n-1}:E_n\longrightarrow E_{n-1}$, along with the horizontal chain:
+\[[\mf{q}_j]^{-r}\cdot E_n\longrightarrow \cdots \longrightarrow E_n\longrightarrow \cdots\longrightarrow [\mf{q}_j]^{r}\cdot E_n\]
+for all $j\in\i{1}{t}$ we can compute the chain:
+\[[\mf{q}_j]^{-r}\cdot E_{n-1}\longrightarrow \cdots \longrightarrow E_{n-1}\longrightarrow \cdots\longrightarrow [\mf{q}_j]^{r}\cdot E_{n-1}\]
+for all $j\in\i{1}{t}$, by the methods of Paragraph \ref{Paragraph 1}. 
+
 We conclude that the attacker can compute the chain of isogenies $(\varphi_i : E_i\longrightarrow E_{i+1})_{0\leq i\leq n-1}$, if at each index $i\in\i{1}{n}$,  if they have access to an oracle providing $\iota_i(\beta_i)$ for $\beta_i\in\mO_i\setminus\mO_{i+1}$, when $E_{i}$ is given. Now, we present such an oracle (for $E_n$), due to Onuki. An alternate oracle relying on SVP will be presented in Paragraph \ref{Paragraph 9}.
 
-First, we look for $\beta\in\mO_n\setminus\mO_{n+1}$ such that $\beta\mO_n=\mf{a}\cdot \mf{b}$, with a big factor $\mf{a}:=\prod_{j=1}^t\mf{q}_j^{e_j}$, with $e_1, \cdots, e_t\in\i{-r}{r}$ and $\mf{b}\subseteq\mO_n$, any ideal. In practice, we test different values of $\beta:=a+b\theta$ with $a$ is sampled uniformly in $\i{-m}{m}$ and $b$ is sampled uniformly in $\i{-m}{m}\setminus\ell\Z$, for $m$ big enough. We stop when $N(\beta)$ has a big enough divisor $Q:=\prod_{j=1}^t q_j^{e_j}$ with $e_1, \cdots, e_t\in\i{-r}{r}$, let's say $Q\geq x$, where the threshold $x$ is to be chosen. Then, we compute the ideal $\mf{a}$ using Algorithm \ref{Algorithm 7} to compute the valuations of the $\mf{q}_j$.  
+First, we look for $\beta\in\mO_n\setminus\mO_{n+1}$ such that $\beta\mO_n=\mf{a}\cdot \mf{b}$, with a big factor $\mf{a}:=\prod_{j=1}^t\mf{q}_j^{e_j}$ whose exponents $e_1, \cdots, e_t$ lye in $\i{-r}{r}$ and $\mf{b}\subseteq\mO_n$, any ideal. In practice, we test different values of $\beta:=a+b\theta$ with $a$ and $b$ sampled uniformly at random in $\i{-m}{m}$ and $\i{-m}{m}\setminus\ell\Z$ respectively, for $m$ big enough. We stop when $N(\beta)$ has a big enough divisor $Q:=\prod_{j=1}^t q_j^{e_j}$ with $e_1, \cdots, e_t\in\i{-r}{r}$, let's say $Q\geq x$, where the threshold $x$ is to be chosen. Then, we compute the $\mf{q}_j$-adic valuation of $\beta$ for all $j\in\i{1}{t}$ (using \cite[Algorithm 2.3.13]{Cohen2} for instance) to express the ideal $\mf{a}$.  
 
 With the knowledge of the chain: 
-\[E_{n,j}^{(-r)}:=[\mf{q}_j^{-r}]\cdot E_n\longrightarrow \cdots \longrightarrow E_{n}\longrightarrow \cdots\longrightarrow E_{n,j}^{(r)}:=[\mf{q}_j^{-r}]\cdot E_n\]
+\[[\mf{q}_j]^{-r}\cdot E_n\longrightarrow \cdots \longrightarrow E_{n}\longrightarrow \cdots\longrightarrow [\mf{q}_j]^{r}\cdot E_n\]
 for all $j\in\i{1}{r}$, using the techniques of Paragraph \ref{Paragraph 8}, it is easy to compute the isogeny $\varphi_{\mf{a}}:E_n\longrightarrow [\mf{a}]\cdot E_n$ of kernel $E_n[\mf{a}]$. 
 
 It remains to compute the isogeny $\varphi_{\mf{b}}:[\mf{a}]\cdot E_n\longrightarrow [\mf{a}\cdot\mf{b}]\cdot E_n=E_n$ of kernel $[\mf{a}]\cdot E_n[\mf{b}]$.  We know that $\deg(\varphi_{\mf{b}})=N(\mf{b})=N(\beta)/N(\mf{a})$, so we can compute $\deg(\varphi_{\mf{b}})$ and factor it into primes:
@@ -1459,7 +1482,7 @@ and use a meet-in-the-middle technique to recover $\varphi_{\mf{b}}$ as follows.
 \[\Omega\(\prod_{k=1}^s(\ell_k+1)^{g_k}+\prod_{k=1}^s(\ell_k+1)^{h_k}\)=\Omega(\sqrt{\deg(\varphi_{\mf{b}})})=\Omega\(\sqrt{\frac{N(\beta)}{\prod_{j=1}^t q_j^{e_j}}}\).\]
 
 \begin{Remark}
-Note that we have no theoretical guarantee that we shall actually find the isogeny $\varphi_{\mf{b}}:[\mf{a}]\cdot E_n\longrightarrow E_n$. Make sure of it would require knowledge of the $K$-orientation of the domain or codomain, which are hidden.
+Note that we have no theoretical guarantee that we actually find the isogeny $\varphi_{\mf{b}}:[\mf{a}]\cdot E_n\longrightarrow E_n$ with this method. Make sure of it would require knowledge of the $K$-orientation of the domain or codomain, which are hidden.
 \end{Remark} 
 
 Here, we estimate the time complexity of Onuki's attack in order to provide sharper security bounds. Indeed, Onuki's estimates were very pessimistic.
@@ -1472,7 +1495,7 @@ where $\kappa:=\frac{1}{4\sqrt{q_1}}\(1-\frac{1}{q_1}\)$ and $x$ is the threshol
 \end{Lemma}
 
 \begin{proof}
-Under the heuristic assumptions we made, we can assume that $N:=N(\beta)$ is a uniform random variable in the range $\i{N_{min}}{N_{max}}$.  We define the random variable:
+Under the heuristic assumption we made, we can assume that $N:=N(\beta)$ is a uniform random variable in the range $\i{N_{min}}{N_{max}}$.  We define the random variable:
 \[Q:=Q(N)=\prod_{j=1}^t q_j^{\min(r,v_{q_j}(N))}.\]
 The cost of the exhaustive search for a suitable $\beta$ is then:
 \[C_1(x)=\frac{1}{\P(Q(N)\geq x)}=\frac{N_{max}-N_{min}}{|S(x)|},\]
@@ -1515,7 +1538,7 @@ Since, we have $N_{min}=\Omega(\ell^{2n})$, to ensure a level of security of $\l
 \[n\geq \frac{5\log(2)}{6\log(\ell)}\lambda+\frac{t}{3}\log(r+1).\]
 
 \begin{Example}
-For $\lambda=128$ bits, $\ell=2$, $r=3$ and $t=100$ (parameters proposed by Onuki), we get $n\geq 153$. This is much less than the first estimate of Onuki (see \cite[§ 6.3]{Onuki}) for the same parameters ($n=1428$) and even less than Col\'{o} and Kohel's choice in \cite[Section 6]{OSIDH} ($n=256$).
+For $\lambda=128$ bits, $\ell=2$, $r=3$ and $t=100$ (parameters proposed by Onuki), we get $n\geq 153$. This is much less than the first estimate of Onuki (see \cite[§ 6.3]{Onuki}) for the same parameters ($n=1428$) and even less than Col\`{o} and Kohel's choice in \cite[Section 6]{OSIDH} ($n=256$).
 \end{Example}
 
 However, this attack can be dramatically improved if we replace the exhaustive search of endomorphisms by a reduction of the relations lattice. This will lead to a significant revision of the security parameters.
@@ -1530,11 +1553,11 @@ in $\Cl(\mO_n)$, with $e_1,\cdots, e_t\in\i{-2r}{2r}$ non-trivial.  Then, we wri
 \[\varphi : E_n \longrightarrow \prod_{j=1}^t[\mf{q}_j]^{e'_j}\cdot E_n \qquad \mbox{and} \qquad \psi : E_n  \longrightarrow  \prod_{j=1}^t[\mf{q}_j]^{-e''_j}\cdot E_n=\prod_{j=1}^t[\mf{q}_j]^{e'_j}\cdot E_n\]
 and finally compute $\iota_n(\beta)=\hat{\psi}\circ\varphi$ with with $\beta\mO_K= \prod_{j=1}^t\mf{q}_j^{e_j}$.
 
-As we saw in Paragraph \ref{Paragraph 11}, we can find a basis set of the lattice:
+As we saw in Paragraph \ref{Paragraph 11}, we can find a basis of the lattice:
 \[L:=\left\{(e_1,\cdots,e_t)\in\Z^t\middle| \  \prod_{j=1}^t[\mf{q}_j]^{e_j}=[1]\right\}\]
-in polynomial time in $n$ and $t$.  Our problem reduces to finding a short vector in $L$ for the norm $\ell_\infty$, hoping that this vector has norm $\leq 2r$ to make sure that we can compute $\iota_n(\beta)$ by the meet-in-the-middle argument presented above.  Hence,  an estimation of the infinity norm of the shortest vector in $L$ is necessary.
+in polynomial time in $n$ and $t$.  Our problem reduces to finding a short vector in $L$ for the norm $\ell_\infty$, hoping that this vector has norm $\leq 2r$ to make sure that we can compute $\iota_n(\beta)$ by the method presented above.  Hence,  an estimation of the infinity norm of the shortest vector in $L$ is necessary.
 
-\subsection{Estimating the first minimum of $L$ for the norm $\ell_\infty$}
+\subsection{Estimating the first minimum of $L$ in infinity norm}
 
 We want to estimate, at least statistically the first minimum of $L$ for the norm $\ell_\infty$, depending on the parameters:
 \[\lambda_1^{(\infty)}(L):=\min_{v\in L\setminus\{0\}}\|v\|_\infty.\]
@@ -1578,7 +1601,7 @@ d_1 & a_{1,2} & \cdots & a_{1,n}\\
 \vdots &  & \ddots & \vdots\\
 0 & 0 & \cdots & d_n
 \end{array}\),\]
-with $d_1, \cdots, d_n\in\N^*$ such that $\prod_{i=1}^n d_i=N$ and $a_{i,i+1}, \cdots, a_{i,n}\in\i{0}{d_i-1}$ for all $i\in\i{1}{n}$.There are only finitely many such matrices. (i) follows.
+with $d_1, \cdots, d_n\in\N^*$ such that $\prod_{i=1}^n d_i=N$ and $a_{i,i+1}, \cdots, a_{i,n}\in\i{0}{d_i-1}$ for all $i\in\i{1}{n}$. There are only finitely many such matrices. (i) follows.
 
 \textbf{(ii)} This result has already been proved in \cite[Theorem 11]{Aono} for the norm $\ell_2$. The reasoning would be exactly the same here. We only have to replace the function $h(n)=\frac{1}{\Vol(B_2(0,1))^{\frac{1}{n}}}$ by the constant $\frac{1}{\Vol(B_\infty(0,1))^{\frac{1}{n}}}=\frac{1}{2}$ in the inequality.
 \end{proof}
@@ -1587,15 +1610,15 @@ with $d_1, \cdots, d_n\in\N^*$ such that $\prod_{i=1}^n d_i=N$ and $a_{i,i+1}, \
 As always,we assume that $\Cl(\mO_n)$ is generated by the $[\mf{q}_j]$. Assuming that $L$ behaves like a random lattice with uniform distribution in $\m{I}_{h(\mO_n),t}$, we get that:
 \[\lambda_1^{(\infty)}(L)\leq \(1+\frac{\log\log(t)}{t}\)\frac{h(\mO_n)^{\frac{1}{t}}}{2}.\] 
 
-To ensure that the key space is sufficiently large to cover a wide portion of $\Cl(\mO_n)$, we require the surjectivity of the map:
-\[f:(e_1,\cdots, e_t)\in\i{-r}{r}^t\longmapsto \prod_{j=1}^t[\mf{q}_j]^{e_j}\in G.\]
+To ensure that the key space covers $\Cl(\mO_n)$, we require the surjectivity of the map:
+\[f:(e_1,\cdots, e_t)\in\i{-r}{r}^t\longmapsto \prod_{j=1}^t[\mf{q}_j]^{e_j}\in \Cl(\mO_n).\]
 It follows that $h(\mO_n)\leq (2r+1)^t$, so that:
 \[2r\geq h(\mO_n)^{\frac{1}{t}}-1>\(1+\frac{\log\log(t)}{t}\)\frac{h(\mO_n)^{\frac{1}{t}}}{2}\geq \lambda_1^{(\infty)}(L)\]
 for $h(\mO_n)$ big enough, so the SVP attack is possible.
 \end{Remark}
 
 \begin{Example}
-For instance, with the parameters of \cite[p. 28]{OSIDH}: $\ell=2$, $r=5$, $t=74$ and $n=256$, assuming that $G=\Cl(\mO_n)$, so that $|G|\approx\ell^n$, we get the upper bound for $\lambda_1^{(\infty)}(L)$ is:
+For instance, with the parameters of \cite[p. 28]{OSIDH}: $\ell=2$, $r=5$, $t=74$ and $n=256$, we get the upper bound for $\lambda_1^{(\infty)}(L)$ is:
 \[\(1+\frac{\log\log(t)}{t}\)\frac{\ell^{\frac{n}{t}}}{2}\approx 5.61,\]
 so that $\lambda_1^{(\infty)}(L)\leq 5<2r=10$ and the attack is indeed possible.
 \end{Example}
@@ -1608,15 +1631,15 @@ There are two ways of countering our attack:
 \item Make any SVP attack impossible by choosing our parameters so that $\lambda_1^{(\infty)}(L)>2r$. 
 \end{enumerate}
 
-The safest way to find a vector $e\in L$ such that $\|e\|_\infty\leq 2r$ is the SVP algorithm for infinity norm due to \cite{Aggarwal2018} whose space and time complexities are $2^{0.62t+o(t)}$ and $2^{0.415t+o(t)}$ respectively. Hence, to ensure $128$ bits of security, choosing $t\geq 207$ would be enough. However, in practice, algorithms with much less time complexity like BKZ \cite{BKZ} provide vectors far shorter than their theoretical bounds (see Paragraph \ref{Paragraph 17}). Considering the fact that SVP algorithms in infinity norm could always be improved, this makes the first method risky. Besides, relying on lattice based problem to ensure the security of OSIDH would damage its relevance as an isogeny based cryptosystem, since one of the main arguments in favor of isogeny based cryptography is diversity: it is based on distinct computational problems and assumptions that of lattice based primitives prevailing in the NIST competition.
+The safest way to find a vector $e\in L$ such that $\|e\|_\infty\leq 2r$ is the SVP algorithm in infinity norm due to \cite{Aggarwal2018}, whose space and time complexities are $2^{0.62t+o(t)}$ and $2^{0.415t+o(t)}$ respectively. Hence, to ensure $128$ bits of security, choosing $t\geq 207$ would be enough. However, in practice, algorithms with much less time complexity like BKZ \cite{BKZ} provide vectors far shorter than their theoretical bounds (see Paragraph \ref{Paragraph 17}). Considering the fact that SVP algorithms in infinity norm could always be improved, this makes the first method risky. Besides, relying on lattice based problem to ensure the security of OSIDH would damage its relevance as an isogeny based cryptosystem, since one of the main arguments in favor of isogeny based cryptography is diversity, meaning introducing primitives based on distinct computational problems and assumptions that of lattice based primitives prevailing in the NIST competition.
 
-The second method is much safer but it has a strong drawback. As explained in Remark \ref{Remark 4}, if the key space covers $\Cl(\mO_n)$, then OSIDH is vulnerable to our attack. Hence, we need to restrict the key space to ensure $\lambda_1^{(\infty)}(L)>2r$. By making that choice, we dramatically reduce the relevance of OSIDH for other cryptographic constructions beyond Diffie-Hellman key exchange. For instance hash proof systems based on OSIDH (see Appendix \ref{Appendix C}) rely on cryptographic group actions with transitivity property. Since we limit the key space to a small portion of the group, the transitivity is no longer guaranteed.
+The second method is much safer but it has a strong drawback. As explained in Remark \ref{Remark 4}, if the key space covers $\Cl(\mO_n)$, then OSIDH is vulnerable to our attack. Hence, we need to restrict the key space to ensure $\lambda_1^{(\infty)}(L)>2r$. By making that choice, we dramatically reduce the relevance of OSIDH for other cryptographic constructions beyond Diffie-Hellman key exchange because we no longer have a restricted effective group action (see Appendix \ref{Appendix C}).
 
 Besides, our attack can still be performed when $\lambda_1^{(\infty)}(L)>2r$. Indeed, let us assume that we found a short vector $e\in L$ with norm $\|e\|_\infty>2r$. Then, we may write $e:=e'+e''+d$ with $e', e'', d\in\Z^t$ such that $\|e'\|_\infty=\|e''\|_\infty=r$ and $d$ has infinity norm as small as possible. As previously, we can compute the isogenies:
 \[\varphi : E_n \longrightarrow E':=\prod_{j=1}^t[\mf{q}_j]^{e'_j}\cdot E_n \qquad \mbox{and} \qquad \psi : E_n  \longrightarrow  E'':=\prod_{j=1}^t[\mf{q}_j]^{-e''_j}\cdot E_n=\prod_{j=1}^t[\mf{q}_j]^{e'_j+d_j}\cdot E_n.\]
 In order to compute the endomorphism of $E_n$ associated to $e$ (whose kernel is $E_n[\prod_{j=1}^t \mf{q}_j^{e_j}]$), it remains to compute the isogeny $E'\longrightarrow E''$ associated to $d$ (whose kernel is $E'[\prod_{j=1}^t\mf{q}_j^{d_j}]$). Following Onuki's idea, we compute this isogeny by meet-in-the middle exhaustive search. Let us write $d:=d'+d''$ with $d'_j:=\lfloor d_j/2\rfloor$ and $d''_j:=d_j-d'_j$ for all $j\in\i{1}{t}$. We compute:
 \[\phi: E'\longrightarrow \prod_{j=1}^t [\mf{q}_j]^{d'_j}\cdot E' \qquad \mbox{and} \qquad \phi': E''\longrightarrow \prod_{j=1}^t [\mf{q}_j]^{-d''_j}\cdot E''=\prod_{j=1}^t [\mf{q}_j]^{d'_j}\cdot E'\]
-by exhaustively testing all isogenies of degree $\prod_{j=1}^t q_j^{|d'_j|}$ and $\prod_{j=1}^t q_j^{|d''_j|}$ respectively, until the codomains of $\phi$ and $\phi'$ match. In that case, the desired endomorphism will be the composite $\widehat{\psi}\circ\widehat{\phi'}\circ\phi\circ\varphi$. Note that, as in Onuki's attack, we have no theoretical guarantee that such an isogeny will actually be a $K$-oriented isomorphism. However, likewise,we can estimate the complexity of this attack.
+by exhaustively testing all isogenies of degree $\prod_{j=1}^t q_j^{|d'_j|}$ and $\prod_{j=1}^t q_j^{|d''_j|}$ respectively, until the codomains of $\phi$ and $\phi'$ match. In that case, the desired endomorphism will be the composite $\widehat{\psi}\circ\widehat{\phi'}\circ\phi\circ\varphi$. Note that, as in Onuki's attack, we have no theoretical guarantee that such an isogeny will actually be a $K$-oriented endomorphism. However, likewise,we can estimate the complexity of this attack.
 
 \begin{Proposition}
 Under the heuristic assumption that $L$ behaves like a random lattice among lattices of covolume $h(\mO_n)$ and that the shortest vector of $L$ can be found in negligible time, our attack performs in time:
@@ -1635,17 +1658,17 @@ The result follows.
 \end{proof}
 
 \begin{Example}
-For the parameters chosen by Col\'{o} and Kohel in \cite[Section 6]{OSIDH} ($\ell=2$, $t=74$, $r=5$ and $K=\Q(i)$), the smallest value possible for $q_1$ (as a splitting prime $\neq \ell$) is $q_1=5$. To ensure a security level of $\lambda=128$ bits,  we need to take $n$ such that:
+For the parameters chosen by Col\`{o} and Kohel in \cite[Section 6]{OSIDH} ($\ell=2$, $t=74$, $r=5$ and $K=\Q(i)$), the smallest value possible for $q_1$ (as a splitting prime $\neq \ell$) is $q_1=5$. To ensure a security level of $\lambda=128$ bits,  we need to take $n$ such that:
 \[(q_1+1)^{\frac{1}{4}\ell^{n/t}-r}\geq 2^\lambda \Longleftrightarrow n\geq t\frac{\log\(4r+\frac{4\lambda\log(2)}{\log(q_1+1)}\)}{\log(\ell)}.\]
 It follows that $n\geq 575$. The value $n=256$ was initially proposed, and the parameters were chosen so that the key space just covers $\Cl(\mO_n)$. (with few or no redundancies). With $n\geq 575$, the key space is way smaller than $\Cl(\mO_n)$.
 \end{Example}
 
 \subsection{Implementation}\label{Paragraph 17}
 
-This attack was implemented in \verb?SageMath? \cite{sagemath}, partly with realistic parameters and completely (end-to-end) with toy parameters. The source code is available on my Github repository \cite{MyGithub}, more specifically:
+This attack was implemented in \verb?SageMath? \cite{sagemath}, partly with realistic parameters and completely (end-to-end) with toy parameters. The source code is available on Github \cite{MyGithub}, more specifically:
 \begin{itemize}
 \item  in the files \verb?Group_basis.py?, \verb?Relations_lattice.py? and \verb?Find_SVP.py? for the partial attack with realistic parameters;
-\item in the files \verb?OSIDH_attack.py? and \verb?OSIDH_attack_tests.py? for the end-to-end attack.
+\item in the files \verb?OSIDH_attack.py? and \verb?OSIDH_attack_tests.py? for the end-to-end attack with toy parameters.
 \end{itemize}
 
 With the parameters of \cite[p. 28]{OSIDH}: $\ell=2$, $r=5$, $t=74$ and $n=256$ $K=\Q(i)$,  and $q_1,\cdots, q_t$ the $t$ smallest splitting primes in $\mO_K$ the relation lattice $L$ was computed in 2 h 31 using \verb?SageMath? \cite{sagemath}, including 1 h 28 for the group basis computation with Algorithm \ref{Algorithm 10} and 1 h 03 for the relations lattice per se with \ref{Algorithm 11}. Have we known before performing the test that $\Cl(\mO_n)$ was cyclic and generated by $[\mf{q}_1]$, the group basis computation could have been dramatically accelerated. The BKZ algorithm \cite{BKZ} was applied to $L$ using the \verb?fpylll? library \cite{fpylll} with a block size $k=4$ to find a vector $e\in L$ of infinity norm $\|e\|_\infty=9<2r$ in less that 0.5 s, proving that our lattice based attack could be very efficient in practice with large parameters.
@@ -1660,7 +1683,7 @@ Step 1 ran in 288.6 s (144.3 s per chain), step 2 ran in 90 s and step 3 ran in 
 
 As explained in Paragraph \ref{Paragraph 18}, the main limiting factor to test our attack with real parameters is the ideal class group action. Roughly speaking, our implementation of the protocol is "as slow as the attack".
 
-\section{Kuperberg's attack}
+\section{Kuperberg's attack}\label{Paragraph 23}
 
 OSIDH is broken whenever the attacker is able to recover the secret ideal class $[\mf{a}]\in\Cl(\mO_n)$, given the public chain $(E_i,\iota_i)_{0\leq i\leq n}$ and the public data of Alice, namely the $t$ horizontal chains:
 \[[\mf{q}_j]^{-r}\cdot E_{A,n}\longrightarrow \cdots \longrightarrow E_{A,n} \longrightarrow \cdots \longrightarrow [\mf{q}_j]^{r}\cdot E_{A,n}\]
@@ -1681,7 +1704,7 @@ See Appendix \ref{Paragraph 14}.
 \end{proof}
 
 \begin{Remark}
-Actually, we know how to compute $f$ and $g$ on products on the prime ideals $[\mf{q}_j]$ but not on the whole group $\Cl(\mO_n)$ a priori. This could be an obstacle to Kuberberg's algorithm because we need an oracle computing these functions for any group element. Assuming those ideal classes $[\mf{q}_j]$ generate $\Cl(\mO_n)$, these oracles can be computed provided that we can easily express any ideal class $[\mf{c}]\in \Cl(\mO_n)$ as a product of the $[\mf{q}_j]$: $[\mf{q}_j]=\prod_{j=1}^t[\mf{q}_j]^{e_j}$, with small exponents $e_j$, and the additional restriction $e_j\in\i{-r}{r}$ for all $j\in\i{1}{t}$ to compute $g$. This can be done relatively efficiently with a basis computation of $\Cl(\mO_n)$ and Babai's algorithm in the relations lattice, as explained earlier.  
+Actually, we know how to evaluate $f$ and $g$ on products of powers of the prime ideals $[\mf{q}_j]$ but not on the whole group $\Cl(\mO_n)$ a priori. This could be an obstacle to Kuberberg's algorithm because we need an oracle computing these functions for any group element. Assuming those ideal classes $[\mf{q}_j]$ generate $\Cl(\mO_n)$, these oracles can be computed provided that we can easily express any ideal class $[\mf{c}]\in \Cl(\mO_n)$ as a product of the $[\mf{q}_j]$: $[\mf{q}_j]=\prod_{j=1}^t[\mf{q}_j]^{e_j}$, with small exponents $e_j$, and the additional restriction $e_j\in\i{-r}{r}$ for all $j\in\i{1}{t}$ to compute $g$. This can be done relatively efficiently with a basis computation of $\Cl(\mO_n)$, a discrete logarithm computation and Babai's algorithm with respect to the relations lattice, as explained earlier.  
 
 However, the condition $|e_j|\leq r$ might be an issue if the parameters are chosen so that $(2r+1)^t\ll |\Cl(\mO_n)|$. Hence, we can avoid both our lattice based classical attack and Kuperberg's attack with this choice of parameters.
 \end{Remark}
@@ -1735,7 +1758,7 @@ In particular, if $f$ factors completely in $\mO_K/\mf{p}[X]$ with simple roots,
 
 \section{Reduction of elliptic curves}\label{Pargraph 20}
 
-Let $R$ be a discrete valuation ring with unique prime ideal $\mf{m}$,  a uniformizer $\pi$ and valuation $v$.  Let $L$ be its field of fractions and $k:=R/\mfm$ be the residue field and $p:=\Char(k)$.  In practice,  $L$ will be a number field, $R$ will be the localization of $\mO_L$ at a place $\mfp$ lying above $p$ so that $\mfm:=\mfp\mO_{L,\mfp}$ and $\pi$ will be any element of $\mfm\setminus\mfm^2$.  In this case, we will talk by abuse, of reduction modulo $\mfp$ instead of reduction modulo $\mfm$. 
+Let $R$ be a discrete valuation ring with unique prime ideal $\mf{m}$,  a uniformizer $\pi$ and valuation $v$.  Let $L$ be its field of fractions and $k:=R/\mfm$ be the residue field and $p:=\Char(k)$.  In practice,  $L$ will be a number field, $R$ will be the localization of $\mO_L$ at a place $\mfp$ lying above $p$ so that $\mfm:=\mfp\mO_{L,\mfp}$ and $\pi$ will be any element of $\mfm\setminus\mfm^2$.  In this case, we shall talk by abuse, of reduction modulo $\mfp$ instead of reduction modulo $\mfm$. 
 
 Let $E$ be an elliptic curve defined over $L$.  We assume that $p\geq 5$ so that $E$ admits a simplified Weierstrass equation $y^2=x^3+ax+b$ with $a,b\in L$.  For all $u\in L^*$,  we can substitute $x':=u^2 x$ and $y':=u^3 y$ so that are changed into: $a':=u^4a$ and  $b':=u^6b$.  With these substitutions,  we can always assume that $a, b\in R$.  We can even find a Weierstrass equation with $a, b\in R$ so that $v(\Delta(E))$ is minimal \cite[Proposition VII.1.3.(a)]{Silverman1}.  
 
@@ -1759,6 +1782,42 @@ This map is in fact injective.  But it is not always surjective : for instance, 
 
 This definition is functorial,  meaning that the reduction of the composite of two isogenies is the composite of the reductions of these isogenies.  
 
+\section{Some prerequisites on quaternions}\label{Paragraph 24}
+
+We give the results of this section without proof. The reader may refer to \cite{Voight} for a complete presentation. A \emph{quaternion algebra} over a field $k$ is a $4$-dimensional $k$-algebra $B$ such that there exists $i, j\in B$ and $a, b\in k^*$ such that:
+\[i^2=a, \quad j^2=b \quad \mbox{and} \quad ij=-ji\]
+We denote $B=H_k(a,b)$ or simply $H(a,b)$.
+
+If $B=H(a,b)$ is a quaternion algebra, then there is an involution called the \emph{conjugation}, given by:
+\[\forall \alpha:=x+yi+zj+tij\in B, \quad \overline{\alpha}:=x-(yi+zj+tij).\] 
+We define the \emph{reduced norm} $\nrd$ and the \emph{reduced trace} $\Tr$ as follows:
+\[\forall \alpha\in B, \quad \nrd(\alpha):=\alpha \overline{\alpha}=\overline{\alpha}\alpha \quad \mbox{and} \quad \Tr(\alpha)=\alpha+\overline{\alpha}\]
+Every element $\alpha\in B$ is annihilated by $X^2-\Tr(\alpha)X+\nrd(\alpha)$, so its degree over $k$ is $\leq 2$.
+
+If $\Char(k)\neq 2$, then a quaternion algebra $B$ defined over $k$ is either a division algebra or a isomorphic to $M_2(k)$ \cite[Theorem 5.4.4]{Voight}. When $k=\R$ there is (up to isomorphism) only one quaternion division algebra which is the Hamilton quaternion algebra $\mathbb{H}:=H_{\R}(-1,-1)$ \cite[Corollary 3.5.8]{Voight}. When $k=\Q_p$ is the $p$-adic field for a given prime number $p\neq 2$, the same result holds \cite[Theorem 12.1.5]{Voight}.
+
+Let $B$ be a quaternion algebra defined over $\Q$. We say that $B$ \emph{ramifies} at a prime $p$ if $B\otimes\Q_p$ is a division algebra and similarly, we say that $B$ ramifies at $\infty$ if $B\otimes\R\simeq \mathbb{H}$.  The latter happens if and only if $a<0$ and $b<0$. The set $\mbox{Ram}(B)$ of places where $B$ ramifies is finite and has even cardinality \cite[Proposition 14.2.1]{Voight} and for every set of places $\Sigma$ of even cardinality (included in the union of prime numbers with $\{\infty\}$), there exists a quaternion algebra $B$ over $\Q$ such that $\mbox{Ram}(B)=\Sigma$ \cite[Proposition 14.2.7]{Voight}.  Moreover, two quaternion algebra $B$ and $B'$ defined over $\Q$ are isomorphic if and only if $\mbox{Ram}(B)=\mbox{Ram}(B')$ \cite[Proposition 14.3.1]{Voight}. Hence, it makes sense to talk about "the" quaternion algebra $B_{p,\infty}$ ramifying at $p$ and $\infty$ (useful in the context of elliptic curves arithmetic).
+
+In the following, we only consider quaternion algebras defined over $\Q$. Let $B$ be such an algebra. We say that $I\subseteq B$ is a \emph{lattice} if it is a sub-$\Z$-module of $B$ of rank $4$.  A lattice $\m{R}\subset B$ is an \emph{order} if it is also a subring of $B$ (with unity: $1\in\m{R}$). If $I\subseteq B$ is a lattice, we define its \emph{left-order} and its \emph{right-order} by:
+\[O_L(I):=\{\alpha\in B\mid \alpha\cdot I \subseteq I\} \quad \mbox{and} \quad O_R(I):=\{\alpha\in B\mid I\cdot\alpha \subseteq I\}\]
+respectively.  A \emph{maximal order} is an order of $B$ that is maximal for the inclusion. Unlike in number fields,  there is not a unique maximal order in a quaternion algebra. If $\m{R}\subseteq B$ is an order, then $\m{R}$ is integral over $\Z$, but not integrally closed in general (even if $\m{R}$ is maximal).  
+
+Let $\m{R}$ be an order of $B$. A (fractional) \emph{left-ideal} $I$ of $\m{R}$ is a lattice $I\subseteq B$ such that $\alpha I\subseteq I$ for all $\alpha\in \m{R}$. If $\m{R}$ is maximal, we then have $\m{R}=O_L(I)$. We define right-ideals similarly. 
+
+Let $I, J\subseteq B$ be two lattices. We say they are \emph{left-equivalent} and denote $I\sim_L J$ or simply $I\sim J$ if there exists $\beta\in B$ such that $J=I\beta$. In that case, $O_L(I)=O_L(J)$.
+
+We say that a lattice $I\subseteq B$ is \emph{integral} if $I^2\subseteq I$. This is actually equivalent to $I\subseteq O_R(I)\cap O_L(J)$ \cite[Lemma 16.2.8]{Voight}.
+
+Let $\m{R}$ and $\m{R}'$ be maximal orders of $B$. A \emph{connecting ideal} between $\m{R}$ and $\m{R}'$ is a lattice $I$ such that $O_L(I)=\m{R}$ and $O_R(I)=\m{R'}$. By \cite[Lemma 17.4.7]{Voight}, $I:=\m{R}\cdot\m{R}'$ is a connecting ideal between $\m{R}$ and~$\m{R}'$.
+
+If $I\subseteq B$ is a lattice and $(\alpha_1, \cdots,\alpha_4)$ is a $\Z$-basis of $I$, we define the \emph{discriminant} of $I$ by:
+\[\disc(I):=\det\(\Tr(\alpha_i\alpha_j)\)_{1\leq i, j\leq 4}.\]
+It can be proved that such a quantity does not depend on the choice of a $\Z$-basis.  If $I\subseteq J$ are two lattices, then we have $\disc(I)=[J:I]^2\disc(J)^2$ \cite[Lemma 15.2.15]{Voight}.
+
+If $I\subseteq B$ is a lattice, we define the \emph{reduced} norm of $I$ by:
+\[\nrd(I):=\gcd\{\nrd(\alpha)\mid\alpha\in I\}.\]
+The reduced norm is multiplicative. Besides,if $I$ is an right or left integral ideal of a maximal order $\m{R}$, then we have $\nrd(I)^2=[\m{R}:I]^2$ \cite[Theorem 16.1.3]{Voight}. 
+
 \section{The Deuring correspondence}\label{Paragraph 2}
 
 Let $E/\F_{p^2}$ be a supersingular elliptic curve and $\m{R}=\End(E)$.  By \cite[Theorem 42.1.9]{Voight}, $\m{R}$ is a maximal order in the quaternion algebra $B_{p,\infty}\simeq\End^0(E)$ ramifying at $p$ and $\infty$. Any left integral $\m{R}$-ideal $I\subseteq \m{R}$ of norm prime to $p$ defines a separable isogeny $\phi_I : E\longrightarrow E_I$ whose kernel is:
@@ -1768,8 +1827,8 @@ This definition can be generalized to ideals $I$ of norm divisible by $p$ by fac
 If $I$ is an integral $\m{R}$-ideal, then the left-order of $I$ is: 
 \[O_L(I):=\{\alpha\in B_{p,\infty}\mid \alpha\cdot I \subseteq I\}=\m{R}\]
 and by \cite[Lemma 42.2.9]{Voight}:
-\[O_R(I)=\{\alpha\in B_{p,\infty}\mid I\cdot\alpha \subseteq I\}\simeq \End(E_I).\]
-Let $I, J$ be two integral left $\m{R}$-ideals. We say they are \emph{right equivalent} and denote $I\sim J$ if there exists $\beta\in B_{p,\infty}$ such that $J=I\beta$. If $I\sim J$, then $E_I\simeq E_J$ (by \cite[Lemma 42.2.13]{Voight}).
+\[O_R(I):=\{\alpha\in B_{p,\infty}\mid I\cdot\alpha \subseteq I\}\simeq \End(E_I).\]
+If $I\sim J$, then $E_I\simeq E_J$ (by \cite[Lemma 42.2.13]{Voight}).
 
 Conversely, one can associate an integral left $\m{R}$-ideal to any finite subgroup $H\subseteq E(\overline{\F_p})$:
 \[I(H)=\{\alpha\in\m{R}\mid\forall P\in H, \quad \alpha(P)=0\}\]
@@ -1779,9 +1838,7 @@ by \cite[Lemma 42.2.7]{Voight}. Unsurprisingly, we always have $I(E[I])=I$ (by \
 
 If $\m{R}'$ is a maximal order of $B_{p,\infty}$, then there exists a connecting integral ideal between $\m{R}$ and $\m{R}'$, that is to say a lattice $I\subseteq \m{R}\cap\m{R}'$ such that $O_L(I)=\m{R}$ and $O_R(I)=\m{R}'$. This ideal can easily be constructed by taking $I=\m{R}\m{R}'$ and multiplying it by a certain integer to eliminate cumbersome denominators (see \cite[Lemma 17.4.7]{Voight}). We then have $\End(E_I)\simeq\m{R}'$, so we just proved that any maximal order is the endomorphism ring of a supersingular elliptic curve. For a given maximal order $\m{R}$, there are only two elliptic curves at most with $\m{R}$ as endomorphism ring up to isomorphism and one is the image of the other by the $p$-th power Frobenius (see \cite[Lemma 42.4.1]{Voight}).   
 
-
-
-\section{The structure of the ideal class group $\Cl(\mO_n)$}\label{Appendix 1}
+\section{Structure of the ideal class group $\Cl(\mO_n)$}\label{Appendix 1}
 
 Let $K$ be a quadratic imaginary field such that $h(\mO_K)=1$, $\ell$ a small prime, $n\in\N^*$ a big integer and $\mO_n=\Z+\ell^n\mO_K$ the order of conductor $\ell^n$.  In this paragraph, we determine the structure of $\Cl(\mO_n)$ and show that this group is either cyclic or quasi-cyclic. Most results of this paragraph are due to \cite[chapter 7]{Cox} and \cite[chapter 4]{Cohen2}.
 
@@ -2185,7 +2242,7 @@ It could be proved that this algorithm is correct and terminates in polynomial t
 
 \section{The KLPT algorithm}\label{Paragraph 3}
 
-Let $p$ be a prime number. In this section, we will mean polynomial in $\log(p)$ every time we use the term polynomial. 
+Let $p$ be a prime number. In this section, we shall mean polynomial in $\log(p)$ every time we use the term polynomial. 
 
 We fix $\m{R}$ a concise maximal order of $B_{p,\infty}$ and $I\subseteq \m{R}$ an integral and concise left $\m{R}$-ideal (as defined in Definition \ref{Definition 3}).  The KLPT algorithm due to Kohel, Lauter, Petit and Tignol \cite{KLPT} finds an equivalent integral ideal $J\sim I$ of powersmooth norm in polynomial time (in $\log(p)$). The main idea of this algorithm lies in the following lemma:
 
@@ -2203,7 +2260,7 @@ Finally, by multiplicativity of the reduced norm \cite[Lemma 16.3.7]{Voight}, we
 Hence, by the previous lemma, the goal of this algorithm is to find $\alpha\in I$ of norm $\nrd(I)S$ where $S$ is a powersmooth integer.  The different steps of the algorithm are presented below (see Algorithm \ref{Algorithm 2}). For this algorithm to work, $\m{R}$ may not be any maximal order, but rather a \emph{special} order defined as follows:
 
 \begin{Definition}\label{Definition 2}
-We say that a maximal order $\m{R}\subseteq B_{p,\infty}$ is \emph{special} if $j\in \m{R}$ (with $j^2=-p$) and there exists a subring of rank $2$, $R\subset\m{R}$, such that $R^\bot\subseteq Rj$ for the scalar product given by:
+We say that a maximal order $\m{R}\subseteq B_{p,\infty}$ is \emph{special} if $j\in \m{R}$ (with $j^2=-p$) and there exists a subring of rank $2$, $R\subset\m{R}$, such that $R^\bot\subseteq Rj$, where $R^\bot$ is the orthogonal of $R$ for the scalar product given by:
 \[(\alpha,\beta)\in B_{p,\infty}^2\longmapsto (\alpha|\beta):=\nrd(\alpha+\beta)-\nrd(\alpha)-\nrd(\beta)=\Tr(\alpha\overline{\beta}).\]
 \end{Definition}
 
@@ -2212,7 +2269,7 @@ Recall the setting of Example \ref{Example 2}. When $p\equiv 3 \ [4]$ and $E_0: 
 \end{Example}
 
 \begin{Remark}
-In practice, it will be very useful to have $|\disc(R)|$ sufficiently small, \ie  polynomial (in $\log(p)$).  For any $p$, we can always find an order $\m{R}$ with $|\disc(R)|=O(\log(p)^2)$, and even $\disc(R)=-4$ (as in Example \ref{Example 3}) and $\disc(R)=-8$ when $p\not\equiv 1 \ [8]$ (see \cite[Section 2.3]{KLPT}). We will always assume that $|\disc(R)|=O(\log(p)^2)$ in the following.
+In practice, it will be very useful to have $|\disc(R)|$ sufficiently small, \ie  polynomial (in $\log(p)$).  For any $p$, we can always find an order $\m{R}$ with $|\disc(R)|=O(\log(p)^2)$, and even $\disc(R)=-4$ (as in Example \ref{Example 3}) and $\disc(R)=-8$ when $p\not\equiv 1 \ [8]$ (see \cite[Section 2.3]{KLPT}). We shall always assume that $|\disc(R)|=O(\log(p)^2)$ in the following.
 \end{Remark}
 
 As previously announced, the following algorithm works under the hypothesis that $\m{R}$ is special but it can be generalized by using a connecting ideal to a special order and two instances of this algorithm (see \cite[Theorem 9]{KLPT}).
@@ -2791,7 +2848,7 @@ The presentation of this section follows Kuperberg's foundational article \cite{
 with $\phi: \Z/2\Z\longrightarrow \Aut(G)$ given by $\phi(1)(g):=g^{-1}$ for all $g\in G$, so that $D_G$ is the set $G\times(\Z/2\Z)$ with inner product given by:
 \[\forall g,g'\in G, \epsilon,\epsilon'\in(\Z/2\Z), \quad (g,\epsilon)\cdot(g',\epsilon')=(g\phi(\epsilon)(g'),\epsilon+\epsilon')=(gg'^{-\epsilon},\epsilon+\epsilon').\]
 
-When $G$ is cyclic of order $N$, $D_G$ is isomorphic to the \emph{dihedral group of order $N$} denoted by $D_N$ generated by a \emph{reflection} $y$ (of order $2$) and a \emph{rotation} $x$ (of order $N$) related by $yxyx=1$.  Elements of $\langle x\rangle$ are called rotations and the others are called reflections. Similarly, when $G$ is not cyclic, we can set $y:=(1,1)$ whose order is $2$ and embed $G$ in $D_G$, so that $D_G$ is generated by $y$ and $G$ and for all $g\in G$, $ygyg=1$. Elements of $G$ are called are called rotations and the others are called reflections.$y$ is called the \emph{standard reflection} but actually, any other reflection $y'$ generate $D_G$ together with $G$ and satisfies $y'gy'g=1$ for all $g\in G$. 
+When $G$ is cyclic of order $N$, $D_G$ is isomorphic to the \emph{dihedral group of order $N$} denoted by $D_N$ generated by a \emph{reflection} $y$ (of order $2$) and a \emph{rotation} $x$ (of order $N$) related by $yxyx=1$.  Elements of $\langle x\rangle$ are called rotations and the others are called reflections. Similarly, when $G$ is not cyclic, we can set $y:=(1,1)$ whose order is $2$ and embed $G$ in $D_G$, so that $D_G$ is generated by $y$ and $G$ and for all $g\in G$, $ygyg=1$. Elements of $G$ are called are called rotations and the others are called reflections. $y$ is called the \emph{standard reflection} but actually, any other reflection $y'$ satisfies $y'gy'g=1$ for all $g\in G$ and $\langle y'\rangle\cdot G=D_G$. 
 
 \begin{Problem}[Hidden Shift Problem]
 Let $G$ be a group. Given $f,g: G\longrightarrow S$ two injective functions such that there exists $s\in G$ such that $g(x)=f(sx)$ for all $x\in G$, the problem is to determine $s$.
@@ -2827,7 +2884,7 @@ Hence, in the latter, we explain how to solve the hidden reflection problem.We s
 
 In the following, we fix $H:=\langle yx^s\rangle$ with $y$ the standard reflection, $x$ a generator of the rotation subgroup and $s\in\Z/N\Z$, the \emph{slope} of our hidden reflection.  We also fix $f:D_N\longrightarrow S$, a function such that for all $u, v\in D_N$, $f(u)=f(v)$ if and only if $v\in Hu$. Our goal is to find $s$ when $f$ is given.
 
-We explain how operations are performed on a quantum computer using the formalism of \cite[chapter 8]{NielsanChaung} and the lecture notes of Dimitri Petritis modelling quantum states as density operators and quantum operations. We assume that $S:=\{0,1\}^e$ is a set of bits.We associate to $f$ a unitary operator $U_f$, defined on the Hilbert space $\C[D_N\times S]$ as:
+We explain how operations are performed on a quantum computer using the formalism of \cite[chapter 8]{NielsanChaung} and the lecture notes of Dimitri Petritis \cite[chapters 2 and 3]{Petritis}, modelling quantum states as density operators and quantum operations as unitary operators or partial traces. We assume that $S:=\{0,1\}^e$ is a set of bits.We associate to $f$ a unitary operator $U_f$, defined on the Hilbert space $\C[D_N\times S]$ as:
 \[\forall g\in D_N, s\in S, \quad U_f|g,s\rangle:=|g,s\oplus f(g)\rangle,\]
 where $\oplus$ is the bitwise addition (xor). Assuming there is a classical circuit to compute $f$, we can create a quantum circuit representing $U_f$. Hence, our classical oracle computing $f$ translates into a quantum oracle computing $U_f$. 
 
@@ -2905,7 +2962,7 @@ Return $k$ and $|\psi_k\rangle$\;
 
 With this procedure, we can produce as many states $|\psi_k\rangle$ as we want and then apply a sieving procedure to all those states in order to determine $s$. The sieving relies on the ability to produce a new state when two states are given. 
 
-\subsection{Basis of the Sieving: producing new states}\label{Paragraph 12}
+\subsection{Principle of the sieve: producing new states}\label{Paragraph 12}
 
 Let $|\psi_k\rangle$ and $|\psi_l\rangle$ be two sampled states. We consider the joint state:
 \[|\psi_k\psi_l\rangle=\frac{1}{2}\(|00\rangle+\omega_N^{ks}|10\rangle+\omega_N^{ls}|01\rangle+\omega_N^{(k+l)s}|11\rangle\)\]
@@ -2934,7 +2991,7 @@ Output $|\psi_{k+(-1)^\epsilon l}\rangle$ and $k+(-1)^\epsilon l$\;
 
 \subsection{Sieving procedure in the case $N=r^n$}
 
-In this paragraph, we describe how this sieving procedure works when $N$ is a prime power $N:=r^n$, with $r$ relatively small. However, this could be generalized to any value of $N$ (see \cite[Algorithm 2]{Kuperberg} for details). Here, we will not deal with the general case because it is not necessary for our application to $G=\Cl(\mO_n)$ whose $p$-groups have small values of $p$.
+In this paragraph, we describe how this sieving procedure works when $N$ is a prime power $N:=r^n$, with $r$ relatively small. However, this could be generalized to any value of $N$ (see \cite[Algorithm 2]{Kuperberg} for details). Here, we shall not deal with the general case because it is not necessary for our application to $G=\Cl(\mO_n)$ whose $p$-groups have small values of $p$.
 
 \subsubsection{Goal of the sieving: reduce the problem to $D_{N/r}$}\label{Paragraph 13}
 
@@ -3093,7 +3150,7 @@ See \cite[Theorem 7.1]{Kuperberg}.
 
 \chapter{Constructing hash proof systems with the OSIDH framework}\label{Appendix C}
 
-This chapter was an attempt to construct new cryptographic primitives with the OSIDH framework beyond key exchange. Indeed, OSIDH runs very slowly compared other isogeny-based Diffie-Hellman protocols such as SIDH (and even CSIDH) which are themselves slow compared to lattice based and code based key exchanged submitted to the NIST. Hence, the potential interest of OSIDH motivating this master's thesis was to go beyond key exchange and to find new primitives based on its framework. Here, we present how to construct hash proof systems with OSIDH but thes constructions are unfortunately insecure.
+This chapter was an attempt to construct new cryptographic primitives with the OSIDH framework beyond key exchange. Indeed, OSIDH runs very slowly compared other isogeny-based Diffie-Hellman protocols such as SIDH (and even CSIDH) which are themselves slow compared to lattice based and code based key exchanged submitted to the NIST. Hence, the potential interest of OSIDH motivating this master's thesis was to go beyond key exchange and to find new primitives based on its framework. Here, we present how to construct hash proof systems with OSIDH but these constructions are unfortunately insecure.
 
 \section{Definition of a hash proof system}
 
