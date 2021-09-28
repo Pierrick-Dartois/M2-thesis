@@ -259,7 +259,7 @@ Otherwise,  $[\Q(\alpha):\Z]=2$ so that $X^2-\Tr(\iota(\alpha))X+\deg(\iota(\alp
 Let $(E, \iota)$ be a $K$-oriented elliptic curve and $\varphi : E\longrightarrow F$ an isogeny.  Then,  we define a $K$-orientation $\varphi_*(\iota)$ on $F$ by:
 \[\forall \alpha\in K,  \quad \varphi_*(\iota)(\alpha)=\frac{1}{\deg(\varphi)}\varphi\iota(\alpha)\widehat{\varphi}.\]
 
-Let $(E, \iota_E)$ and $(F,\iota_F)$ be two isogenies.  An isogeny $\varphi : E\longrightarrow F$ is $K$-\emph{oriented} if $\varphi_*(\iota_E)=\iota_F$.  We denote this by $\varphi : (E, \iota_E)\longrightarrow(F,\iota_F)$.
+Let $(E, \iota_E)$ and $(F,\iota_F)$ be two $K$-oriented elliptic curves.  An isogeny $\varphi : E\longrightarrow F$ is $K$-\emph{oriented} if $\varphi_*(\iota_E)=\iota_F$.  We denote this by $\varphi : (E, \iota_E)\longrightarrow(F,\iota_F)$.
 \end{Definition}
 
 Let $\varphi : (E, \iota_E)\longrightarrow(F,\iota_F)$ be a $K$-oriented isogeny,  $\mO:=\iota_E^{-1}(\End(E))$ and $\mO':=\iota_F^{-1}(\End(F))$,  so that $\iota_E$ is a primitive $\mO$-orientation and $\iota_F$ is a primitive $\mO'$-orientation.  
@@ -277,11 +277,11 @@ Since $\varphi$ is $K$-oriented,  we have $\deg(\varphi)\iota_F=\varphi\iota_E\w
 
 It follows that :
 \[\Z+m\deg(\varphi)\mO'\subseteq \Z+m\mO= \Z+m'\mO'.\]
-Taking a generator $\omega$ of $\mO$ ($\mO=\Z[\omega]$),  we get that $m\deg(\varphi)\omega=a+bm'\omega$ for certain integers $a,b\in\Z$.  It follows that $m\deg(\varphi)=bm'$ so that $m'|\deg(\varphi)$ because $m$ and $m'$ are coprime.  By symmetry,  $m|\deg(\varphi)$,  so $mm'|\deg(\varphi)$.
+Taking a generator $\omega$ of $\mO$ ($\mO=\Z[\omega]$),  we get that $m\deg(\varphi)\omega=a+bm'\omega$ for certain integers $a,b\in\Z$.  It follows that $a=0$ and $m\deg(\varphi)=bm'$ so that $m'|\deg(\varphi)$ because $m$ and $m'$ are coprime.  By symmetry,  $m|\deg(\varphi)$,  so $mm'|\deg(\varphi)$.
 \end{proof}
 
 \begin{Proposition}\label{Proposition 4}
-We assume that $\ell:=\deg(\varphi)$ is a prime number $\neq p$.  Then one of the following statements holds:
+We assume that $\ell:=\deg(\varphi)$ is a prime number.  Then one of the following statements holds:
 \begin{description}
 \item[(i)] $\mO=\mO'$,  in which case,  we say that $\varphi$ is \emph{horizontal}.
 \item[(ii)] $\mO\supsetneq \mO'$ and $[\mO:\mO']=\ell$,  in which case,  we say that $\varphi$ is \emph{descending}. 
@@ -940,7 +940,7 @@ Under the assumptions of Proposition \ref{Proposition 9},  $(\star)_i$ admits on
 \begin{Remark}
 The choice of direction $\mfq$ and $\overline{\mfq}$ at step $i=1$ is not compulsory, and the non-principality of $(\mfq^{(1)})^2$ in $\mO_1$ can be a restrictive hypothesis in general, especially if we consider multiple prime ideals like in the real OSIDH cryptosystem. Actually, when $(\mfq^{(i)})^2$ is principal in $\mO_i$, $j(E_i/E_i[\mfq^{(i)}])=j(E_i/E_i[\overline{\mfq^{(i)}}])$ and equation $(\star)_{i-1}$ admits only one solution, so there is no ambiguity till $(\mfq^{(i)})^2$ is no longer principal in $\mO_i$. Instead of determining the direction at rank $1$, we may then determine the direction at rank $i_0$ such that $(\mfq^{(i_0)})^2$ is not principal in $\mO_{i_0}$. 
 
-Such an index $i_0$ always exists.  indeed, if $(\mfq^{(i)})^2=\alpha\mO_i$ for a certain $\alpha\in\mO_i$, then $N(\alpha)=q^2$ by \cite[Lemma 7.14.(i)]{Cox}. Let $\tau$ be a generator of $\mO_K$, $t$ its trace and $d$ its norm. Then,  $\mO_i=\Z+\ell^i\tau\Z$ and $\alpha=a+b\ell^i\tau$ with $a, b\in\Z$, so that:
+Such an index $i_0$ always exists.  Indeed, if $(\mfq^{(i)})^2=\alpha\mO_i$ for a certain $\alpha\in\mO_i$, then $N(\alpha)=q^2$ by \cite[Lemma 7.14.(i)]{Cox}. Let $\tau$ be a generator of $\mO_K$, $t$ its trace and $d$ its norm. Then,  $\mO_i=\Z+\ell^i\tau\Z$ and $\alpha=a+b\ell^i\tau$ with $a, b\in\Z$, so that:
 \[q^2=N(\alpha)=(a+b\ell^i\tau)(a+b\ell^i\overline{\tau})=a^2+ab\ell^it+b^2\ell^{2i}d.\]
 If $b\neq 0$, we get that $a$ is a root of the polynomial $X^2+b\ell^itX+b^2\ell^{2i}d-q^2$ whose discriminant is:
 \[b^2\ell^{2i}(t^2-4d^2)+4q^2=b^2\ell^{2i}\Delta_K+4q^2\leq 4q^2+\ell^{2i}\Delta_K.\]
@@ -1122,7 +1122,7 @@ The real OSIDH protocol as introduced in \cite[§ 5.2]{OSIDH} is presented in Fi
     
   % Calculations of Alice
   \node[draw=none,fill=none,anchor=east] (asecret) at ($(Alice) + (0,-1)$) {$e_1,\cdots, e_t\in_R\i{-r}{r}$};
-  \node[draw=none,fill=none,anchor=east] (asecretideal) at ($(Alice) + (0,-1.75)$) {$\mf{a}:=\prod_{j=1}^t[\mf{q}_j]^{e_j}$};
+  \node[draw=none,fill=none,anchor=east] (asecretideal) at ($(Alice) + (0,-1.75)$) {$\mf{a}:=\prod_{j=1}^t\mf{q}_j^{e_j}$};
   \node[draw=none,fill=none,anchor=east] (Apublic) at ($(Alice) + (0,-3)$) {$(E_{A,i},\iota_{A,i}):=[\mf{a}]\cdot (E_i,\iota_i)$};
   \node[draw=none,fill=none,anchor=east] (akey) at ($(Alice) + (0,-5)$) {$E_{AB,n}:= [\mf{a}]\cdot E_{B,n}$};
     
@@ -1131,8 +1131,8 @@ The real OSIDH protocol as introduced in \cite[§ 5.2]{OSIDH} is presented in Fi
   \draw[thick] (Bob) -- ++(0, -5);
    
   % Calculations of Bob
-  \node[draw=none,fill=none,anchor=west] (bsecret) at ($(Bob) + (0,-1)$) {$e_1,\cdots, e_t\in_R\i{-r}{r}$};
-   \node[draw=none,fill=none,anchor=west] (bsecretideal) at ($(Bob) + (0,-1.75)$) {$\mf{b}:=\prod_{j=1}^t[\mf{q}_j]^{f_j}$};
+  \node[draw=none,fill=none,anchor=west] (bsecret) at ($(Bob) + (0,-1)$) {$f_1,\cdots, f_t\in_R\i{-r}{r}$};
+   \node[draw=none,fill=none,anchor=west] (bsecretideal) at ($(Bob) + (0,-1.75)$) {$\mf{b}:=\prod_{j=1}^t\mf{q}_j^{f_j}$};
   \node[draw=none,fill=none,anchor=west] (Bpublic) at ($(Bob) + (0,-4)$) {$(E_{B,i},\iota_{B,i}):=[\mf{b}]\cdot (E_i,\iota_i)$};
   \node[draw=none,fill=none,anchor=west] (bkey) at ($(Bob) + (0,-5)$) {$E_{AB,n}:= [\mf{b}]\cdot E_{A,n}$};
    
@@ -1581,12 +1581,12 @@ Since $h(\mO_n)=\frac{\ell^{n-1}}{[\mO_K^\times:\mO_n^\times]}\(\ell-\(\frac{\De
 However, we do not know how thight the estimate $\lambda_1^{(\infty)}(L)\leq h(\mO_n)^{\frac{1}{t}}$ is, and therefore if the choice of parameters $2r<O(\ell^{\frac{n}{t}})$ is sufficient. Assuming that the $[\mf{q}_j]$ generate $\Cl(\mO_n)$, we have $\Covol(L)=h(\mO_n)^{\frac{1}{t}}$, and $\Covol(L)$ is close to this bound if the $[\mf{q}_j]$ generate a big enough subgroup. Heuristically, it makes sense to assume that $\lambda_1^{(\infty)}(L)$ is relatively close to $\Covol(L)^{\frac{1}{t}}$ in general, namely that $\lambda_1^{(\infty)}(L)=\Theta(\Covol(L)^{\frac{1}{t}})$, as the following asymptotical result indicates. 
 \end{Remark}
 
-Let $N, n\in\N^*$ and $\m{I}_{N,n}$ be the set of full-rank sublattices of $\Z^n$ of rank $N$.
+Let $N, n\in\N^*$ and $\m{I}_{N,n}$ be the set of full-rank sublattices of $\Z^n$ of covolume $N$.
 
 \begin{Lemma}\label{Lemma 22}
 \begin{description}
 \item[(i)] $\m{I}_{N,n}$ is finite.
-\item[(ii)] Let $\Lambda$ be a random value following the uniform distribution on $\m{I}_{N,n}$. Then, for all $\varepsilon>0$, there exists $n_0, N_0\in\N^*$ such that for all $n\geq n_0$ and $N\geq N_0$:
+\item[(ii)] Let $\Lambda$ be a random variable following the uniform distribution on $\m{I}_{N,n}$. Then, for all $\varepsilon>0$, there exists $n_0, N_0\in\N^*$ such that for all $n\geq n_0$ and $N\geq N_0$:
 \[\P\left[\left|\lambda_1^{(\infty)}(\Lambda)-\frac{N^{\frac{1}{n}}}{2}\right|\leq \frac{\log\log(n)}{n}\frac{N^{\frac{1}{n}}}{2}\right]\geq 1-\varepsilon.\]
 \end{description}
 \end{Lemma}
@@ -2099,18 +2099,19 @@ be an injective group homomorphism. Then:
 \begin{proof}
 \textbf{(i)} We may write $\Phi(g):=(\phi_1(g),\phi_2(g))$ for all $g\in G_1\times G_2$, where $\phi_i:G_1\times G_2\longrightarrow H_i$ are group homomorphisms.  Let $g_1\in G_1$. Then, $|\phi_2(g_1,1)|||g_1|$ ($|x|$ being the order of $x$) and by Lagrange's theorem $|\phi_2(g_1,1)|||H_2|$ and $|g_1|||G_1|||H_1|$. Since $|H_1|$ and $|H_2|$ are coprime, we have $|\phi_2(g_1,1)|=1$ so $\phi_2(g_1,1)=1$. By similar arguments, $\phi_1(1,g_2)=1$ for all $g_2\in G_2$ and the result follows.
 
-\textbf{(ii)} It suffices to prove that:
-\[ (\Z/d\Z)^2=\im(\varphi)\oplus\{0\}\times\Z/d\Z.\]
+\textbf{(ii)} Let $\varphi(1):=(\overline{a},\overline{b})$, with $a,b\in\i{0}{d-1}$. Since $\varphi$ is injective, $\varphi(1)$ has order $d$ so $a, b$ and $d$ are coprime. As a consequence, there exists $u,v\in\i{0}{d-1}$ such that $au+bv\equiv 1 \ [d]$. As a consequence,
+\[(\overline{x},\overline{y})\in(\Z/d\Z)^2\longmapsto (\overline{a}\overline{x}-\overline{v}\overline{y},\overline{b}\overline{x}+\overline{u}\overline{y})\in(\Z/d\Z)^2\]
+is an automorphism of $\Z$-modules because its matrix in the canonical basis of $(\Z/d\Z)^2$ has determinant $\overline{au+bv}=1$. It follows that
+\[(\Z/d\Z)^2=\Z(\overline{a},\overline{b})\oplus\Z(-\overline{v},\overline{u})=\im(\varphi)\oplus\Z(-\overline{v},\overline{u}),\]
+so that $(\Z/d\Z)^2/\im(\varphi)\simeq \Z(-\overline{v},\overline{u})\simeq \Z/d\Z$.
 
-Let $\varphi(1):=(\overline{a},\overline{b})$, with $a,b\in\i{0}{d-1}$. Then,  $\varphi(1)$ has order $d$ because $\varphi$ is injective so either $\overline{a}$ or $\overline{b}$ have order $d$ so we either have $\gcd(a,d)=1$ or $\gcd(b,d)=1$. Without loss of generality, we can assume that $\gcd(a,d)=1$.  It follows that for all $k,l\in\Z$, if $\varphi(\overline{k})+(0,\overline{l})=0$, then we have $k\overline{a}=0$ so $d|ka$ so $d|k$ and $\overline{k}=0$, so that $\overline{l}=0$. Besides, if $x,y\in\Z$, by B\'{e}zout's theorem, there exists $k\in\Z$ such that $k\overline{a}=\overline{x}$ and setting $l:=\overline{y}-k\overline{b}$, we get $\varphi(\overline{k})+(0,\overline{l})=(\overline{x},\overline{y})$. 
-
-\textbf{(iii)} Let $a,b\in\Z$ such that $\varphi(1)=(\overline{a},\overline{b})$.  Since $\varphi$ is injective, $\varphi(1)$ has order $\ell^{n-1}$ so $\ell^{n-1}\overline{b}=0$ \ie $\ell^n|\ell^{n-1}b$ \ie $\ell|b$. So we may write $a:=\ell^e a'$ and $b:=\ell^f b'$ with $a'$ and $b'$ prime to $\ell$, $e\in\N$ and $f\in\N^*$.  It follows that:
+\textbf{(iii)} Let $a,b\in\Z$ such that $\varphi(1)=(\overline{a},\overline{b})$.  Since $\varphi$ is injective, $\varphi(1)$ has order $\ell^{n-1}$ so $\ell^{n-1}\overline{b}=0$ \ie $\ell^n|\ell^{n-1}b$ \ie $\ell|b$. So we may write $a:=\ell^e a'$ and $b:=\ell^f b'$ with $a'$ and $b'$ prime to $\ell$, and $(e,f)\in\N\times\N^*$.  It follows that
 \[\ell^{n-1}=|\varphi(1)|=\lcm(|\overline{a}|,|\overline{b}|)=\lcm(\ell^{n-1-e},\ell^{n-f})=\ell^{\max(n-1-e,n-f)},\]
-so that $\max(n-1-e,n-f)=n-1$. If $e=0$, we obtain that:
-\[(\Z/\ell^{n-1}\Z)\times(\Z/\ell^{n}\Z)/\im(\varphi)\simeq \Z/\ell^{n}\Z,\]
-by the arguments we used in (ii). 
+so that $\max(n-1-e,n-f)=n-1$. If $e=0$, then $\overline{a}$ generates $\Z/\ell^{n-1}\Z$, so
+\[(\Z/\ell^{n-1}\Z)\times(\Z/\ell^{n}\Z)=\im(\varphi)\oplus \{0\}\times\Z/\ell^{n}\Z,\]
+and we immediately conclude that the quotient is isomorphic to $\Z/\ell^{n}\Z$.
 
-Else, we have $f=1$. To conclude, it suffices to prove that the quotient has exponent $\ell^{n-1}$. Let $x,y\in\Z$. Then, $\ell^{n-1}(\overline{x},\overline{y})=(0,\overline{\ell^{n-1}y})=\varphi(\overline{\ell^{n-2}k})$ with $k\in\Z$ such that $kb'\equiv y \ [\ell]$ (such a $k$ exists because $b'$ and $\ell$ are coprime).  Hence, the exponent of the quotient divides $\ell^{n-1}$.  Furthermore, if $\ell^{n-2}(\overline{1},0)=\varphi(\overline{k})$ for some $k\in\Z$ then $\ell^n|k\ell b'$ so $\ell^{n-1}|k$ since $\gcd(\ell,b')=1$. Hence, $\overline{k}=0$ and $\ell^{n-2}(\overline{1},0)=0$. Contradiction. So $(\overline{1},0)$ has order $\ell^{n-1}$ in the quotient. This completes the proof.
+Else, we have $f=1$. To conclude, it suffices to prove that the quotient has exponent $\ell^{n-1}$. Let $x,y\in\Z$. Then, $\ell^{n-1}(\overline{x},\overline{y})=(0,\overline{\ell^{n-1}y})=\varphi(\overline{\ell^{n-2}k})$ with $k\in\Z$ such that $kb'\equiv y \ [\ell]$ (such a $k$ exists because $b'$ and $\ell$ are coprime).  Hence, the exponent of the quotient divides $\ell^{n-1}$.  Furthermore, if $\ell^{n-2}(\overline{1},0)=\varphi(\overline{k'})$ for some $k'\in\Z$ then $\ell^n|k'\ell b'$ so $\ell^{n-1}|k'$ since $\gcd(\ell,b')=1$. Hence, $\overline{k'}=0$ and $\ell^{n-2}(\overline{1},0)=0$. Contradiction. So $(\overline{1},0)$ has order $\ell^{n-1}$ in the quotient. This completes the proof.
 
 \end{proof}
 
